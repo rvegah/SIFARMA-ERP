@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Frontend React
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sifarma-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - sifarma-network
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    labels:
+      - "com.sifarma.description=Frontend React SIFARMA"
+      - "com.sifarma.version=1.0.0"
+
+  # Backend (placeholder para cuando lo tengas)
+  # backend:
+  #   image: sifarma-backend:latest
+  #   container_name: sifarma-backend
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - DB_HOST=database
+  #     - DB_PORT=5432
+  #     - DB_NAME=sifarma
+  #     - DB_USER=sifarma_user
+  #     - DB_PASS=${DB_PASSWORD}
+  #   depends_on:
+  #     - database
+  #   restart: unless-stopped
+  #   networks:
+  #     - sifarma-network
+
+  # Base de datos PostgreSQL
+  # database:
+  #   image: postgres:15-alpine
+  #   container_name: sifarma-db
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_DB=sifarma
+  #     - POSTGRES_USER=sifarma_user
+  #     - POSTGRES_PASSWORD=${DB_PASSWORD}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #     - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   restart: unless-stopped
+  #   networks:
+  #     - sifarma-network
+
+networks:
+  sifarma-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:
