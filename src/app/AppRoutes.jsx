@@ -4,6 +4,9 @@ import LoginPage from '../shared/components/LoginPage'
 import DashboardLayout from '../shared/components/DashboardLayout'
 import Dashboard from '../shared/components/Dashboard'
 
+// LÍNEA NUEVA: Importar UsersPage
+import UsersPage from '../modules/access-security/pages/UsersPage'
+
 function AppRoutes() {
   // Estado para manejar si el usuario está logueado
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -31,6 +34,10 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        
+        {/* LÍNEA NUEVA: Ruta de usuarios */}
+        <Route path="/users" element={<UsersPage />} />
+        
         <Route path="/access-security/*" element={<div>Módulo de Seguridad (próximamente)</div>} />
         <Route path="*" element={<div>Página no encontrada</div>} />
       </Routes>

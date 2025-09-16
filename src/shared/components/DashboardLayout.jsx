@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Box,
   AppBar,
@@ -10,12 +11,15 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Divider,
   IconButton,
   useTheme,
   useMediaQuery,
   Chip,
-  Badge
+  Badge,
+  Collapse,
+  Menu,
+  MenuItem,
+  Button
 } from '@mui/material'
 import {
   Security,
@@ -24,135 +28,422 @@ import {
   ShoppingCart,
   SwapHoriz,
   PointOfSale,
-  Receipt,
-  AccountBalance,
   Assessment,
-  TrendingUp,
   Menu as MenuIcon,
   Notifications,
-  ExitToApp
+  ExitToApp,
+  ExpandLess,
+  ExpandMore,
+  Group,
+  Edit,
+  KeyboardArrowDown
 } from '@mui/icons-material'
 
 const drawerWidth = 280
+const collapsedDrawerWidth = 60
 
+// Configuración completa de menús con submenús
 const menuItems = [
-  { text: 'Configuracion', icon: <Security />, path: '/access-security', active: true },
-  { text: 'Inventarios', icon: <Inventory />, path: '/inventory' },
-  { text: 'Almacenes', icon: <Warehouse />, path: '/warehouse' },
-  { text: 'Compras y Proveedores', icon: <ShoppingCart />, path: '/purchases' },
-  { text: 'Inter-Sucursales', icon: <SwapHoriz />, path: '/transfers' },
-  { text: 'Ventas', icon: <PointOfSale />, path: '/sales' },
-  { text: 'Facturación', icon: <Receipt />, path: '/billing' },
-  { text: 'Contabilidad', icon: <AccountBalance />, path: '/accounting' },
-  { text: 'Reportes', icon: <Assessment />, path: '/reports' },
-  { text: 'Presupuesto', icon: <TrendingUp />, path: '/budget' }
+  {
+    text: 'Usuarios',
+    icon: <Group />,
+    path: '/users',
+    subItems: [
+      { text: 'Nuevo Usuario', path: '/users/new' },
+      { text: 'Lista de Usuarios', path: '/users/list' }
+    ]
+  },
+  {
+    text: 'Productos',
+    icon: <Inventory />,
+    path: '/productos',
+    subItems: [
+      { text: 'Ver Productos', path: '/productos/ver' },
+      { text: 'Agregar Producto', path: '/productos/agregar' }
+    ]
+  },
+  {
+    text: 'Compras',
+    icon: <ShoppingCart />,
+    path: '/compras',
+    subItems: [
+      { text: 'Nueva Compra', path: '/compras/nueva' },
+      { text: 'Nueva Salida', path: '/compras/salida' },
+      { text: 'Compras a Credito', path: '/compras/credito' },
+      { text: 'Ingresos del Día', path: '/compras/ingresos' }
+    ]
+  },
+  {
+    text: 'Proveedor',
+    icon: <Warehouse />,
+    path: '/proveedor',
+    subItems: [
+      { text: 'Nuevo Proveedor', path: '/proveedor/nuevo' }
+    ]
+  },
+  {
+    text: 'Ventas',
+    icon: <PointOfSale />,
+    path: '/ventas',
+    subItems: [
+      { text: 'Nueva Venta', path: '/ventas/nueva' },
+      { text: 'Realizar Pedidos', path: '/ventas/pedidos' },
+      { text: 'Mis Pedidos', path: '/ventas/mis-pedidos' }
+    ]
+  },
+  {
+    text: 'Traspasos',
+    icon: <SwapHoriz />,
+    path: '/traspasos',
+    subItems: [
+      { text: 'Nuevo Traspaso', path: '/traspasos/nuevo' }
+    ]
+  },
+  {
+    text: 'Reportes',
+    icon: <Assessment />,
+    path: '/reportes',
+    subItems: [
+      { text: 'Reporte Diario', path: '/reportes/diario' },
+      { text: 'Reporte Mensual', path: '/reportes/mensual' },
+      { text: 'Reporte Todos', path: '/reportes/todos' },
+      { text: 'Reporte Productos', path: '/reportes/productos' },
+      { text: 'Control de sistema', path: '/reportes/control' },
+      { text: 'Reporte H. Ventas', path: '/reportes/horario-ventas' },
+      { text: 'Reporte por sucursales', path: '/reportes/sucursales' },
+      { text: 'Reporte Vencimientos', path: '/reportes/vencimientos' },
+      { text: 'Reporte Stock Almacenes', path: '/reportes/stock' },
+      { text: 'Productos mas vendidos', path: '/reportes/mas-vendidos' },
+      { text: 'Inventario Diario', path: '/reportes/inventario-diario' },
+      { text: 'Inventario por Líneas', path: '/reportes/inventario-lineas' },
+      { text: 'Kardex', path: '/reportes/kardex' },
+      { text: 'Reporte Pedidos', path: '/reportes/pedidos' }
+    ]
+  },
+  {
+    text: 'Configuracion',
+    icon: <Security />,
+    path: '/configuracion',
+    subItems: [
+      { text: 'Ordenar sucursales', path: '/configuracion/sucursales' }
+    ]
+  }
+]
+
+// Sucursales disponibles
+const sucursales = [
+  { name: 'SAN MARTIN', code: 'SM', percentage: '[15.56%]' },
+  { name: 'BRASIL', code: 'BR', percentage: '[-1.11%]' },
+  { name: 'URUGUAY', code: 'UY', percentage: '[-37.78%]' },
+  { name: 'TIQUIPAYA', code: 'TQ', percentage: '[7.78%]' }
 ]
 
 function DashboardLayout({ children, onLogout }) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+  const [openSubMenus, setOpenSubMenus] = useState({})
+  const [currentSucursal, setCurrentSucursal] = useState(sucursales[1]) // BRASIL por defecto
+  const [userMenuAnchor, setUserMenuAnchor] = useState(null)
+  const [sucursalMenuAnchor, setSucursalMenuAnchor] = useState(null)
+  
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
 
+  const handleCollapseToggle = () => {
+    setCollapsed(!collapsed)
+    if (!collapsed) {
+      setOpenSubMenus({}) // Cerrar submenús al colapsar
+    }
+  }
+
+  // FUNCIÓN ACORDEÓN CORREGIDA
+  const handleSubMenuToggle = (menuIndex) => {
+    if (collapsed) return
+    
+    setOpenSubMenus(prev => {
+      const newState = {}
+      // Si el menú clickeado ya está abierto, lo cerramos (todos quedan cerrados)
+      if (prev[menuIndex]) {
+        return {}
+      }
+      // Si no está abierto, cerramos todos y abrimos solo este
+      newState[menuIndex] = true
+      return newState
+    })
+  }
+
+  const handleMenuClick = (path, hasSubItems = false, menuIndex = null) => {
+    if (hasSubItems && !collapsed) {
+      handleSubMenuToggle(menuIndex)
+    } else {
+      navigate(path)
+      if (isMobile) {
+        setMobileOpen(false)
+      }
+    }
+  }
+
+  const handleUserMenuClick = (event) => {
+    setUserMenuAnchor(event.currentTarget)
+  }
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null)
+  }
+
+  const handleSucursalMenuClick = (event) => {
+    setSucursalMenuAnchor(event.currentTarget)
+  }
+
+  const handleSucursalMenuClose = () => {
+    setSucursalMenuAnchor(null)
+  }
+
+  const handleSucursalChange = (sucursal) => {
+    setCurrentSucursal(sucursal)
+    handleSucursalMenuClose()
+  }
+
+  const handleEditProfile = () => {
+    navigate('/users')
+    handleUserMenuClose()
+  }
+
+  const isActiveItem = (itemPath) => {
+    if (itemPath === '/users') {
+      return location.pathname === '/users' || location.pathname.startsWith('/users')
+    }
+    return location.pathname.startsWith(itemPath)
+  }
+
   const drawer = (
-    <Box sx={{ height: '100%', background: 'linear-gradient(180deg, #2D3748 0%, #1A202C 100%)' }}>
+    <Box sx={{ 
+      height: '100%', 
+      background: 'linear-gradient(180deg, #2D3748 0%, #1A202C 100%)',
+      width: collapsed ? collapsedDrawerWidth : drawerWidth,
+      transition: 'width 0.3s ease'
+    }}>
       {/* Profile Section */}
-      <Box sx={{ p: 3, textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <Avatar 
-          sx={{ 
-            bgcolor: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)', 
-            width: 64, 
-            height: 64,
-            margin: '0 auto',
-            mb: 2,
-            boxShadow: '0 4px 20px rgba(255,107,53,0.3)'
+      <Box sx={{ 
+        p: collapsed ? 1 : 3, 
+        textAlign: 'center', 
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        transition: 'all 0.3s ease'
+      }}>
+        <Button
+          onClick={!collapsed ? handleSucursalMenuClick : undefined}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            color: 'white',
+            textTransform: 'none',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+            width: '100%',
+            p: collapsed ? 0.5 : 2
           }}
         >
-          <Typography variant="h6" fontWeight="bold">BA</Typography>
-        </Avatar>
-        <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
-          Brasil Admin
-        </Typography>
-        <Chip 
-          label="BRASIL" 
-          size="small" 
-          sx={{ 
-            bgcolor: 'rgba(255,255,255,0.1)', 
-            color: 'white',
-            mt: 1
-          }} 
-        />
+          <Avatar 
+            sx={{ 
+              bgcolor: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)', 
+              width: collapsed ? 40 : 64, 
+              height: collapsed ? 40 : 64,
+              mb: collapsed ? 0 : 2,
+              boxShadow: '0 4px 20px rgba(255,107,53,0.3)',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <Typography variant={collapsed ? "body2" : "h6"} fontWeight="bold">
+              {currentSucursal.code}
+            </Typography>
+          </Avatar>
+          
+          {!collapsed && (
+            <>
+              <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
+                Brasil Admin
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                <Chip 
+                  label={currentSucursal.name} 
+                  size="small" 
+                  sx={{ 
+                    bgcolor: 'rgba(255,255,255,0.1)', 
+                    color: 'white'
+                  }} 
+                />
+                <KeyboardArrowDown />
+              </Box>
+            </>
+          )}
+        </Button>
       </Box>
 
       {/* Navigation */}
-      <Box sx={{ px: 2, py: 1 }}>
-        <Typography
-          variant="overline"
-          sx={{ 
-            px: 2, 
-            py: 1, 
-            color: 'rgba(255,255,255,0.6)',
-            fontWeight: 600,
-            letterSpacing: 1.2
-          }}
-        >
-          NAVEGACIÓN PRINCIPAL
-        </Typography>
+      <Box sx={{ 
+        px: collapsed ? 0.5 : 2, 
+        py: 1,
+        height: 'calc(100vh - 160px)',
+        overflow: 'hidden'
+      }}>
+        {!collapsed && (
+          <Typography
+            variant="overline"
+            sx={{ 
+              px: 2, 
+              py: 1, 
+              color: 'rgba(255,255,255,0.6)',
+              fontWeight: 600,
+              letterSpacing: 1.2,
+              fontSize: '0.7rem'
+            }}
+          >
+            NAVEGACIÓN PRINCIPAL
+          </Typography>
+        )}
 
-        <List sx={{ px: 1 }}>
-          {menuItems.map((item, index) => (
-            <ListItem
-              key={index}
-              sx={{
-                borderRadius: 2,
-                mb: 0.5,
-                cursor: 'pointer',
-                background: item.active ? 
-                  'linear-gradient(135deg, rgba(74,95,255,0.2) 0%, rgba(42,63,223,0.2) 100%)' : 
-                  'transparent',
-                border: item.active ? '1px solid rgba(74,95,255,0.3)' : 'none',
-                '&:hover': { 
-                  bgcolor: 'rgba(255,255,255,0.05)',
-                  transform: 'translateX(4px)',
-                  transition: 'all 0.2s ease'
-                }
-              }}
-            >
-              <ListItemIcon sx={{ color: item.active ? '#4A5FFF' : 'rgba(255,255,255,0.7)' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText 
-                primary={item.text}
-                primaryTypographyProps={{ 
-                  variant: 'body2',
-                  sx: { 
-                    color: item.active ? 'white' : 'rgba(255,255,255,0.8)',
-                    fontWeight: item.active ? 600 : 400
-                  }
-                }}
-              />
-            </ListItem>
-          ))}
-        </List>
+        <Box sx={{ 
+          px: collapsed ? 0 : 1,
+          height: 'calc(100% - 40px)',
+          overflowY: 'auto',
+          '&::-webkit-scrollbar': {
+            display: 'none'
+          },
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none'
+        }}>
+          <List sx={{ py: 0 }}>
+            {menuItems.map((item, index) => {
+              const isActive = isActiveItem(item.path)
+              const hasSubItems = item.subItems && item.subItems.length > 0
+              const isSubMenuOpen = openSubMenus[index]
+              
+              return (
+                <React.Fragment key={index}>
+                  <ListItem
+                    onClick={() => handleMenuClick(item.path, hasSubItems, index)}
+                    sx={{
+                      borderRadius: collapsed ? 1 : 2,
+                      mb: 0.5,
+                      cursor: 'pointer',
+                      minHeight: 48,
+                      background: isActive ? 
+                        'linear-gradient(135deg, rgba(74,95,255,0.2) 0%, rgba(42,63,223,0.2) 100%)' : 
+                        'transparent',
+                      border: isActive ? '1px solid rgba(74,95,255,0.3)' : 'none',
+                      '&:hover': { 
+                        bgcolor: 'rgba(255,255,255,0.05)',
+                        transform: collapsed ? 'none' : 'translateX(4px)',
+                        transition: 'all 0.2s ease'
+                      },
+                      justifyContent: collapsed ? 'center' : 'flex-start',
+                      px: collapsed ? 1 : 2
+                    }}
+                  >
+                    <ListItemIcon 
+                      sx={{ 
+                        color: isActive ? '#4A5FFF' : 'rgba(255,255,255,0.7)',
+                        minWidth: collapsed ? 'unset' : 56,
+                        mr: collapsed ? 0 : 2,
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    
+                    {!collapsed && (
+                      <>
+                        <ListItemText 
+                          primary={item.text}
+                          primaryTypographyProps={{ 
+                            variant: 'body2',
+                            sx: { 
+                              color: isActive ? 'white' : 'rgba(255,255,255,0.8)',
+                              fontWeight: isActive ? 600 : 400
+                            }
+                          }}
+                        />
+                        {hasSubItems && (
+                          <IconButton 
+                            size="small" 
+                            sx={{ color: 'rgba(255,255,255,0.7)' }}
+                          >
+                            {isSubMenuOpen ? <ExpandLess /> : <ExpandMore />}
+                          </IconButton>
+                        )}
+                      </>
+                    )}
+                  </ListItem>
+
+                  {/* Submenús */}
+                  {hasSubItems && !collapsed && (
+                    <Collapse in={isSubMenuOpen} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding sx={{ pl: 2 }}>
+                        {item.subItems.map((subItem, subIndex) => (
+                          <ListItem
+                            key={subIndex}
+                            onClick={() => handleMenuClick(subItem.path)}
+                            sx={{
+                              borderRadius: 1,
+                              mb: 0.5,
+                              cursor: 'pointer',
+                              minHeight: 40,
+                              '&:hover': { 
+                                bgcolor: 'rgba(255,255,255,0.05)'
+                              }
+                            }}
+                          >
+                            <ListItemIcon 
+                              sx={{ 
+                                color: 'rgba(255,255,255,0.5)',
+                                minWidth: 32
+                              }}
+                            >
+                              <Typography sx={{ fontSize: '1rem' }}>›</Typography>
+                            </ListItemIcon>
+                            <ListItemText 
+                              primary={subItem.text}
+                              primaryTypographyProps={{ 
+                                variant: 'body2',
+                                sx: { 
+                                  color: 'rgba(255,255,255,0.7)',
+                                  fontSize: '0.85rem'
+                                }
+                              }}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Collapse>
+                  )}
+                </React.Fragment>
+              )
+            })}
+          </List>
+        </Box>
       </Box>
     </Box>
   )
 
   return (
     <Box sx={{ display: 'flex' }}>
-      {/* Enhanced App Bar */}
+      {/* App Bar */}
       <AppBar
         position="fixed"
         sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
+          width: { md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth}px)` },
+          ml: { md: `${collapsed ? collapsedDrawerWidth : drawerWidth}px` },
           background: 'linear-gradient(135deg, #4A5FFF 0%, #667EEA 100%)',
           backdropFilter: 'blur(10px)',
           borderBottom: 'none',
-          boxShadow: '0 4px 20px rgba(74,95,255,0.15)'
+          boxShadow: '0 4px 20px rgba(74,95,255,0.15)',
+          transition: 'all 0.3s ease'
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -160,19 +451,27 @@ function DashboardLayout({ children, onLogout }) {
             <IconButton
               color="inherit"
               edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { md: 'none' } }}
+              onClick={isMobile ? handleDrawerToggle : handleCollapseToggle}
+              sx={{ mr: 2 }}
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 1 }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                fontWeight: 700, 
+                letterSpacing: 1,
+                cursor: 'pointer'
+              }}
+              onClick={() => navigate('/dashboard')}
+            >
               Sifarm
             </Typography>
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Chip
-              label="Facturación electrónica en línea: (Activado)"
+              label="Facturación electrónica en línea: (Activada)"
               size="small"
               sx={{
                 bgcolor: 'rgba(255,255,255,0.2)',
@@ -182,12 +481,22 @@ function DashboardLayout({ children, onLogout }) {
             />
             
             <IconButton color="inherit">
-              <Badge badgeContent={3} color="error">
+              <Badge badgeContent={14} color="error">
                 <Notifications />
               </Badge>
             </IconButton>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Button
+              onClick={handleUserMenuClick}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                color: 'white',
+                textTransform: 'none',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+              }}
+            >
               <Avatar 
                 sx={{ 
                   bgcolor: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)',
@@ -202,19 +511,66 @@ function DashboardLayout({ children, onLogout }) {
                   Brasil Admin
                 </Typography>
               </Box>
-            </Box>
-
-            <IconButton color="inherit" onClick={onLogout}>
-              <ExitToApp />
-            </IconButton>
+              <KeyboardArrowDown />
+            </Button>
           </Box>
         </Toolbar>
       </AppBar>
 
-      {/* Enhanced Sidebar */}
+      {/* Menús desplegables */}
+      <Menu
+        anchorEl={userMenuAnchor}
+        open={Boolean(userMenuAnchor)}
+        onClose={handleUserMenuClose}
+        PaperProps={{
+          sx: { mt: 1, minWidth: 180 }
+        }}
+      >
+        <MenuItem onClick={handleEditProfile}>
+          <Edit sx={{ mr: 2 }} />
+          Editar Perfil
+        </MenuItem>
+        <MenuItem onClick={onLogout}>
+          <ExitToApp sx={{ mr: 2 }} />
+          Salir
+        </MenuItem>
+      </Menu>
+
+      <Menu
+        anchorEl={sucursalMenuAnchor}
+        open={Boolean(sucursalMenuAnchor)}
+        onClose={handleSucursalMenuClose}
+        PaperProps={{
+          sx: { mt: 1, minWidth: 200 }
+        }}
+      >
+        {sucursales.map((sucursal, index) => (
+          <MenuItem 
+            key={index}
+            onClick={() => handleSucursalChange(sucursal)}
+            selected={currentSucursal.name === sucursal.name}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <Typography>{sucursal.name}</Typography>
+              <Typography 
+                variant="caption" 
+                color={sucursal.percentage.includes('-') ? 'error' : 'success.main'}
+              >
+                {sucursal.percentage}
+              </Typography>
+            </Box>
+          </MenuItem>
+        ))}
+      </Menu>
+
+      {/* Sidebar */}
       <Box
         component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+        sx={{ 
+          width: { md: collapsed ? collapsedDrawerWidth : drawerWidth }, 
+          flexShrink: { md: 0 },
+          transition: 'width 0.3s ease'
+        }}
       >
         <Drawer
           variant="temporary"
@@ -223,7 +579,11 @@ function DashboardLayout({ children, onLogout }) {
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth }
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: drawerWidth,
+              overflow: 'hidden' // Sin scroll
+            }
           }}
         >
           {drawer}
@@ -232,7 +592,12 @@ function DashboardLayout({ children, onLogout }) {
           variant="permanent"
           sx={{
             display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth }
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: collapsed ? collapsedDrawerWidth : drawerWidth,
+              transition: 'width 0.3s ease',
+              overflow: 'hidden' // Sin scroll
+            }
           }}
           open
         >
@@ -240,16 +605,17 @@ function DashboardLayout({ children, onLogout }) {
         </Drawer>
       </Box>
 
-      {/* Enhanced Main Content */}
+      {/* Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: { xs: 2, sm: 3 },
-          width: { md: `calc(100% - ${drawerWidth}px)` },
+          width: { md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth}px)` },
           minHeight: '100vh',
           bgcolor: '#F8FAFC',
-          mt: 8
+          mt: 8,
+          transition: 'all 0.3s ease'
         }}
       >
         {children}
