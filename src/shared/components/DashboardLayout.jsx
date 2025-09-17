@@ -44,10 +44,10 @@ const collapsedDrawerWidth = 60
 
 // Configuración completa de menús con submenús
 const menuItems = [
-  {
+   {
     text: 'Usuarios',
     icon: <Group />,
-    path: '/users',
+    path: '/users',  // Ruta original mantenida
     subItems: [
       { text: 'Nuevo Usuario', path: '/users/new' },
       { text: 'Lista de Usuarios', path: '/users/list' }
@@ -211,7 +211,7 @@ function DashboardLayout({ children, onLogout }) {
   }
 
   const handleEditProfile = () => {
-    navigate('/users')
+    navigate('/profile')  // Ruta para perfil personal separada
     handleUserMenuClose()
   }
 
@@ -522,6 +522,7 @@ function DashboardLayout({ children, onLogout }) {
         anchorEl={userMenuAnchor}
         open={Boolean(userMenuAnchor)}
         onClose={handleUserMenuClose}
+        disableScrollLock={true}
         PaperProps={{
           sx: { mt: 1, minWidth: 180 }
         }}
