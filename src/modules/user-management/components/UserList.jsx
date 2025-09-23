@@ -1,4 +1,4 @@
-// UserList.jsx - Componente completo con toda la funcionalidad del monolítico
+// UserList.jsx - Componente completo con columna nombreEquipo
 
 import React from 'react';
 import {
@@ -72,7 +72,7 @@ const UserList = ({ onCreateUser, onEditUser, onAssignPermissions, onAssignSched
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       <Typography variant="h4" sx={{ fontWeight: 700, color: '#1A202C', mb: 1 }}>
         Gestión de Usuarios
       </Typography>
@@ -150,7 +150,7 @@ const UserList = ({ onCreateUser, onEditUser, onAssignPermissions, onAssignSched
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
-              placeholder="Buscar usuarios..."
+              placeholder="Buscar por usuario, nombre, email o equipo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -194,7 +194,7 @@ const UserList = ({ onCreateUser, onEditUser, onAssignPermissions, onAssignSched
         </Grid>
       </Paper>
 
-      {/* Tabla de usuarios */}
+      {/* Tabla de usuarios - ACTUALIZADA con columna nombreEquipo */}
       <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
         <Table>
           <TableHead sx={{ bgcolor: '#f8f9fa' }}>
@@ -202,6 +202,7 @@ const UserList = ({ onCreateUser, onEditUser, onAssignPermissions, onAssignSched
               <TableCell sx={{ fontWeight: 600, color: '#1A202C' }}>Avatar</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#1A202C' }}>Usuario</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#1A202C' }}>Nombre Completo</TableCell>
+              <TableCell sx={{ fontWeight: 600, color: '#1A202C' }}>Equipo</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#1A202C' }}>Email</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#1A202C' }}>Rol</TableCell>
               <TableCell sx={{ fontWeight: 600, color: '#1A202C' }}>Sucursal</TableCell>
@@ -224,6 +225,18 @@ const UserList = ({ onCreateUser, onEditUser, onAssignPermissions, onAssignSched
                   </Typography>
                 </TableCell>
                 <TableCell>{user.nombreCompleto}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={user.nombreEquipo || 'Sin asignar'}
+                    size="small"
+                    variant="outlined"
+                    sx={{ 
+                      bgcolor: user.nombreEquipo ? '#e3f2fd' : '#f5f5f5',
+                      color: user.nombreEquipo ? '#1976d2' : '#666',
+                      borderColor: user.nombreEquipo ? '#1976d2' : '#ccc'
+                    }}
+                  />
+                </TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
                   <Chip

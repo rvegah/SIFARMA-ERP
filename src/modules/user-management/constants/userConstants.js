@@ -1,4 +1,4 @@
-// userConstants.js - Datos completos extraídos del archivo monolítico
+// userConstants.js - Datos completos con campo nombreEquipo agregado
 
 // Constantes de configuración
 export const sucursales = ['BRASIL', 'SAN MARTIN', 'URUGUAY', 'TIQUIPAYA'];
@@ -6,13 +6,14 @@ export const roles = ['ADMIN', 'FARMACEUTICO', 'VENDEDOR', 'SUPERVISOR', 'CONTAD
 export const tiposUsuario = ['ADMINISTRADOR', 'USUARIO NORMAL', 'INVITADO'];
 export const generos = ['Masculino', 'Femenino'];
 
-// Datos completos de usuarios - EXACTAMENTE como en el monolítico
+// Datos completos de usuarios - EXACTAMENTE como en el monolítico + nombreEquipo
 export const allUsers = [
   // Usuarios de BRASIL
   {
     id: 1,
     usuario: 'brasil_admin',
     nombreCompleto: 'Brasil Admin',
+    nombreEquipo: 'PC-BRASIL-01',
     email: 'brazil@hotmail.es',
     cedula: '12345678',
     telefono: '655999',
@@ -28,6 +29,7 @@ export const allUsers = [
     id: 2,
     usuario: 'brasil_farm01',
     nombreCompleto: 'MARCELA VILCA',
+    nombreEquipo: 'PC-BRASIL-02',
     email: 'marcela@sifarma.com',
     cedula: '87654321',
     telefono: '77788899',
@@ -44,6 +46,7 @@ export const allUsers = [
     id: 3,
     usuario: 'sanmartin_admin',
     nombreCompleto: 'USUARIO DE PRUEBA',
+    nombreEquipo: 'PC-SANMARTIN-01',
     email: 'sanmartin@sifarma.com',
     cedula: '11223344',
     telefono: '66677788',
@@ -59,6 +62,7 @@ export const allUsers = [
     id: 4,
     usuario: 'veronica_brasil',
     nombreCompleto: 'VERONICA OCAÑA',
+    nombreEquipo: 'PC-SANMARTIN-02',
     email: 'veronica@sifarma.com',
     cedula: '55443322',
     telefono: '99887766',
@@ -75,6 +79,7 @@ export const allUsers = [
     id: 5,
     usuario: 'valerio_valerolo',
     nombreCompleto: 'Valerio Valerolo',
+    nombreEquipo: 'PC-URUGUAY-01',
     email: 'valerio@sifarma.com',
     cedula: '44556677',
     telefono: '88776655',
@@ -91,6 +96,7 @@ export const allUsers = [
     id: 6,
     usuario: 'xinienio_xinienito',
     nombreCompleto: 'Xinienio Xinienito',
+    nombreEquipo: 'PC-TIQUIPAYA-01',
     email: 'xinienio@sifarma.com',
     cedula: '33445566',
     telefono: '77665544',
@@ -110,9 +116,10 @@ export const currentUserConfig = {
   isAdmin: true
 };
 
-// Estructura del formulario inicial - del monolítico
+// Estructura del formulario inicial - ACTUALIZADA con nombreEquipo
 export const initialFormState = {
   sucursal: '',
+  nombreEquipo: '',
   tipoUsuario: '',
   usuario: '',
   password: '',

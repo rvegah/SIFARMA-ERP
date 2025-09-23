@@ -23,7 +23,7 @@ import {
   Visibility,
   VisibilityOff
 } from '@mui/icons-material';
-import { useUsers } from '../context/UserContext';
+import { useUsers } from '../hooks/useUsers';
 import { sucursales, roles, generos } from '../constants/userConstants';
 
 const CreateUserForm = ({ onCancel }) => {
@@ -87,10 +87,24 @@ const CreateUserForm = ({ onCancel }) => {
             </FormControl>
           </Grid>
 
-          {/* 2. Tipo de usuario */}
+          {/* 2. Nombre de equipo */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              2.- Tipo de usuario:
+              2.- Nombre de equipo:
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder="Ingrese nombre del equipo asignado"
+              value={userForm.nombreEquipo}
+              onChange={handleFormChange('nombreEquipo')}
+              sx={{ bgcolor: 'white' }}
+            />
+          </Grid>
+
+          {/* 3. Tipo de usuario */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
+              3.- Tipo de usuario:
             </Typography>
             <FormControl fullWidth>
               <InputLabel>TIPO DE USUARIO</InputLabel>
@@ -108,10 +122,10 @@ const CreateUserForm = ({ onCancel }) => {
             </FormControl>
           </Grid>
 
-          {/* 3. Usuario */}
+          {/* 4. Usuario */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              3.- Usuario:
+              4.- Usuario:
             </Typography>
             <TextField
               fullWidth
@@ -123,10 +137,10 @@ const CreateUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 4. Password */}
+          {/* 5. Password */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              4.- Password:
+              5.- Password:
             </Typography>
             <TextField
               fullWidth
@@ -146,10 +160,10 @@ const CreateUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 5. Cédula de identidad */}
+          {/* 6. Cédula de identidad */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              5.- Cédula de identidad:
+              6.- Cédula de identidad:
             </Typography>
             <TextField
               fullWidth
@@ -160,10 +174,10 @@ const CreateUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 6. Nombre completo */}
+          {/* 7. Nombre completo */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              6.- Nombre completo:
+              7.- Nombre completo:
             </Typography>
             <TextField
               fullWidth
@@ -175,10 +189,10 @@ const CreateUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 7. Apellidos */}
+          {/* 8. Apellidos */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              7.- Apellidos:
+              8.- Apellidos:
             </Typography>
             <TextField
               fullWidth
@@ -189,10 +203,10 @@ const CreateUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 8. Título */}
+          {/* 9. Título */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              8.- Título:
+              9.- Título:
             </Typography>
             <TextField
               fullWidth
@@ -203,10 +217,10 @@ const CreateUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 9. Género */}
+          {/* 10. Género */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              9.- Género:
+              10.- Género:
             </Typography>
             <RadioGroup
               value={userForm.genero}
@@ -218,10 +232,10 @@ const CreateUserForm = ({ onCancel }) => {
             </RadioGroup>
           </Grid>
 
-          {/* 10. Celular */}
+          {/* 11. Celular */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              10.- Celular:
+              11.- Celular:
             </Typography>
             <TextField
               fullWidth
@@ -232,10 +246,10 @@ const CreateUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 11. Email */}
+          {/* 12. Email */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              11.- Email:
+              12.- Email:
             </Typography>
             <TextField
               fullWidth
@@ -248,10 +262,10 @@ const CreateUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 12. Dirección */}
+          {/* 13. Dirección */}
           <Grid item xs={12}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
-              12.- Dirección:
+              13.- Dirección:
             </Typography>
             <TextField
               fullWidth

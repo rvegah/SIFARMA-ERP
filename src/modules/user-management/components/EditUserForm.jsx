@@ -1,4 +1,4 @@
-// EditUserForm.jsx - Formulario de edición completo con toda la funcionalidad del monolítico
+// EditUserForm.jsx - Formulario de edición completo con nombreEquipo
 
 import React from 'react';
 import {
@@ -85,7 +85,7 @@ const EditUserForm = ({ onCancel }) => {
       {/* Encabezado amarillo con nombre del usuario - exacto del monolítico */}
       <Paper sx={{ p: 3, mb: 3, bgcolor: '#fff3cd', borderLeft: '4px solid #ffc107' }}>
         <Typography variant="h5" sx={{ fontWeight: 600, color: '#1A202C', mb: 1 }}>
-          EDITAR USUARIO: {selectedUser.nombreCompleto}
+          EDITAR USUARIO: {userToEdit.nombreCompleto}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Modificar información del usuario existente
@@ -115,10 +115,24 @@ const EditUserForm = ({ onCancel }) => {
             </FormControl>
           </Grid>
 
-          {/* 2. Tipo de usuario */}
+          {/* 2. Nombre de equipo */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              2.- Tipo de usuario:
+              2.- Nombre de equipo:
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder="Ingrese nombre del equipo asignado"
+              value={userForm.nombreEquipo}
+              onChange={handleFormChange('nombreEquipo')}
+              sx={{ bgcolor: 'white' }}
+            />
+          </Grid>
+
+          {/* 3. Tipo de usuario */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+              3.- Tipo de usuario:
             </Typography>
             <FormControl fullWidth>
               <InputLabel>TIPO DE USUARIO</InputLabel>
@@ -136,10 +150,10 @@ const EditUserForm = ({ onCancel }) => {
             </FormControl>
           </Grid>
 
-          {/* 3. Usuario */}
+          {/* 4. Usuario */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              3.- Usuario:
+              4.- Usuario:
             </Typography>
             <TextField
               fullWidth
@@ -151,10 +165,10 @@ const EditUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 4. Nueva Password (opcional) */}
+          {/* 5. Nueva Password (opcional) */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              4.- Nueva Password (opcional):
+              5.- Nueva Password (opcional):
             </Typography>
             <TextField
               fullWidth
@@ -176,10 +190,10 @@ const EditUserForm = ({ onCancel }) => {
             </Typography>
           </Grid>
 
-          {/* 5. Cédula de identidad */}
+          {/* 6. Cédula de identidad */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              5.- Cédula de identidad:
+              6.- Cédula de identidad:
             </Typography>
             <TextField
               fullWidth
@@ -190,10 +204,10 @@ const EditUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 6. Nombre completo */}
+          {/* 7. Nombre completo */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              6.- Nombre completo:
+              7.- Nombre completo:
             </Typography>
             <TextField
               fullWidth
@@ -205,10 +219,10 @@ const EditUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 7. Apellidos */}
+          {/* 8. Apellidos */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              7.- Apellidos:
+              8.- Apellidos:
             </Typography>
             <TextField
               fullWidth
@@ -219,10 +233,10 @@ const EditUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 8. Título */}
+          {/* 9. Título */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              8.- Título:
+              9.- Título:
             </Typography>
             <TextField
               fullWidth
@@ -233,10 +247,10 @@ const EditUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 9. Género */}
+          {/* 10. Género */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              9.- Género:
+              10.- Género:
             </Typography>
             <RadioGroup
               value={userForm.genero}
@@ -248,10 +262,10 @@ const EditUserForm = ({ onCancel }) => {
             </RadioGroup>
           </Grid>
 
-          {/* 10. Celular */}
+          {/* 11. Celular */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              10.- Celular:
+              11.- Celular:
             </Typography>
             <TextField
               fullWidth
@@ -262,10 +276,10 @@ const EditUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 11. Email */}
+          {/* 12. Email */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              11.- Email:
+              12.- Email:
             </Typography>
             <TextField
               fullWidth
@@ -278,10 +292,10 @@ const EditUserForm = ({ onCancel }) => {
             />
           </Grid>
 
-          {/* 12. Dirección */}
+          {/* 13. Dirección */}
           <Grid item xs={12}>
             <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
-              12.- Dirección:
+              13.- Dirección:
             </Typography>
             <TextField
               fullWidth

@@ -1,4 +1,4 @@
-// useUsers.js - Hook completo con toda la lógica del monolítico
+// useUsers.js - Hook completo con toda la lógica del monolítico + nombreEquipo
 
 import { useState, useMemo } from 'react';
 import { useSnackbar } from 'notistack';
@@ -47,18 +47,19 @@ export const useUsers = () => {
     }
   }, [users, selectedTab, currentUserSucursal, isAdmin]);
 
-  // Usuarios filtrados por búsqueda y rol - exacto del monolítico
+  // Usuarios filtrados por búsqueda y rol - ACTUALIZADO para incluir nombreEquipo
   const filteredUsers = useMemo(() => {
     return getFilteredUsersByTab.filter(user => {
       const matchesSearch = user.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            user.usuario.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.email.toLowerCase().includes(searchTerm.toLowerCase());
+                           user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (user.nombreEquipo && user.nombreEquipo.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesRole = filterRole === '' || user.rol === filterRole;
       return matchesSearch && matchesRole;
     });
   }, [getFilteredUsersByTab, searchTerm, filterRole]);
 
-  // Función para crear usuario - exacta del monolítico
+  // Función para crear usuario - ACTUALIZADA con nombreEquipo
   const handleCreateUser = () => {
     // Validación - exacta del monolítico
     if (!userForm.usuario || !userForm.password || !userForm.nombreCompleto || !userForm.email) {
@@ -70,6 +71,7 @@ export const useUsers = () => {
       id: users.length + 1,
       usuario: userForm.usuario,
       nombreCompleto: `${userForm.nombreCompleto} ${userForm.apellidos}`,
+      nombreEquipo: userForm.nombreEquipo,
       email: userForm.email,
       cedula: userForm.cedula,
       telefono: userForm.telefono,
@@ -87,7 +89,7 @@ export const useUsers = () => {
     return true;
   };
 
-  // Función para actualizar usuario - exacta del monolítico  
+  // Función para actualizar usuario - ACTUALIZADA con nombreEquipo  
   const handleUpdateUser = () => {
     // Validación - exacta del monolítico
     if (!userForm.usuario || !userForm.nombreCompleto || !userForm.email) {
@@ -101,6 +103,7 @@ export const useUsers = () => {
             ...user,
             usuario: userForm.usuario,
             nombreCompleto: `${userForm.nombreCompleto} ${userForm.apellidos}`,
+            nombreEquipo: userForm.nombreEquipo,
             email: userForm.email,
             cedula: userForm.cedula,
             telefono: userForm.telefono,
@@ -125,13 +128,14 @@ export const useUsers = () => {
     enqueueSnackbar('Usuario eliminado correctamente', { variant: 'success' });
   };
 
-  // Función para preparar edición de usuario - exacta del monolítico
+  // Función para preparar edición de usuario - ACTUALIZADA con nombreEquipo
   const prepareEditUser = (user) => {
     console.log('Preparando usuario para edición:', user);
     setSelectedUser(user);
-    // Pre-poblar el formulario con los datos del usuario - exacto del monolítico
+    // Pre-poblar el formulario con los datos del usuario - ACTUALIZADO con nombreEquipo
     setUserForm({
       sucursal: user.sucursal,
+      nombreEquipo: user.nombreEquipo || '',
       tipoUsuario: user.rol,
       usuario: user.usuario,
       password: '', // Por seguridad, no pre-poblar contraseña
