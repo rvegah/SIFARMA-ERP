@@ -24,7 +24,7 @@ import {
   VisibilityOff
 } from '@mui/icons-material';
 import { useUsers } from '../hooks/useUsers';
-import { sucursales, roles, generos } from '../constants/userConstants';
+import { sucursales, roles, generos, deviceIPMapping } from '../constants/userConstants';
 
 const CreateUserForm = ({ onCancel }) => {
   const {
@@ -38,6 +38,21 @@ const CreateUserForm = ({ onCancel }) => {
     clearForm,
     setShowPassword
   } = useUsers();
+
+  // Filtrar equipos según la sucursal seleccionada
+  const getEquiposPorSucursal = (sucursal) => {
+    if (!sucursal) return [];
+    
+    return Object.keys(deviceIPMapping).filter(equipo => {
+      if (sucursal === 'BRASIL') return equipo.includes('BRASIL');
+      if (sucursal === 'SAN MARTIN') return equipo.includes('SANMARTIN');
+      if (sucursal === 'URUGUAY') return equipo.includes('URUGUAY');
+      if (sucursal === 'TIQUIPAYA') return equipo.includes('TIQUIPAYA');
+      return false;
+    });
+  };
+
+  const equiposDisponibles = getEquiposPorSucursal(userForm.sucursal);
 
   const handleSave = () => {
     const success = handleCreateUser();
@@ -87,18 +102,31 @@ const CreateUserForm = ({ onCancel }) => {
             </FormControl>
           </Grid>
 
-          {/* 2. Nombre de equipo */}
+          {/* 2. Nombre de equipo - CAMBIADO A SELECT FILTRADO POR SUCURSAL */}
           <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ color: '#4A5FFF', mb: 1, fontWeight: 600 }}>
               2.- Nombre de equipo:
             </Typography>
-            <TextField
-              fullWidth
-              placeholder="Ingrese nombre del equipo asignado"
-              value={userForm.nombreEquipo}
-              onChange={handleFormChange('nombreEquipo')}
-              sx={{ bgcolor: 'white' }}
-            />
+            <FormControl fullWidth>
+              <InputLabel>SELECCIONAR EQUIPO</InputLabel>
+              <Select
+                value={userForm.nombreEquipo}
+                onChange={handleFormChange('nombreEquipo')}
+                label="SELECCIONAR EQUIPO"
+                disabled={!userForm.sucursal} // Deshabilitar hasta seleccionar sucursal
+              >
+                {equiposDisponibles.map((equipo) => (
+                  <MenuItem key={equipo} value={equipo}>
+                    {equipo}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {!userForm.sucursal && (
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                * Primero seleccione una sucursal
+              </Typography>
+            )}
           </Grid>
 
           {/* 3. Tipo de usuario */}

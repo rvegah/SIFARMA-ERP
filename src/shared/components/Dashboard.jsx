@@ -19,38 +19,38 @@ import {
   Warning
 } from '@mui/icons-material'
 
-const statsCards = [
+const tarjetasEstadisticas = [
   {
-    title: 'Ventas del día',
-    value: '393',
+    titulo: 'Ventas del día',
+    valor: '393',
     color: '#00BCD4',
-    icon: <TrendingUp />,
-    change: '+12.5%',
-    changeType: 'positive'
+    icono: <TrendingUp />,
+    cambio: '+12.5%',
+    tipoCambio: 'positive'
   },
   {
-    title: 'Compras del día',
-    value: '91',
+    titulo: 'Compras del día',
+    valor: '91',
     color: '#4CAF50',
-    icon: <ShoppingCart />,
-    change: '+8.2%',
-    changeType: 'positive'
+    icono: <ShoppingCart />,
+    cambio: '+8.2%',
+    tipoCambio: 'positive'
   },
   {
-    title: 'Traspasos del día',
-    value: '27',
+    titulo: 'Traspasos del día',
+    valor: '27',
     color: '#FF9800',
-    icon: <SwapHoriz />,
-    change: '-2.1%',
-    changeType: 'negative'
+    icono: <SwapHoriz />,
+    cambio: '-2.1%',
+    tipoCambio: 'negative'
   },
   {
-    title: 'Compras a crédito por pagar',
-    value: '1',
+    titulo: 'Compras a crédito por pagar',
+    valor: '1',
     color: '#F44336',
-    icon: <CreditCard />,
-    change: 'Urgente',
-    changeType: 'warning'
+    icono: <CreditCard />,
+    cambio: 'Urgente',
+    tipoCambio: 'warning'
   }
 ]
 
@@ -69,7 +69,7 @@ function Dashboard() {
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        {statsCards.map((card, index) => (
+        {tarjetasEstadisticas.map((card, index) => (
           <Grid item xs={12} sm={6} lg={3} key={index}>
             <Card 
               sx={{
@@ -88,10 +88,10 @@ function Dashboard() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box>
                     <Typography variant="h3" sx={{ fontWeight: 800, mb: 1 }}>
-                      {card.value}
+                      {card.valor}
                     </Typography>
                     <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      {card.title}
+                      {card.titulo}
                     </Typography>
                   </Box>
                   <Box sx={{ 
@@ -100,17 +100,17 @@ function Dashboard() {
                     p: 1.5,
                     backdropFilter: 'blur(10px)'
                   }}>
-                    {card.icon}
+                    {card.icono}
                   </Box>
                 </Box>
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Chip
-                    label={card.change}
+                    label={card.cambio}
                     size="small"
                     sx={{
-                      bgcolor: card.changeType === 'positive' ? 'rgba(255,255,255,0.2)' :
-                              card.changeType === 'negative' ? 'rgba(0,0,0,0.2)' : 'rgba(255,193,7,0.2)',
+                      bgcolor: card.tipoCambio === 'positive' ? 'rgba(255,255,255,0.2)' :
+                              card.tipoCambio === 'negative' ? 'rgba(0,0,0,0.2)' : 'rgba(255,193,7,0.2)',
                       color: 'white',
                       fontWeight: 600
                     }}

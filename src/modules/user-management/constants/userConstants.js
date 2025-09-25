@@ -1,10 +1,30 @@
-// userConstants.js - Datos completos con campo nombreEquipo agregado
+// src/modules/user-management/constants/userConstants.js - Actualizado con validación IP
 
 // Constantes de configuración
 export const sucursales = ['BRASIL', 'SAN MARTIN', 'URUGUAY', 'TIQUIPAYA'];
 export const roles = ['ADMIN', 'FARMACEUTICO', 'VENDEDOR', 'SUPERVISOR', 'CONTADOR'];
 export const tiposUsuario = ['ADMINISTRADOR', 'USUARIO NORMAL', 'INVITADO'];
 export const generos = ['Masculino', 'Femenino'];
+
+// NUEVO: Mapeo de equipos a IPs autorizadas
+export const deviceIPMapping = {
+  'PC-BRASIL-01': ['192.168.0.8', '192.168.1.101'],
+  'PC-BRASIL-02': ['192.168.0.8', '192.168.1.102'],  
+  'PC-SANMARTIN-01': ['192.168.1.201'],
+  'PC-SANMARTIN-02': ['192.168.1.202'],
+  'PC-URUGUAY-01': ['192.168.1.301'],
+  'PC-TIQUIPAYA-01': ['192.168.1.401']
+};
+
+// NUEVO: Credenciales de usuarios para login (separado de allUsers para seguridad)
+export const loginCredentials = [
+  { usuario: 'brasil_admin', password: '123', nombreEquipo: 'PC-BRASIL-01' },
+  { usuario: 'brasil_farm01', password: '123', nombreEquipo: 'PC-BRASIL-02' },
+  { usuario: 'sanmartin_admin', password: '123', nombreEquipo: 'PC-SANMARTIN-01' },
+  { usuario: 'veronica_brasil', password: '123', nombreEquipo: 'PC-SANMARTIN-02' },
+  { usuario: 'valerio_valerolo', password: '123', nombreEquipo: 'PC-URUGUAY-01' },
+  { usuario: 'xinienio_xinienito', password: '123', nombreEquipo: 'PC-TIQUIPAYA-01' }
+];
 
 // Datos completos de usuarios - EXACTAMENTE como en el monolítico + nombreEquipo
 export const allUsers = [
@@ -136,3 +156,15 @@ export const initialFormState = {
 // Campos obligatorios para validación
 export const requiredFields = ['usuario', 'password', 'nombreCompleto', 'email'];
 export const requiredFieldsEdit = ['usuario', 'nombreCompleto', 'email']; // Sin password en edición
+
+// NUEVO: Función helper para obtener IPs autorizadas de un equipo
+export const getAuthorizedIPs = (nombreEquipo) => {
+  return deviceIPMapping[nombreEquipo] || [];
+};
+
+// NUEVO: Función helper para validar credenciales y obtener nombreEquipo
+export const validateCredentials = (usuario, password) => {
+  return loginCredentials.find(cred => 
+    cred.usuario === usuario && cred.password === password
+  );
+};

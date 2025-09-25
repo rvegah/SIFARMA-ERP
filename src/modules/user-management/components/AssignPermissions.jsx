@@ -42,164 +42,164 @@ import { useUsers } from '../context/UserContext';
 // Configuración de módulos y permisos organizados por categorías - COMPLETA con 70+ permisos
 const permissionsConfig = {
   usuarios: {
-    name: 'Usuarios',
-    icon: '👥',
+    nombre: 'Usuarios',
+    icono: '👥',
     color: '#4A5FFF',
-    permissions: [
-      { id: 'user_create', name: 'Nuevo Usuario', description: 'Crear nuevos usuarios' },
-      { id: 'user_list', name: 'Lista de Usuarios', description: 'Ver lista de usuarios' },
-      { id: 'user_edit', name: 'Editar Usuario', description: 'Modificar datos de usuarios' },
-      { id: 'user_delete', name: 'Eliminar Usuario', description: 'Eliminar usuarios del sistema' },
-      { id: 'user_permissions', name: 'Asignar Permisos', description: 'Gestionar permisos de usuarios' }
+    permisos: [
+      { id: 'usuario_crear', nombre: 'Nuevo Usuario', descripcion: 'Crear nuevos usuarios' },
+      { id: 'usuario_lista', nombre: 'Lista de Usuarios', descripcion: 'Ver lista de usuarios' },
+      { id: 'usuario_editar', nombre: 'Editar Usuario', descripcion: 'Modificar datos de usuarios' },
+      { id: 'usuario_eliminar', nombre: 'Eliminar Usuario', descripcion: 'Eliminar usuarios del sistema' },
+      { id: 'usuario_permisos', nombre: 'Asignar Permisos', descripcion: 'Gestionar permisos de usuarios' }
     ]
   },
   productos: {
-    name: 'Productos',
-    icon: '📦',
+    nombre: 'Productos',
+    icono: '📦',
     color: '#10B981',
-    permissions: [
-      { id: 'product_view', name: 'Ver Productos', description: 'Consultar catálogo de productos' },
-      { id: 'product_create', name: 'Agregar Producto', description: 'Añadir nuevos productos' },
-      { id: 'product_edit', name: 'Editar Producto', description: 'Modificar información de productos' },
-      { id: 'product_delete', name: 'Eliminar Producto', description: 'Eliminar productos del sistema' },
-      { id: 'product_categories', name: 'Gestionar Categorías', description: 'Administrar categorías de productos' },
-      { id: 'product_inventory', name: 'Control de Inventario', description: 'Gestionar stock y existencias' }
+    permisos: [
+      { id: 'producto_ver', nombre: 'Ver Productos', descripcion: 'Consultar catálogo de productos' },
+      { id: 'producto_crear', nombre: 'Agregar Producto', descripcion: 'Añadir nuevos productos' },
+      { id: 'producto_editar', nombre: 'Editar Producto', descripcion: 'Modificar información de productos' },
+      { id: 'producto_eliminar', nombre: 'Eliminar Producto', descripcion: 'Eliminar productos del sistema' },
+      { id: 'producto_categorias', nombre: 'Gestionar Categorías', descripcion: 'Administrar categorías de productos' },
+      { id: 'producto_inventario', nombre: 'Control de Inventario', descripcion: 'Gestionar stock y existencias' }
     ]
   },
   compras: {
-    name: 'Compras',
-    icon: '🛒',
+    nombre: 'Compras',
+    icono: '🛒',
     color: '#F59E0B',
-    permissions: [
-      { id: 'purchase_create', name: 'Nueva Compra', description: 'Registrar nuevas compras' },
-      { id: 'purchase_edit', name: 'Editar Compras', description: 'Modificar compras existentes' },
-      { id: 'purchase_exit', name: 'Nueva Salida', description: 'Registrar salidas de inventario' },
-      { id: 'purchase_credit', name: 'Compras a Crédito', description: 'Gestionar compras a crédito' },
-      { id: 'purchase_income', name: 'Ingresos del Día', description: 'Ver ingresos diarios' },
-      { id: 'purchase_warehouse', name: 'Almacén Traspasos', description: 'Gestionar traspasos entre almacenes' },
-      { id: 'purchase_orders', name: 'Órdenes de Compra', description: 'Crear y gestionar órdenes de compra' }
+    permisos: [
+      { id: 'compra_crear', nombre: 'Nueva Compra', descripcion: 'Registrar nuevas compras' },
+      { id: 'compra_editar', nombre: 'Editar Compras', descripcion: 'Modificar compras existentes' },
+      { id: 'compra_salida', nombre: 'Nueva Salida', descripcion: 'Registrar salidas de inventario' },
+      { id: 'compra_credito', nombre: 'Compras a Crédito', descripcion: 'Gestionar compras a crédito' },
+      { id: 'compra_ingresos', nombre: 'Ingresos del Día', descripcion: 'Ver ingresos diarios' },
+      { id: 'compra_almacen', nombre: 'Almacén Traspasos', descripcion: 'Gestionar traspasos entre almacenes' },
+      { id: 'compra_ordenes', nombre: 'Órdenes de Compra', descripcion: 'Crear y gestionar órdenes de compra' }
     ]
   },
   proveedor: {
-    name: 'Proveedores',
-    icon: '🏢',
+    nombre: 'Proveedores',
+    icono: '🏢',
     color: '#8B5CF6',
-    permissions: [
-      { id: 'supplier_create', name: 'Nuevo Proveedor', description: 'Registrar nuevos proveedores' },
-      { id: 'supplier_edit', name: 'Editar Proveedor', description: 'Modificar datos de proveedores' },
-      { id: 'supplier_view', name: 'Ver Proveedores', description: 'Consultar lista de proveedores' },
-      { id: 'supplier_delete', name: 'Eliminar Proveedor', description: 'Eliminar proveedores del sistema' }
+    permisos: [
+      { id: 'proveedor_crear', nombre: 'Nuevo Proveedor', descripcion: 'Registrar nuevos proveedores' },
+      { id: 'proveedor_editar', nombre: 'Editar Proveedor', descripcion: 'Modificar datos de proveedores' },
+      { id: 'proveedor_ver', nombre: 'Ver Proveedores', descripcion: 'Consultar lista de proveedores' },
+      { id: 'proveedor_eliminar', nombre: 'Eliminar Proveedor', descripcion: 'Eliminar proveedores del sistema' }
     ]
   },
   ventas: {
-    name: 'Ventas',
-    icon: '💰',
+    nombre: 'Ventas',
+    icono: '💰',
     color: '#EF4444',
-    permissions: [
-      { id: 'sale_create', name: 'Nueva Venta', description: 'Registrar nuevas ventas' },
-      { id: 'sale_edit', name: 'Editar Venta', description: 'Modificar ventas existentes' },
-      { id: 'sale_orders', name: 'Realizar Pedidos', description: 'Gestionar pedidos de clientes' },
-      { id: 'sale_my_orders', name: 'Mis Pedidos', description: 'Ver mis pedidos personales' },
-      { id: 'sale_cancel', name: 'Cancelar Ventas', description: 'Cancelar ventas realizadas' },
-      { id: 'sale_refund', name: 'Devoluciones', description: 'Procesar devoluciones de productos' }
+    permisos: [
+      { id: 'venta_crear', nombre: 'Nueva Venta', descripcion: 'Registrar nuevas ventas' },
+      { id: 'venta_editar', nombre: 'Editar Venta', descripcion: 'Modificar ventas existentes' },
+      { id: 'venta_pedidos', nombre: 'Realizar Pedidos', descripcion: 'Gestionar pedidos de clientes' },
+      { id: 'venta_mis_pedidos', nombre: 'Mis Pedidos', descripcion: 'Ver mis pedidos personales' },
+      { id: 'venta_cancelar', nombre: 'Cancelar Ventas', descripcion: 'Cancelar ventas realizadas' },
+      { id: 'venta_devoluciones', nombre: 'Devoluciones', descripcion: 'Procesar devoluciones de productos' }
     ]
   },
   traspasos: {
-    name: 'Traspasos',
-    icon: '🔄',
+    nombre: 'Traspasos',
+    icono: '🔄',
     color: '#06B6D4',
-    permissions: [
-      { id: 'transfer_create', name: 'Nuevo Traspaso', description: 'Crear traspasos entre sucursales' },
-      { id: 'transfer_approve', name: 'Aprobar Traspasos', description: 'Aprobar traspasos pendientes' },
-      { id: 'transfer_receive', name: 'Recibir Traspasos', description: 'Confirmar recepción de traspasos' },
-      { id: 'transfer_history', name: 'Historial Traspasos', description: 'Ver historial de traspasos' }
+    permisos: [
+      { id: 'traspaso_crear', nombre: 'Nuevo Traspaso', descripcion: 'Crear traspasos entre sucursales' },
+      { id: 'traspaso_aprobar', nombre: 'Aprobar Traspasos', descripcion: 'Aprobar traspasos pendientes' },
+      { id: 'traspaso_recibir', nombre: 'Recibir Traspasos', descripcion: 'Confirmar recepción de traspasos' },
+      { id: 'traspaso_historial', nombre: 'Historial Traspasos', descripcion: 'Ver historial de traspasos' }
     ]
   },
   reportes: {
-    name: 'Reportes',
-    icon: '📊',
+    nombre: 'Reportes',
+    icono: '📊',
     color: '#8B5CF6',
-    permissions: [
-      { id: 'report_daily', name: 'Reporte Diario', description: 'Generar reportes diarios' },
-      { id: 'report_monthly', name: 'Reporte Mensual', description: 'Generar reportes mensuales' },
-      { id: 'report_products', name: 'Reporte Productos', description: 'Reportes de productos' },
-      { id: 'report_sales', name: 'Reporte Ventas', description: 'Reportes de ventas' },
-      { id: 'report_purchases', name: 'Reporte Compras', description: 'Reportes de compras' },
-      { id: 'report_inventory', name: 'Inventario Diario', description: 'Control de inventario' },
-      { id: 'report_expired', name: 'Productos Vencidos', description: 'Productos próximos a vencer' },
-      { id: 'report_stock', name: 'Stock Almacenes', description: 'Estado de stock por almacén' },
-      { id: 'report_branches', name: 'Reporte por Sucursales', description: 'Reportes específicos por sucursal' },
-      { id: 'report_expired_products', name: 'Reporte Vencimientos', description: 'Productos próximos a vencer' },
-      { id: 'report_categories', name: 'Reporte Categorías', description: 'Reportes por categorías de productos' },
-      { id: 'report_suppliers', name: 'Reporte Proveedores', description: 'Reportes de proveedores' },
-      { id: 'report_bestsellers', name: 'Productos más vendidos', description: 'Productos con mayor rotación' },
-      { id: 'report_attendance', name: 'Reporte de Asistencia', description: 'Control de asistencia del personal' },
-      { id: 'report_kardex', name: 'Kardex', description: 'Movimientos detallados de productos' },
-      { id: 'report_orders', name: 'Reporte Pedidos', description: 'Estado de pedidos y órdenes' }
+    permisos: [
+      { id: 'reporte_diario', nombre: 'Reporte Diario', descripcion: 'Generar reportes diarios' },
+      { id: 'reporte_mensual', nombre: 'Reporte Mensual', descripcion: 'Generar reportes mensuales' },
+      { id: 'reporte_productos', nombre: 'Reporte Productos', descripcion: 'Reportes de productos' },
+      { id: 'reporte_ventas', nombre: 'Reporte Ventas', descripcion: 'Reportes de ventas' },
+      { id: 'reporte_compras', nombre: 'Reporte Compras', descripcion: 'Reportes de compras' },
+      { id: 'reporte_inventario', nombre: 'Inventario Diario', descripcion: 'Control de inventario' },
+      { id: 'reporte_vencidos', nombre: 'Productos Vencidos', descripcion: 'Productos próximos a vencer' },
+      { id: 'reporte_stock', nombre: 'Stock Almacenes', descripcion: 'Estado de stock por almacén' },
+      { id: 'reporte_sucursales', nombre: 'Reporte por Sucursales', descripcion: 'Reportes específicos por sucursal' },
+      { id: 'reporte_productos_vencidos', nombre: 'Reporte Vencimientos', descripcion: 'Productos próximos a vencer' },
+      { id: 'reporte_categorias', nombre: 'Reporte Categorías', descripcion: 'Reportes por categorías de productos' },
+      { id: 'reporte_proveedores', nombre: 'Reporte Proveedores', descripcion: 'Reportes de proveedores' },
+      { id: 'reporte_mas_vendidos', nombre: 'Productos más vendidos', descripcion: 'Productos con mayor rotación' },
+      { id: 'reporte_asistencia', nombre: 'Reporte de Asistencia', descripcion: 'Control de asistencia del personal' },
+      { id: 'reporte_kardex', nombre: 'Kardex', descripcion: 'Movimientos detallados de productos' },
+      { id: 'reporte_pedidos', nombre: 'Reporte Pedidos', descripcion: 'Estado de pedidos y órdenes' }
     ]
   },
   finanzas: {
-    name: 'Finanzas',
-    icon: '💳',
+    nombre: 'Finanzas',
+    icono: '💳',
     color: '#059669',
-    permissions: [
-      { id: 'finance_daily_income', name: 'Ingresos del Día', description: 'Ver ingresos diarios' },
-      { id: 'finance_monthly_income', name: 'Ingresos Mensuales', description: 'Ver ingresos mensuales' },
-      { id: 'finance_expenses', name: 'Gastos', description: 'Gestionar gastos de la empresa' },
-      { id: 'finance_cash_flow', name: 'Flujo de Caja', description: 'Control de flujo de efectivo' },
-      { id: 'finance_accounts', name: 'Cuentas por Cobrar', description: 'Gestionar cuentas pendientes' },
-      { id: 'finance_payments', name: 'Métodos de Pago', description: 'Configurar métodos de pago' }
+    permisos: [
+      { id: 'finanzas_ingresos_diarios', nombre: 'Ingresos del Día', descripcion: 'Ver ingresos diarios' },
+      { id: 'finanzas_ingresos_mensuales', nombre: 'Ingresos Mensuales', descripcion: 'Ver ingresos mensuales' },
+      { id: 'finanzas_gastos', nombre: 'Gastos', descripcion: 'Gestionar gastos de la empresa' },
+      { id: 'finanzas_flujo_caja', nombre: 'Flujo de Caja', descripcion: 'Control de flujo de efectivo' },
+      { id: 'finanzas_cuentas', nombre: 'Cuentas por Cobrar', descripcion: 'Gestionar cuentas pendientes' },
+      { id: 'finanzas_pagos', nombre: 'Métodos de Pago', descripcion: 'Configurar métodos de pago' }
     ]
   },
   clientes: {
-    name: 'Clientes',
-    icon: '👤',
+    nombre: 'Clientes',
+    icono: '👤',
     color: '#DC2626',
-    permissions: [
-      { id: 'customer_create', name: 'Nuevo Cliente', description: 'Registrar nuevos clientes' },
-      { id: 'customer_edit', name: 'Editar Cliente', description: 'Modificar datos de clientes' },
-      { id: 'customer_view', name: 'Ver Clientes', description: 'Consultar lista de clientes' },
-      { id: 'customer_history', name: 'Historial Cliente', description: 'Ver historial de compras del cliente' },
-      { id: 'customer_credit', name: 'Crédito Cliente', description: 'Gestionar créditos de clientes' }
+    permisos: [
+      { id: 'cliente_crear', nombre: 'Nuevo Cliente', descripcion: 'Registrar nuevos clientes' },
+      { id: 'cliente_editar', nombre: 'Editar Cliente', descripcion: 'Modificar datos de clientes' },
+      { id: 'cliente_ver', nombre: 'Ver Clientes', descripcion: 'Consultar lista de clientes' },
+      { id: 'cliente_historial', nombre: 'Historial Cliente', descripcion: 'Ver historial de compras del cliente' },
+      { id: 'cliente_credito', nombre: 'Crédito Cliente', descripcion: 'Gestionar créditos de clientes' }
     ]
   },
   laboratorio: {
-    name: 'Laboratorio',
-    icon: '🧪',
+    nombre: 'Laboratorio',
+    icono: '🧪',
     color: '#7C3AED',
-    permissions: [
-      { id: 'lab_tests', name: 'Exámenes de Laboratorio', description: 'Gestionar exámenes médicos' },
-      { id: 'lab_results', name: 'Resultados', description: 'Consultar y entregar resultados' },
-      { id: 'lab_equipment', name: 'Equipos', description: 'Gestionar equipos de laboratorio' },
-      { id: 'lab_samples', name: 'Muestras', description: 'Control de muestras médicas' },
-      { id: 'lab_scheduling', name: 'Programación', description: 'Programar citas de laboratorio' }
+    permisos: [
+      { id: 'laboratorio_examenes', nombre: 'Exámenes de Laboratorio', descripcion: 'Gestionar exámenes médicos' },
+      { id: 'laboratorio_resultados', nombre: 'Resultados', descripcion: 'Consultar y entregar resultados' },
+      { id: 'laboratorio_equipos', nombre: 'Equipos', descripcion: 'Gestionar equipos de laboratorio' },
+      { id: 'laboratorio_muestras', nombre: 'Muestras', descripcion: 'Control de muestras médicas' },
+      { id: 'laboratorio_programacion', nombre: 'Programación', descripcion: 'Programar citas de laboratorio' }
     ]
   },
   farmacia: {
-    name: 'Farmacia',
-    icon: '💊',
+    nombre: 'Farmacia',
+    icono: '💊',
     color: '#16A34A',
-    permissions: [
-      { id: 'pharmacy_prescriptions', name: 'Recetas Médicas', description: 'Gestionar recetas médicas' },
-      { id: 'pharmacy_controlled', name: 'Medicamentos Controlados', description: 'Manejo de sustancias controladas' },
-      { id: 'pharmacy_preparation', name: 'Preparaciones Magistrales', description: 'Preparar fórmulas magistrales' },
-      { id: 'pharmacy_consultation', name: 'Consulta Farmacéutica', description: 'Brindar consultas farmacéuticas' },
-      { id: 'pharmacy_inventory_control', name: 'Control Farmacéutico', description: 'Control específico de medicamentos' }
+    permisos: [
+      { id: 'farmacia_recetas', nombre: 'Recetas Médicas', descripcion: 'Gestionar recetas médicas' },
+      { id: 'farmacia_controlados', nombre: 'Medicamentos Controlados', descripcion: 'Manejo de sustancias controladas' },
+      { id: 'farmacia_preparaciones', nombre: 'Preparaciones Magistrales', descripcion: 'Preparar fórmulas magistrales' },
+      { id: 'farmacia_consulta', nombre: 'Consulta Farmacéutica', descripcion: 'Brindar consultas farmacéuticas' },
+      { id: 'farmacia_control_inventario', nombre: 'Control Farmacéutico', descripcion: 'Control específico de medicamentos' }
     ]
   },
   sistema: {
-    name: 'Sistema',
-    icon: '⚙️',
+    nombre: 'Sistema',
+    icono: '⚙️',
     color: '#6B7280',
-    permissions: [
-      { id: 'system_backup', name: 'Respaldos', description: 'Crear y restaurar respaldos' },
-      { id: 'system_config', name: 'Configuración', description: 'Configurar parámetros del sistema' },
-      { id: 'system_branches', name: 'Ordenar Sucursales', description: 'Gestionar sucursales' },
-      { id: 'system_logs', name: 'Logs del Sistema', description: 'Ver registros del sistema' },
-      { id: 'system_maintenance', name: 'Mantenimiento', description: 'Realizar mantenimiento del sistema' },
-      { id: 'system_updates', name: 'Actualizaciones', description: 'Gestionar actualizaciones del sistema' },
-      { id: 'system_security', name: 'Seguridad', description: 'Configurar parámetros de seguridad' },
-      { id: 'system_database', name: 'Base de Datos', description: 'Administrar base de datos' }
+    permisos: [
+      { id: 'sistema_respaldos', nombre: 'Respaldos', descripcion: 'Crear y restaurar respaldos' },
+      { id: 'sistema_configuracion', nombre: 'Configuración', descripcion: 'Configurar parámetros del sistema' },
+      { id: 'sistema_sucursales', nombre: 'Ordenar Sucursales', descripcion: 'Gestionar sucursales' },
+      { id: 'sistema_logs', nombre: 'Logs del Sistema', descripcion: 'Ver registros del sistema' },
+      { id: 'sistema_mantenimiento', nombre: 'Mantenimiento', descripcion: 'Realizar mantenimiento del sistema' },
+      { id: 'sistema_actualizaciones', nombre: 'Actualizaciones', descripcion: 'Gestionar actualizaciones del sistema' },
+      { id: 'sistema_seguridad', nombre: 'Seguridad', descripcion: 'Configurar parámetros de seguridad' },
+      { id: 'sistema_base_datos', nombre: 'Base de Datos', descripcion: 'Administrar base de datos' }
     ]
   }
 };
@@ -207,84 +207,84 @@ const permissionsConfig = {
 // Roles predefinidos con permisos típicos - ACTUALIZADO con nuevos módulos
 const roleTemplates = {
   ADMIN: {
-    name: 'Administrador',
-    description: 'Acceso completo al sistema',
-    permissions: Object.keys(permissionsConfig).flatMap(module => 
-      permissionsConfig[module].permissions.map(p => p.id)
+    nombre: 'Administrador',
+    descripcion: 'Acceso completo al sistema',
+    permisos: Object.keys(permissionsConfig).flatMap(module => 
+      permissionsConfig[module].permisos.map(p => p.id)
     )
   },
   FARMACEUTICO: {
-    name: 'Farmacéutico',
-    description: 'Acceso a farmacia, ventas, productos e inventario',
-    permissions: [
+    nombre: 'Farmacéutico',
+    descripcion: 'Acceso a farmacia, ventas, productos e inventario',
+    permisos: [
       // Productos
-      'product_view', 'product_edit', 'product_inventory',
+      'producto_ver', 'producto_editar', 'producto_inventario',
       // Ventas
-      'sale_create', 'sale_orders', 'sale_refund',
+      'venta_crear', 'venta_pedidos', 'venta_devoluciones',
       // Farmacia
-      'pharmacy_prescriptions', 'pharmacy_controlled', 'pharmacy_preparation', 'pharmacy_consultation', 'pharmacy_inventory_control',
+      'farmacia_recetas', 'farmacia_controlados', 'farmacia_preparaciones', 'farmacia_consulta', 'farmacia_control_inventario',
       // Clientes
-      'customer_view', 'customer_history',
+      'cliente_ver', 'cliente_historial',
       // Reportes básicos
-      'report_daily', 'report_inventory', 'report_expired', 'report_kardex'
+      'reporte_diario', 'reporte_inventario', 'reporte_vencidos', 'reporte_kardex'
     ]
   },
   VENDEDOR: {
-    name: 'Vendedor',
-    description: 'Acceso básico a ventas y productos',
-    permissions: [
+    nombre: 'Vendedor',
+    descripcion: 'Acceso básico a ventas y productos',
+    permisos: [
       // Productos (solo lectura)
-      'product_view',
+      'producto_ver',
       // Ventas
-      'sale_create', 'sale_my_orders',
+      'venta_crear', 'venta_mis_pedidos',
       // Clientes
-      'customer_create', 'customer_view', 'customer_history',
+      'cliente_crear', 'cliente_ver', 'cliente_historial',
       // Reportes básicos
-      'report_daily'
+      'reporte_diario'
     ]
   },
   SUPERVISOR: {
-    name: 'Supervisor',
-    description: 'Acceso a reportes, supervisión y operaciones',
-    permissions: [
+    nombre: 'Supervisor',
+    descripcion: 'Acceso a reportes, supervisión y operaciones',
+    permisos: [
       // Productos
-      'product_view', 'product_edit',
+      'producto_ver', 'producto_editar',
       // Ventas
-      'sale_create', 'sale_orders', 'sale_cancel',
+      'venta_crear', 'venta_pedidos', 'venta_cancelar',
       // Compras
-      'purchase_create', 'purchase_edit',
+      'compra_crear', 'compra_editar',
       // Traspasos
-      'transfer_create', 'transfer_approve', 'transfer_history',
+      'traspaso_crear', 'traspaso_aprobar', 'traspaso_historial',
       // Clientes
-      'customer_view', 'customer_edit', 'customer_history', 'customer_credit',
+      'cliente_ver', 'cliente_editar', 'cliente_historial', 'cliente_credito',
       // Reportes avanzados
-      'report_daily', 'report_monthly', 'report_sales', 'report_inventory', 'report_purchases', 'report_branches', 'report_attendance'
+      'reporte_diario', 'reporte_mensual', 'reporte_ventas', 'reporte_inventario', 'reporte_compras', 'reporte_sucursales', 'reporte_asistencia'
     ]
   },
   CONTADOR: {
-    name: 'Contador',
-    description: 'Acceso a finanzas, reportes contables y administrativos',
-    permissions: [
+    nombre: 'Contador',
+    descripcion: 'Acceso a finanzas, reportes contables y administrativos',
+    permisos: [
       // Finanzas
-      'finance_daily_income', 'finance_monthly_income', 'finance_expenses', 'finance_cash_flow', 'finance_accounts', 'finance_payments',
+      'finanzas_ingresos_diarios', 'finanzas_ingresos_mensuales', 'finanzas_gastos', 'finanzas_flujo_caja', 'finanzas_cuentas', 'finanzas_pagos',
       // Reportes financieros
-      'report_daily', 'report_monthly', 'report_sales', 'report_purchases', 'report_branches',
+      'reporte_diario', 'reporte_mensual', 'reporte_ventas', 'reporte_compras', 'reporte_sucursales',
       // Proveedores
-      'supplier_view',
+      'proveedor_ver',
       // Clientes (cuentas)
-      'customer_view', 'customer_credit'
+      'cliente_ver', 'cliente_credito'
     ]
   },
   LABORATORISTA: {
-    name: 'Laboratorista',
-    description: 'Acceso específico para laboratorio médico',
-    permissions: [
+    nombre: 'Laboratorista',
+    descripcion: 'Acceso específico para laboratorio médico',
+    permisos: [
       // Laboratorio
-      'lab_tests', 'lab_results', 'lab_equipment', 'lab_samples', 'lab_scheduling',
+      'laboratorio_examenes', 'laboratorio_resultados', 'laboratorio_equipos', 'laboratorio_muestras', 'laboratorio_programacion',
       // Clientes
-      'customer_view', 'customer_history',
+      'cliente_ver', 'cliente_historial',
       // Reportes específicos
-      'report_daily'
+      'reporte_diario'
     ]
   }
 };
@@ -302,7 +302,7 @@ const AssignPermissions = ({ onCancel }) => {
   const applyRoleTemplate = (roleKey) => {
     const template = roleTemplates[roleKey];
     if (template) {
-      setUserPermissions(new Set(template.permissions));
+      setUserPermissions(new Set(template.permisos));
     }
   };
 
@@ -319,7 +319,7 @@ const AssignPermissions = ({ onCancel }) => {
 
   // Función para alternar todos los permisos de un módulo
   const toggleModulePermissions = (moduleKey) => {
-    const modulePermissions = permissionsConfig[moduleKey].permissions.map(p => p.id);
+    const modulePermissions = permissionsConfig[moduleKey].permisos.map(p => p.id);
     const allSelected = modulePermissions.every(p => userPermissions.has(p));
     
     const newPermissions = new Set(userPermissions);
@@ -342,7 +342,7 @@ const AssignPermissions = ({ onCancel }) => {
 
   // Calcular estadísticas de permisos
   const totalPermissions = Object.values(permissionsConfig)
-    .reduce((sum, module) => sum + module.permissions.length, 0);
+    .reduce((sum, module) => sum + module.permisos.length, 0);
   const selectedPermissions = userPermissions.size;
 
   return (
@@ -410,7 +410,7 @@ const AssignPermissions = ({ onCancel }) => {
                   onClick={() => applyRoleTemplate(roleKey)}
                   sx={{ mb: 1, justifyContent: 'flex-start' }}
                 >
-                  {template.name}
+                  {template.nombre}
                 </Button>
               ))}
             </CardContent>
@@ -450,7 +450,7 @@ const AssignPermissions = ({ onCancel }) => {
                     size="small"
                     onClick={() => {
                       const allPermissions = Object.values(permissionsConfig)
-                        .flatMap(module => module.permissions.map(p => p.id));
+                        .flatMap(module => module.permisos.map(p => p.id));
                       setUserPermissions(new Set(allPermissions));
                     }}
                   >
@@ -467,7 +467,7 @@ const AssignPermissions = ({ onCancel }) => {
               </Box>
 
               {Object.entries(permissionsConfig).map(([moduleKey, module]) => {
-                const modulePermissions = module.permissions.map(p => p.id);
+                const modulePermissions = module.permisos.map(p => p.id);
                 const selectedCount = modulePermissions.filter(p => userPermissions.has(p)).length;
                 const isExpanded = expandedPanels.includes(moduleKey);
 
@@ -481,20 +481,20 @@ const AssignPermissions = ({ onCancel }) => {
                     <AccordionSummary expandIcon={<ExpandMore />}>
                       <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                         <Typography sx={{ mr: 2, fontSize: '1.2rem' }}>
-                          {module.icon}
+                          {module.icono}
                         </Typography>
                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                          {module.name}
+                          {module.nombre}
                         </Typography>
                         <Chip 
-                          label={`${selectedCount}/${module.permissions.length}`}
+                          label={`${selectedCount}/${module.permisos.length}`}
                           size="small"
                           color={selectedCount > 0 ? 'primary' : 'default'}
                           sx={{ mr: 1 }}
                         />
                         <Switch
-                          checked={selectedCount === module.permissions.length}
-                          indeterminate={selectedCount > 0 && selectedCount < module.permissions.length ? true : undefined}
+                          checked={selectedCount === module.permisos.length}
+                          indeterminate={selectedCount > 0 && selectedCount < module.permisos.length ? true : undefined}
                           onChange={() => toggleModulePermissions(moduleKey)}
                           onClick={(e) => e.stopPropagation()}
                         />
@@ -502,7 +502,7 @@ const AssignPermissions = ({ onCancel }) => {
                     </AccordionSummary>
                     <AccordionDetails>
                       <Grid container spacing={1}>
-                        {module.permissions.map((permission) => (
+                        {module.permisos.map((permission) => (
                           <Grid item xs={12} key={permission.id}>
                             <FormControlLabel
                               control={
@@ -514,10 +514,10 @@ const AssignPermissions = ({ onCancel }) => {
                               label={
                                 <Box>
                                   <Typography variant="body2" fontWeight={500}>
-                                    {permission.name}
+                                    {permission.nombre}
                                   </Typography>
                                   <Typography variant="caption" color="text.secondary">
-                                    {permission.description}
+                                    {permission.descripcion}
                                   </Typography>
                                 </Box>
                               }

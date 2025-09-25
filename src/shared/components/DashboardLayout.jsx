@@ -43,99 +43,99 @@ const drawerWidth = 280
 const collapsedDrawerWidth = 60
 
 // Configuración completa de menús con submenús
-const menuItems = [
+const elementosMenu = [
    {
-    text: 'Usuarios',
-    icon: <Group />,
-    path: '/users',  // Ruta original mantenida
-    subItems: [
-      { text: 'Nuevo Usuario', path: '/users/new' },
-      { text: 'Lista de Usuarios', path: '/users/list' }
+    texto: 'Usuarios',
+    icono: <Group />,
+    ruta: '/users',  // Ruta original mantenida
+    subElementos: [
+      { texto: 'Nuevo Usuario', ruta: '/users/new' },
+      { texto: 'Lista de Usuarios', ruta: '/users/list' }
     ]
   },
   {
-    text: 'Productos',
-    icon: <Inventory />,
-    path: '/productos',
-    subItems: [
-      { text: 'Ver Productos', path: '/productos/ver' },
-      { text: 'Agregar Producto', path: '/productos/agregar' }
+    texto: 'Productos',
+    icono: <Inventory />,
+    ruta: '/productos',
+    subElementos: [
+      { texto: 'Ver Productos', ruta: '/productos/ver' },
+      { texto: 'Agregar Producto', ruta: '/productos/agregar' }
     ]
   },
   {
-    text: 'Compras',
-    icon: <ShoppingCart />,
-    path: '/compras',
-    subItems: [
-      { text: 'Nueva Compra', path: '/compras/nueva' },
-      { text: 'Nueva Salida', path: '/compras/salida' },
-      { text: 'Compras a Credito', path: '/compras/credito' },
-      { text: 'Ingresos del Día', path: '/compras/ingresos' }
+    texto: 'Compras',
+    icono: <ShoppingCart />,
+    ruta: '/compras',
+    subElementos: [
+      { texto: 'Nueva Compra', ruta: '/compras/nueva' },
+      { texto: 'Nueva Salida', ruta: '/compras/salida' },
+      { texto: 'Compras a Credito', ruta: '/compras/credito' },
+      { texto: 'Ingresos del Día', ruta: '/compras/ingresos' }
     ]
   },
   {
-    text: 'Proveedor',
-    icon: <Warehouse />,
-    path: '/proveedor',
-    subItems: [
-      { text: 'Nuevo Proveedor', path: '/proveedor/nuevo' }
+    texto: 'Proveedor',
+    icono: <Warehouse />,
+    ruta: '/proveedor',
+    subElementos: [
+      { texto: 'Nuevo Proveedor', ruta: '/proveedor/nuevo' }
     ]
   },
   {
-    text: 'Ventas',
-    icon: <PointOfSale />,
-    path: '/ventas',
-    subItems: [
-      { text: 'Nueva Venta', path: '/ventas/nueva' },
-      { text: 'Realizar Pedidos', path: '/ventas/pedidos' },
-      { text: 'Mis Pedidos', path: '/ventas/mis-pedidos' }
+    texto: 'Ventas',
+    icono: <PointOfSale />,
+    ruta: '/ventas',
+    subElementos: [
+      { texto: 'Nueva Venta', ruta: '/ventas/nueva' },
+      { texto: 'Realizar Pedidos', ruta: '/ventas/pedidos' },
+      { texto: 'Mis Pedidos', ruta: '/ventas/mis-pedidos' }
     ]
   },
   {
-    text: 'Traspasos',
-    icon: <SwapHoriz />,
-    path: '/traspasos',
-    subItems: [
-      { text: 'Nuevo Traspaso', path: '/traspasos/nuevo' }
+    texto: 'Traspasos',
+    icono: <SwapHoriz />,
+    ruta: '/traspasos',
+    subElementos: [
+      { texto: 'Nuevo Traspaso', ruta: '/traspasos/nuevo' }
     ]
   },
   {
-    text: 'Reportes',
-    icon: <Assessment />,
-    path: '/reportes',
-    subItems: [
-      { text: 'Reporte Diario', path: '/reportes/diario' },
-      { text: 'Reporte Mensual', path: '/reportes/mensual' },
-      { text: 'Reporte Todos', path: '/reportes/todos' },
-      { text: 'Reporte Productos', path: '/reportes/productos' },
-      { text: 'Control de sistema', path: '/reportes/control' },
-      { text: 'Reporte H. Ventas', path: '/reportes/horario-ventas' },
-      { text: 'Reporte por sucursales', path: '/reportes/sucursales' },
-      { text: 'Reporte Vencimientos', path: '/reportes/vencimientos' },
-      { text: 'Reporte Stock Almacenes', path: '/reportes/stock' },
-      { text: 'Productos mas vendidos', path: '/reportes/mas-vendidos' },
-      { text: 'Inventario Diario', path: '/reportes/inventario-diario' },
-      { text: 'Inventario por Líneas', path: '/reportes/inventario-lineas' },
-      { text: 'Kardex', path: '/reportes/kardex' },
-      { text: 'Reporte Pedidos', path: '/reportes/pedidos' }
+    texto: 'Reportes',
+    icono: <Assessment />,
+    ruta: '/reportes',
+    subElementos: [
+      { texto: 'Reporte Diario', ruta: '/reportes/diario' },
+      { texto: 'Reporte Mensual', ruta: '/reportes/mensual' },
+      { texto: 'Reporte Todos', ruta: '/reportes/todos' },
+      { texto: 'Reporte Productos', ruta: '/reportes/productos' },
+      { texto: 'Control de sistema', ruta: '/reportes/control' },
+      { texto: 'Reporte H. Ventas', ruta: '/reportes/horario-ventas' },
+      { texto: 'Reporte por sucursales', ruta: '/reportes/sucursales' },
+      { texto: 'Reporte Vencimientos', ruta: '/reportes/vencimientos' },
+      { texto: 'Reporte Stock Almacenes', ruta: '/reportes/stock' },
+      { texto: 'Productos mas vendidos', ruta: '/reportes/mas-vendidos' },
+      { texto: 'Inventario Diario', ruta: '/reportes/inventario-diario' },
+      { texto: 'Inventario por Líneas', ruta: '/reportes/inventario-lineas' },
+      { texto: 'Kardex', ruta: '/reportes/kardex' },
+      { texto: 'Reporte Pedidos', ruta: '/reportes/pedidos' }
     ]
   },
   {
-    text: 'Configuracion',
-    icon: <Security />,
-    path: '/configuracion',
-    subItems: [
-      { text: 'Ordenar sucursales', path: '/configuracion/sucursales' }
+    texto: 'Configuracion',
+    icono: <Security />,
+    ruta: '/configuracion',
+    subElementos: [
+      { texto: 'Ordenar sucursales', ruta: '/configuracion/sucursales' }
     ]
   }
 ]
 
 // Sucursales disponibles
 const sucursales = [
-  { name: 'SAN MARTIN', code: 'SM', percentage: '[15.56%]' },
-  { name: 'BRASIL', code: 'BR', percentage: '[-1.11%]' },
-  { name: 'URUGUAY', code: 'UY', percentage: '[-37.78%]' },
-  { name: 'TIQUIPAYA', code: 'TQ', percentage: '[7.78%]' }
+  { nombre: 'SAN MARTIN', codigo: 'SM', porcentaje: '[15.56%]' },
+  { nombre: 'BRASIL', codigo: 'BR', porcentaje: '[-1.11%]' },
+  { nombre: 'URUGUAY', codigo: 'UY', porcentaje: '[-37.78%]' },
+  { nombre: 'TIQUIPAYA', codigo: 'TQ', porcentaje: '[7.78%]' }
 ]
 
 function DashboardLayout({ children, onLogout }) {
@@ -260,7 +260,7 @@ function DashboardLayout({ children, onLogout }) {
             }}
           >
             <Typography variant={collapsed ? "body2" : "h6"} fontWeight="bold">
-              {currentSucursal.code}
+              {currentSucursal.codigo}
             </Typography>
           </Avatar>
           
@@ -271,7 +271,7 @@ function DashboardLayout({ children, onLogout }) {
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                 <Chip 
-                  label={currentSucursal.name} 
+                  label={currentSucursal.nombre} 
                   size="small" 
                   sx={{ 
                     bgcolor: 'rgba(255,255,255,0.1)', 
@@ -319,15 +319,15 @@ function DashboardLayout({ children, onLogout }) {
           scrollbarWidth: 'none'
         }}>
           <List sx={{ py: 0 }}>
-            {menuItems.map((item, index) => {
-              const isActive = isActiveItem(item.path)
-              const hasSubItems = item.subItems && item.subItems.length > 0
+            {elementosMenu.map((item, index) => {
+              const isActive = isActiveItem(item.ruta)
+              const hasSubItems = item.subElementos && item.subElementos.length > 0
               const isSubMenuOpen = openSubMenus[index]
               
               return (
                 <React.Fragment key={index}>
                   <ListItem
-                    onClick={() => handleMenuClick(item.path, hasSubItems, index)}
+                    onClick={() => handleMenuClick(item.ruta, hasSubItems, index)}
                     sx={{
                       borderRadius: collapsed ? 1 : 2,
                       mb: 0.5,
@@ -354,13 +354,13 @@ function DashboardLayout({ children, onLogout }) {
                         justifyContent: 'center'
                       }}
                     >
-                      {item.icon}
+                      {item.icono}
                     </ListItemIcon>
                     
                     {!collapsed && (
                       <>
                         <ListItemText 
-                          primary={item.text}
+                          primary={item.texto}
                           primaryTypographyProps={{ 
                             variant: 'body2',
                             sx: { 
@@ -385,10 +385,10 @@ function DashboardLayout({ children, onLogout }) {
                   {hasSubItems && !collapsed && (
                     <Collapse in={isSubMenuOpen} timeout="auto" unmountOnExit>
                       <List component="div" disablePadding sx={{ pl: 2 }}>
-                        {item.subItems.map((subItem, subIndex) => (
+                        {item.subElementos.map((subItem, subIndex) => (
                           <ListItem
                             key={subIndex}
-                            onClick={() => handleMenuClick(subItem.path)}
+                            onClick={() => handleMenuClick(subItem.ruta)}
                             sx={{
                               borderRadius: 1,
                               mb: 0.5,
@@ -408,7 +408,7 @@ function DashboardLayout({ children, onLogout }) {
                               <Typography sx={{ fontSize: '1rem' }}>›</Typography>
                             </ListItemIcon>
                             <ListItemText 
-                              primary={subItem.text}
+                              primary={subItem.texto}
                               primaryTypographyProps={{ 
                                 variant: 'body2',
                                 sx: { 
@@ -549,15 +549,15 @@ function DashboardLayout({ children, onLogout }) {
           <MenuItem 
             key={index}
             onClick={() => handleSucursalChange(sucursal)}
-            selected={currentSucursal.name === sucursal.name}
+            selected={currentSucursal.nombre === sucursal.nombre}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-              <Typography>{sucursal.name}</Typography>
+              <Typography>{sucursal.nombre}</Typography>
               <Typography 
                 variant="caption" 
-                color={sucursal.percentage.includes('-') ? 'error' : 'success.main'}
+                color={sucursal.porcentaje.includes('-') ? 'error' : 'success.main'}
               >
-                {sucursal.percentage}
+                {sucursal.porcentaje}
               </Typography>
             </Box>
           </MenuItem>

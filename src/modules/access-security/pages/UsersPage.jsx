@@ -35,110 +35,110 @@ import {
 import { useSnackbar } from 'notistack';
 
 // Datos del usuario actual (simulando datos del perfil)
-const currentUser = {
+const usuarioActual = {
   id: 1,
-  username: 'brasil_admin',
-  email: 'brazil@hotmail.es',
-  firstName: 'Brasil',
-  lastName: 'Admin',
-  role: 'ADMIN',
+  nombreUsuario: 'brasil_admin',
+  correo: 'brazil@hotmail.es',
+  nombre: 'Brasil',
+  apellido: 'Admin',
+  rol: 'ADMIN',
   avatar: 'BA',
-  memberSince: 'JAN. 2025',
-  phoneNumber: '655999',
-  profileImage: null,
+  miembroDesdel: 'ENE. 2025',
+  numeroTelefono: '655999',
+  imagenPerfil: null,
   sucursal: 'BRASIL',
-  permissions: ['users', 'inventory', 'sales', 'reports', 'settings']
+  permisos: ['usuarios', 'inventario', 'ventas', 'reportes', 'configuracion']
 };
 
 // Lista de usuarios del sistema
-const mockUsers = [
+const usuariosMock = [
   {
     id: 1,
-    username: 'brasil_admin',
-    email: 'brazil@hotmail.es',
-    firstName: 'Brasil',
-    lastName: 'Admin',
-    role: 'ADMIN',
-    status: 'Activo',
+    nombreUsuario: 'brasil_admin',
+    correo: 'brazil@hotmail.es',
+    nombre: 'Brasil',
+    apellido: 'Admin',
+    rol: 'ADMIN',
+    estado: 'Activo',
     avatar: 'BA',
-    lastLogin: '2024-09-11 10:30:00'
+    ultimoAcceso: '2024-09-11 10:30:00'
   },
   {
     id: 2,
-    username: 'farmaceutico01',
-    email: 'farmaceutico@sifarma.com',
-    firstName: 'Carlos',
-    lastName: 'Rodríguez',
-    role: 'FARMACÉUTICO',
-    status: 'Activo',
+    nombreUsuario: 'farmaceutico01',
+    correo: 'farmaceutico@sifarma.com',
+    nombre: 'Carlos',
+    apellido: 'Rodríguez',
+    rol: 'FARMACÉUTICO',
+    estado: 'Activo',
     avatar: 'CR',
-    lastLogin: '2024-09-10 16:45:00'
+    ultimoAcceso: '2024-09-10 16:45:00'
   },
   {
     id: 3,
-    username: 'vendedor01',
-    email: 'vendedor@sifarma.com',
-    firstName: 'Ana',
-    lastName: 'García',
-    role: 'VENDEDOR',
-    status: 'Activo',
+    nombreUsuario: 'vendedor01',
+    correo: 'vendedor@sifarma.com',
+    nombre: 'Ana',
+    apellido: 'García',
+    rol: 'VENDEDOR',
+    estado: 'Activo',
     avatar: 'AG',
-    lastLogin: '2024-09-09 14:20:00'
+    ultimoAcceso: '2024-09-09 14:20:00'
   },
   {
     id: 4,
-    username: 'supervisor01',
-    email: 'supervisor@sifarma.com',
-    firstName: 'Miguel',
-    lastName: 'López',
-    role: 'SUPERVISOR',
-    status: 'Inactivo',
+    nombreUsuario: 'supervisor01',
+    correo: 'supervisor@sifarma.com',
+    nombre: 'Miguel',
+    apellido: 'López',
+    rol: 'SUPERVISOR',
+    estado: 'Inactivo',
     avatar: 'ML',
-    lastLogin: '2024-08-25 11:15:00'
+    ultimoAcceso: '2024-08-25 11:15:00'
   }
 ];
 
-const menuOptions = [
+const opcionesMenu = [
   {
-    title: 'Datos del Usuario',
-    description: 'Ver y editar información personal',
-    icon: <AccountCircle />,
-    action: 'profile',
+    titulo: 'Datos del Usuario',
+    descripcion: 'Ver y editar información personal',
+    icono: <AccountCircle />,
+    accion: 'perfil',
     color: '#4A5FFF'
   },
   {
-    title: 'Gestión de Usuarios',
-    description: 'Administrar usuarios del sistema',
-    icon: <Group />,
-    action: 'users',
+    titulo: 'Gestión de Usuarios',
+    descripcion: 'Administrar usuarios del sistema',
+    icono: <Group />,
+    accion: 'usuarios',
     color: '#00BCD4'
   },
   {
-    title: 'Roles y Permisos',
-    description: 'Configurar roles y permisos',
-    icon: <AdminPanelSettings />,
-    action: 'roles',
+    titulo: 'Roles y Permisos',
+    descripcion: 'Configurar roles y permisos',
+    icono: <AdminPanelSettings />,
+    accion: 'roles',
     color: '#4CAF50'
   },
   {
-    title: 'Configuración de Seguridad',
-    description: 'Políticas de seguridad y acceso',
-    icon: <Security />,
-    action: 'security',
+    titulo: 'Configuración de Seguridad',
+    descripcion: 'Políticas de seguridad y acceso',
+    icono: <Security />,
+    accion: 'seguridad',
     color: '#FF9800'
   }
 ];
 
 const UsersPage = () => {
-  const [activeView, setActiveView] = useState('menu');
-  const [editForm, setEditForm] = useState({
-    firstName: currentUser.firstName,
-    lastName: currentUser.lastName,
-    email: currentUser.email,
-    phoneNumber: currentUser.phoneNumber,
-    password: '',
-    confirmPassword: '',
-    sucursal: currentUser.sucursal
+  const [vistaActiva, setVistaActiva] = useState('menu');
+  const [formularioEdicion, setFormularioEdicion] = useState({
+    nombre: usuarioActual.nombre,
+    apellido: usuarioActual.apellido,
+    correo: usuarioActual.correo,
+    numeroTelefono: usuarioActual.numeroTelefono,
+    contrasena: '',
+    confirmarContrasena: '',
+    sucursal: usuarioActual.sucursal
   });
   const { enqueueSnackbar } = useSnackbar();
 
@@ -150,53 +150,53 @@ const UsersPage = () => {
     'ARGENTINA'
   ];
 
-  const handleMenuClick = (action) => {
-    setActiveView(action);
+  const manejarClickMenu = (accion) => {
+    setVistaActiva(accion);
   };
 
-  const handleEditProfile = () => {
-    setActiveView('editProfile');
+  const manejarEditarPerfil = () => {
+    setVistaActiva('editarPerfil');
   };
 
-  const handleFormChange = (field) => (event) => {
-    setEditForm({
-      ...editForm,
-      [field]: event.target.value
+  const manejarCambioFormulario = (campo) => (event) => {
+    setFormularioEdicion({
+      ...formularioEdicion,
+      [campo]: event.target.value
     });
   };
 
-  const handleSaveProfile = () => {
+  const manejarGuardarPerfil = () => {
     // Validaciones básicas
-    if (!editForm.firstName || !editForm.lastName || !editForm.email) {
+    if (!formularioEdicion.nombre || !formularioEdicion.apellido || !formularioEdicion.correo) {
       enqueueSnackbar('Por favor complete todos los campos obligatorios', { variant: 'error' });
       return;
     }
 
-    if (editForm.password && editForm.password !== editForm.confirmPassword) {
+    if (formularioEdicion.contrasena && formularioEdicion.contrasena !== formularioEdicion.confirmarContrasena) {
       enqueueSnackbar('Las contraseñas no coinciden', { variant: 'error' });
       return;
     }
 
     // Simulación de guardado
     enqueueSnackbar('Perfil actualizado correctamente', { variant: 'success' });
-    setActiveView('menu');
+    setVistaActiva('menu');
   };
 
-  const handleCancelEdit = () => {
+  const manejarCancelarEdicion = () => {
     // Restaurar valores originales
-    setEditForm({
-      firstName: currentUser.firstName,
-      lastName: currentUser.lastName,
-      email: currentUser.email,
-      phoneNumber: currentUser.phoneNumber,
-      password: '',
-      confirmPassword: '',
-      sucursal: currentUser.sucursal
+    setFormularioEdicion({
+      nombre: usuarioActual.nombre,
+      apellido: usuarioActual.apellido,
+      correo: usuarioActual.correo,
+      numeroTelefono: usuarioActual.numeroTelefono,
+      contrasena: '',
+      confirmarContrasena: '',
+      sucursal: usuarioActual.sucursal
     });
-    setActiveView('menu');
+    setVistaActiva('menu');
   };
 
-  const renderEditProfile = () => (
+  const renderizarEditarPerfil = () => (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       {/* Header del formulario */}
       <Paper 
@@ -214,7 +214,7 @@ const UsersPage = () => {
           </Typography>
           <IconButton 
             sx={{ color: 'white' }}
-            onClick={handleCancelEdit}
+            onClick={manejarCancelarEdicion}
           >
             <Close />
           </IconButton>
@@ -229,8 +229,8 @@ const UsersPage = () => {
             <TextField
               fullWidth
               label="Nombre Completo *"
-              value={editForm.firstName}
-              onChange={handleFormChange('firstName')}
+              value={formularioEdicion.nombre}
+              onChange={manejarCambioFormulario('nombre')}
               InputProps={{
                 startAdornment: <Person sx={{ color: 'action.active', mr: 1 }} />
               }}
@@ -242,8 +242,8 @@ const UsersPage = () => {
             <TextField
               fullWidth
               label="Apellidos *"
-              value={editForm.lastName}
-              onChange={handleFormChange('lastName')}
+              value={formularioEdicion.apellido}
+              onChange={manejarCambioFormulario('apellido')}
               InputProps={{
                 startAdornment: <Person sx={{ color: 'action.active', mr: 1 }} />
               }}
@@ -255,8 +255,8 @@ const UsersPage = () => {
             <TextField
               fullWidth
               label="Celular *"
-              value={editForm.phoneNumber}
-              onChange={handleFormChange('phoneNumber')}
+              value={formularioEdicion.numeroTelefono}
+              onChange={manejarCambioFormulario('numeroTelefono')}
               InputProps={{
                 startAdornment: <Phone sx={{ color: 'action.active', mr: 1 }} />
               }}
@@ -269,8 +269,8 @@ const UsersPage = () => {
               fullWidth
               label="Correo Electrónico *"
               type="email"
-              value={editForm.email}
-              onChange={handleFormChange('email')}
+              value={formularioEdicion.correo}
+              onChange={manejarCambioFormulario('correo')}
               InputProps={{
                 startAdornment: <Email sx={{ color: 'action.active', mr: 1 }} />
               }}
@@ -302,8 +302,8 @@ const UsersPage = () => {
               fullWidth
               label="Contraseña *"
               type="password"
-              value={editForm.password}
-              onChange={handleFormChange('password')}
+              value={formularioEdicion.contrasena}
+              onChange={manejarCambioFormulario('contrasena')}
               placeholder="••••••••••••••"
               InputProps={{
                 startAdornment: <Lock sx={{ color: 'action.active', mr: 1 }} />
@@ -317,8 +317,8 @@ const UsersPage = () => {
               fullWidth
               label="Repetir Contraseña *"
               type="password"
-              value={editForm.confirmPassword}
-              onChange={handleFormChange('confirmPassword')}
+              value={formularioEdicion.confirmarContrasena}
+              onChange={manejarCambioFormulario('confirmarContrasena')}
               placeholder="••••••••••••••"
               InputProps={{
                 startAdornment: <Lock sx={{ color: 'action.active', mr: 1 }} />
@@ -332,8 +332,8 @@ const UsersPage = () => {
               fullWidth
               select
               label="Punto de venta *"
-              value={editForm.sucursal}
-              onChange={handleFormChange('sucursal')}
+              value={formularioEdicion.sucursal}
+              onChange={manejarCambioFormulario('sucursal')}
             >
               {puntosVenta.map((punto) => (
                 <MenuItem key={punto} value={punto}>
@@ -363,7 +363,7 @@ const UsersPage = () => {
               <Button
                 variant="outlined"
                 startIcon={<Cancel />}
-                onClick={handleCancelEdit}
+                onClick={manejarCancelarEdicion}
                 sx={{
                   borderColor: '#F44336',
                   color: '#F44336',
@@ -378,7 +378,7 @@ const UsersPage = () => {
               <Button
                 variant="contained"
                 startIcon={<Save />}
-                onClick={handleSaveProfile}
+                onClick={manejarGuardarPerfil}
                 sx={{
                   bgcolor: '#4CAF50',
                   '&:hover': { bgcolor: '#45A049' }
@@ -393,7 +393,7 @@ const UsersPage = () => {
     </Container>
   );
 
-  const renderUserProfile = () => (
+  const renderizarPerfilUsuario = () => (
     <Box sx={{ textAlign: 'center', mb: 4 }}>
       <Paper 
         sx={{ 
@@ -416,22 +416,22 @@ const UsersPage = () => {
             boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
           }}
         >
-          {currentUser.avatar}
+          {usuarioActual.avatar}
         </Avatar>
         
         <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-          {currentUser.firstName} {currentUser.lastName} - {currentUser.role}
+          {usuarioActual.nombre} {usuarioActual.apellido} - {usuarioActual.rol}
         </Typography>
         
         <Typography variant="body1" sx={{ opacity: 0.9, mb: 2 }}>
-          Miembro desde {currentUser.memberSince}
+          Miembro desde {usuarioActual.miembroDesdel}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 3 }}>
           <Button
             variant="contained"
             startIcon={<Edit />}
-            onClick={handleEditProfile}
+            onClick={manejarEditarPerfil}
             sx={{
               bgcolor: 'rgba(255,255,255,0.2)',
               color: 'white',
@@ -461,7 +461,7 @@ const UsersPage = () => {
     </Box>
   );
 
-  const renderMainMenu = () => (
+  const renderizarMenuPrincipal = () => (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700, color: '#1A202C', mb: 1 }}>
         Configuración
@@ -470,10 +470,10 @@ const UsersPage = () => {
         Gestión de Acceso y Seguridad - Administración de usuarios
       </Typography>
 
-      {renderUserProfile()}
+      {renderizarPerfilUsuario()}
 
       <Grid container spacing={3}>
-        {menuOptions.map((option, index) => (
+        {opcionesMenu.map((opcion, index) => (
           <Grid item xs={12} md={6} key={index}>
             <Card
               sx={{
@@ -481,16 +481,16 @@ const UsersPage = () => {
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-4px)',
-                  boxShadow: `0 8px 32px ${option.color}30`
+                  boxShadow: `0 8px 32px ${opcion.color}30`
                 }
               }}
-              onClick={() => handleMenuClick(option.action)}
+              onClick={() => manejarClickMenu(opcion.accion)}
             >
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Box
                     sx={{
-                      bgcolor: option.color,
+                      bgcolor: opcion.color,
                       color: 'white',
                       p: 1.5,
                       borderRadius: 2,
@@ -499,14 +499,14 @@ const UsersPage = () => {
                       alignItems: 'center'
                     }}
                   >
-                    {option.icon}
+                    {opcion.icono}
                   </Box>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
-                      {option.title}
+                      {opcion.titulo}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {option.description}
+                      {opcion.descripcion}
                     </Typography>
                   </Box>
                 </Box>
@@ -523,24 +523,24 @@ const UsersPage = () => {
       </Typography>
 
       <Grid container spacing={2}>
-        {mockUsers.slice(0, 3).map((user) => (
-          <Grid item xs={12} md={4} key={user.id}>
+        {usuariosMock.slice(0, 3).map((usuario) => (
+          <Grid item xs={12} md={4} key={usuario.id}>
             <Card sx={{ p: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Avatar sx={{ bgcolor: '#4A5FFF' }}>
-                  {user.avatar}
+                  {usuario.avatar}
                 </Avatar>
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                    {user.firstName} {user.lastName}
+                    {usuario.nombre} {usuario.apellido}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {user.role}
+                    {usuario.rol}
                   </Typography>
                   <Chip
-                    label={user.status}
+                    label={usuario.estado}
                     size="small"
-                    color={user.status === 'Activo' ? 'success' : 'default'}
+                    color={usuario.estado === 'Activo' ? 'success' : 'default'}
                     sx={{ ml: 1 }}
                   />
                 </Box>
@@ -553,20 +553,20 @@ const UsersPage = () => {
   );
 
   // Por ahora solo renderizamos el menú principal
-  if (activeView === 'menu') {
-    return renderMainMenu();
+  if (vistaActiva === 'menu') {
+    return renderizarMenuPrincipal();
   }
 
   // Renderizar formulario de editar perfil
-  if (activeView === 'editProfile') {
-    return renderEditProfile();
+  if (vistaActiva === 'editarPerfil') {
+    return renderizarEditarPerfil();
   }
 
   // Placeholder para otras vistas
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Button
-        onClick={() => setActiveView('menu')}
+        onClick={() => setVistaActiva('menu')}
         sx={{ mb: 3 }}
         startIcon={<Settings />}
       >
@@ -574,14 +574,14 @@ const UsersPage = () => {
       </Button>
       
       <Typography variant="h5" gutterBottom>
-        {activeView === 'profile' && 'Datos del Usuario'}
-        {activeView === 'users' && 'Gestión de Usuarios'}
-        {activeView === 'roles' && 'Roles y Permisos'}
-        {activeView === 'security' && 'Configuración de Seguridad'}
+        {vistaActiva === 'perfil' && 'Datos del Usuario'}
+        {vistaActiva === 'usuarios' && 'Gestión de Usuarios'}
+        {vistaActiva === 'roles' && 'Roles y Permisos'}
+        {vistaActiva === 'seguridad' && 'Configuración de Seguridad'}
       </Typography>
       
       <Typography color="text.secondary">
-        Vista en desarrollo: {activeView}
+        Vista en desarrollo: {vistaActiva}
       </Typography>
     </Container>
   );

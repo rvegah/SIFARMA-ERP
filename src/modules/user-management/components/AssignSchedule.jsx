@@ -47,56 +47,56 @@ import {
 import { useUsers } from '../context/UserContext';
 
 // Configuración de días de la semana
-const daysOfWeek = [
-  { key: 'monday', name: 'Lunes', short: 'LUN' },
-  { key: 'tuesday', name: 'Martes', short: 'MAR' },
-  { key: 'wednesday', name: 'Miércoles', short: 'MIE' },
-  { key: 'thursday', name: 'Jueves', short: 'JUE' },
-  { key: 'friday', name: 'Viernes', short: 'VIE' },
-  { key: 'saturday', name: 'Sábado', short: 'SAB' },
-  { key: 'sunday', name: 'Domingo', short: 'DOM' }
+const diasSemana = [
+  { clave: 'lunes', nombre: 'Lunes', corto: 'LUN' },
+  { clave: 'martes', nombre: 'Martes', corto: 'MAR' },
+  { clave: 'miercoles', nombre: 'Miércoles', corto: 'MIE' },
+  { clave: 'jueves', nombre: 'Jueves', corto: 'JUE' },
+  { clave: 'viernes', nombre: 'Viernes', corto: 'VIE' },
+  { clave: 'sabado', nombre: 'Sábado', corto: 'SAB' },
+  { clave: 'domingo', nombre: 'Domingo', corto: 'DOM' }
 ];
 
 // Turnos predefinidos
-const shiftTemplates = {
-  morning: {
-    name: 'Turno Mañana',
-    icon: <WbSunny />,
+const plantillasTurnos = {
+  manana: {
+    nombre: 'Turno Mañana',
+    icono: <WbSunny />,
     color: '#FF9800',
-    schedule: {
-      start: '07:00',
-      end: '15:00',
-      break: { start: '12:00', end: '13:00' }
+    horario: {
+      inicio: '07:00',
+      fin: '15:00',
+      descanso: { inicio: '12:00', fin: '13:00' }
     }
   },
-  afternoon: {
-    name: 'Turno Tarde',
-    icon: <NightsStay />,
+  tarde: {
+    nombre: 'Turno Tarde',
+    icono: <NightsStay />,
     color: '#3F51B5',
-    schedule: {
-      start: '15:00',
-      end: '23:00',
-      break: { start: '19:00', end: '20:00' }
+    horario: {
+      inicio: '15:00',
+      fin: '23:00',
+      descanso: { inicio: '19:00', fin: '20:00' }
     }
   },
-  full: {
-    name: 'Turno Completo',
-    icon: <WorkOutline />,
+  completo: {
+    nombre: 'Turno Completo',
+    icono: <WorkOutline />,
     color: '#4CAF50',
-    schedule: {
-      start: '08:00',
-      end: '18:00',
-      break: { start: '12:00', end: '14:00' }
+    horario: {
+      inicio: '08:00',
+      fin: '18:00',
+      descanso: { inicio: '12:00', fin: '14:00' }
     }
   },
-  night: {
-    name: 'Turno Nocturno',
-    icon: <NightsStay />,
+  nocturno: {
+    nombre: 'Turno Nocturno',
+    icono: <NightsStay />,
     color: '#9C27B0',
-    schedule: {
-      start: '22:00',
-      end: '06:00',
-      break: { start: '02:00', end: '03:00' }
+    horario: {
+      inicio: '22:00',
+      fin: '06:00',
+      descanso: { inicio: '02:00', fin: '03:00' }
     }
   }
 };
@@ -108,10 +108,10 @@ const AssignSchedule = ({ onCancel }) => {
   // Estado inicial del horario semanal
   const [weeklySchedule, setWeeklySchedule] = useState(() => {
     const initial = {};
-    daysOfWeek.forEach(day => {
-      initial[day.key] = {
-        active: false,
-        shifts: []
+    diasSemana.forEach(dia => {
+      initial[dia.clave] = {
+        activo: false,
+        turnos: []
       };
     });
     return initial;
@@ -121,111 +121,111 @@ const AssignSchedule = ({ onCancel }) => {
   const currentUser = users.find(u => u.id === parseInt(selectedUserId));
 
   // Agregar turno a un día específico
-  const addShiftToDay = (dayKey, shiftTemplate = null) => {
-    const newShift = shiftTemplate ? {
+  const addShiftToDay = (claveDia, plantillaTurno = null) => {
+    const nuevoTurno = plantillaTurno ? {
       id: Date.now(),
-      ...shiftTemplate.schedule,
-      name: shiftTemplate.name,
-      color: shiftTemplate.color
+      ...plantillaTurno.horario,
+      nombre: plantillaTurno.nombre,
+      color: plantillaTurno.color
     } : {
       id: Date.now(),
-      start: '09:00',
-      end: '17:00',
-      break: { start: '12:00', end: '13:00' },
-      name: 'Turno Personalizado',
+      inicio: '09:00',
+      fin: '17:00',
+      descanso: { inicio: '12:00', fin: '13:00' },
+      nombre: 'Turno Personalizado',
       color: '#6B7280'
     };
 
     setWeeklySchedule(prev => ({
       ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        active: true,
-        shifts: [...prev[dayKey].shifts, newShift]
+      [claveDia]: {
+        ...prev[claveDia],
+        activo: true,
+        turnos: [...prev[claveDia].turnos, nuevoTurno]
       }
     }));
   };
 
   // Eliminar turno de un día
-  const removeShiftFromDay = (dayKey, shiftId) => {
+  const removeShiftFromDay = (claveDia, idTurno) => {
     setWeeklySchedule(prev => {
-      const updatedShifts = prev[dayKey].shifts.filter(shift => shift.id !== shiftId);
+      const turnosActualizados = prev[claveDia].turnos.filter(turno => turno.id !== idTurno);
       return {
         ...prev,
-        [dayKey]: {
-          ...prev[dayKey],
-          shifts: updatedShifts,
-          active: updatedShifts.length > 0
+        [claveDia]: {
+          ...prev[claveDia],
+          turnos: turnosActualizados,
+          activo: turnosActualizados.length > 0
         }
       };
     });
   };
 
   // Actualizar turno específico
-  const updateShift = (dayKey, shiftId, field, value) => {
+  const updateShift = (claveDia, idTurno, campo, valor) => {
     setWeeklySchedule(prev => ({
       ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        shifts: prev[dayKey].shifts.map(shift =>
-          shift.id === shiftId ? { ...shift, [field]: value } : shift
+      [claveDia]: {
+        ...prev[claveDia],
+        turnos: prev[claveDia].turnos.map(turno =>
+          turno.id === idTurno ? { ...turno, [campo]: valor } : turno
         )
       }
     }));
   };
 
   // Copiar horario de un día a otros días
-  const copyDaySchedule = (fromDay) => {
-    const sourceSchedule = weeklySchedule[fromDay];
-    const selectedDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']; // Ejemplo: copiar a días laborales
+  const copyDaySchedule = (diaOrigen) => {
+    const horarioOrigen = weeklySchedule[diaOrigen];
+    const diasSeleccionados = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes']; // Ejemplo: copiar a días laborales
 
     setWeeklySchedule(prev => {
-      const updated = { ...prev };
-      selectedDays.forEach(day => {
-        if (day !== fromDay) {
-          updated[day] = {
-            active: sourceSchedule.active,
-            shifts: sourceSchedule.shifts.map(shift => ({
-              ...shift,
+      const actualizado = { ...prev };
+      diasSeleccionados.forEach(dia => {
+        if (dia !== diaOrigen) {
+          actualizado[dia] = {
+            activo: horarioOrigen.activo,
+            turnos: horarioOrigen.turnos.map(turno => ({
+              ...turno,
               id: Date.now() + Math.random()
             }))
           };
         }
       });
-      return updated;
+      return actualizado;
     });
   };
 
   // Alternar día activo/inactivo
-  const toggleDay = (dayKey) => {
+  const toggleDay = (claveDia) => {
     setWeeklySchedule(prev => ({
       ...prev,
-      [dayKey]: {
-        ...prev[dayKey],
-        active: !prev[dayKey].active,
-        shifts: !prev[dayKey].active ? prev[dayKey].shifts : []
+      [claveDia]: {
+        ...prev[claveDia],
+        activo: !prev[claveDia].activo,
+        turnos: !prev[claveDia].activo ? prev[claveDia].turnos : []
       }
     }));
   };
 
   // Calcular horas totales semanales
   const calculateWeeklyHours = () => {
-    let totalHours = 0;
-    Object.values(weeklySchedule).forEach(day => {
-      if (day.active) {
-        day.shifts.forEach(shift => {
-          const startTime = new Date(`2000-01-01 ${shift.start}`);
-          const endTime = new Date(`2000-01-01 ${shift.end}`);
-          const breakStart = new Date(`2000-01-01 ${shift.break.start}`);
-          const breakEnd = new Date(`2000-01-01 ${shift.break.end}`);
+    let totalHoras = 0;
+    Object.values(weeklySchedule).forEach(dia => {
+      if (dia.activo) {
+        dia.turnos.forEach(turno => {
+          const horaInicio = new Date(`2000-01-01 ${turno.inicio}`);
+          const horaFin = new Date(`2000-01-01 ${turno.fin}`);
+          const inicioDescanso = new Date(`2000-01-01 ${turno.descanso.inicio}`);
+          const finDescanso = new Date(`2000-01-01 ${turno.descanso.fin}`);
           
-          const workHours = (endTime - startTime) / (1000 * 60 * 60);
-          const breakHours = (breakEnd - breakStart) / (1000 * 60 * 60);
-          totalHours += workHours - breakHours;
+          const horasTrabajo = (horaFin - horaInicio) / (1000 * 60 * 60);
+          const horasDescanso = (finDescanso - inicioDescanso) / (1000 * 60 * 60);
+          totalHoras += horasTrabajo - horasDescanso;
         });
       }
     });
-    return totalHours.toFixed(1);
+    return totalHoras.toFixed(1);
   };
 
   return (
@@ -284,24 +284,24 @@ const AssignSchedule = ({ onCancel }) => {
                 Plantillas de Turno
               </Typography>
               
-              {Object.entries(shiftTemplates).map(([key, template]) => (
+              {Object.entries(plantillasTurnos).map(([clave, plantilla]) => (
                 <Button
-                  key={key}
+                  key={clave}
                   fullWidth
                   variant="outlined"
-                  startIcon={template.icon}
+                  startIcon={plantilla.icono}
                   sx={{ 
                     mb: 1, 
                     justifyContent: 'flex-start',
-                    borderColor: template.color,
-                    color: template.color,
+                    borderColor: plantilla.color,
+                    color: plantilla.color,
                     '&:hover': {
-                      bgcolor: `${template.color}20`,
-                      borderColor: template.color
+                      bgcolor: `${plantilla.color}20`,
+                      borderColor: plantilla.color
                     }
                   }}
                 >
-                  {template.name}
+                  {plantilla.nombre}
                 </Button>
               ))}
             </CardContent>
@@ -324,12 +324,12 @@ const AssignSchedule = ({ onCancel }) => {
               </Box>
               <Box sx={{ mb: 1 }}>
                 <Typography variant="body2">
-                  Días activos: {Object.values(weeklySchedule).filter(day => day.active).length}/7
+                  Días activos: {Object.values(weeklySchedule).filter(dia => dia.activo).length}/7
                 </Typography>
               </Box>
               <Box>
                 <Typography variant="body2">
-                  Total turnos: {Object.values(weeklySchedule).reduce((sum, day) => sum + day.shifts.length, 0)}
+                  Total turnos: {Object.values(weeklySchedule).reduce((suma, dia) => suma + dia.turnos.length, 0)}
                 </Typography>
               </Box>
             </CardContent>
@@ -344,21 +344,21 @@ const AssignSchedule = ({ onCancel }) => {
                 Configuración Semanal
               </Typography>
 
-              {daysOfWeek.map((day) => (
-                <Paper key={day.key} sx={{ mb: 2, p: 2, bgcolor: weeklySchedule[day.key].active ? '#f8f9fa' : '#fafafa' }}>
+              {diasSemana.map((dia) => (
+                <Paper key={dia.clave} sx={{ mb: 2, p: 2, bgcolor: weeklySchedule[dia.clave].activo ? '#f8f9fa' : '#fafafa' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Typography variant="h6" sx={{ minWidth: 100 }}>
-                        {day.name}
+                        {dia.nombre}
                       </Typography>
                       <Switch
-                        checked={weeklySchedule[day.key].active}
-                        onChange={() => toggleDay(day.key)}
+                        checked={weeklySchedule[dia.clave].activo}
+                        onChange={() => toggleDay(dia.clave)}
                         color="primary"
                       />
-                      {weeklySchedule[day.key].active && (
+                      {weeklySchedule[dia.clave].activo && (
                         <Chip 
-                          label={`${weeklySchedule[day.key].shifts.length} turno${weeklySchedule[day.key].shifts.length !== 1 ? 's' : ''}`}
+                          label={`${weeklySchedule[dia.clave].turnos.length} turno${weeklySchedule[dia.clave].turnos.length !== 1 ? 's' : ''}`}
                           size="small"
                           color="primary"
                         />
@@ -366,12 +366,12 @@ const AssignSchedule = ({ onCancel }) => {
                     </Box>
                     
                     <Box>
-                      {weeklySchedule[day.key].active && (
+                      {weeklySchedule[dia.clave].activo && (
                         <>
                           <Tooltip title="Copiar a días laborales">
                             <IconButton
                               size="small"
-                              onClick={() => copyDaySchedule(day.key)}
+                              onClick={() => copyDaySchedule(dia.clave)}
                               sx={{ mr: 1 }}
                             >
                               <Copy />
@@ -380,7 +380,7 @@ const AssignSchedule = ({ onCancel }) => {
                           <Button
                             size="small"
                             startIcon={<Add />}
-                            onClick={() => addShiftToDay(day.key)}
+                            onClick={() => addShiftToDay(dia.clave)}
                           >
                             Agregar Turno
                           </Button>
@@ -389,18 +389,18 @@ const AssignSchedule = ({ onCancel }) => {
                     </Box>
                   </Box>
 
-                  {weeklySchedule[day.key].active && (
+                  {weeklySchedule[dia.clave].activo && (
                     <Grid container spacing={2}>
-                      {weeklySchedule[day.key].shifts.map((shift, index) => (
-                        <Grid item xs={12} key={shift.id}>
-                          <Paper sx={{ p: 2, bgcolor: 'white', border: `2px solid ${shift.color}20` }}>
+                      {weeklySchedule[dia.clave].turnos.map((turno, index) => (
+                        <Grid item xs={12} key={turno.id}>
+                          <Paper sx={{ p: 2, bgcolor: 'white', border: `2px solid ${turno.color}20` }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                              <Typography variant="subtitle1" sx={{ color: shift.color, fontWeight: 600 }}>
-                                {shift.name}
+                              <Typography variant="subtitle1" sx={{ color: turno.color, fontWeight: 600 }}>
+                                {turno.nombre}
                               </Typography>
                               <IconButton
                                 size="small"
-                                onClick={() => removeShiftFromDay(day.key, shift.id)}
+                                onClick={() => removeShiftFromDay(dia.clave, turno.id)}
                                 color="error"
                               >
                                 <Delete />
@@ -412,8 +412,8 @@ const AssignSchedule = ({ onCancel }) => {
                                 <TextField
                                   label="Hora Inicio"
                                   type="time"
-                                  value={shift.start}
-                                  onChange={(e) => updateShift(day.key, shift.id, 'start', e.target.value)}
+                                  value={turno.inicio}
+                                  onChange={(e) => updateShift(dia.clave, turno.id, 'inicio', e.target.value)}
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
                                   size="small"
@@ -423,8 +423,8 @@ const AssignSchedule = ({ onCancel }) => {
                                 <TextField
                                   label="Hora Fin"
                                   type="time"
-                                  value={shift.end}
-                                  onChange={(e) => updateShift(day.key, shift.id, 'end', e.target.value)}
+                                  value={turno.fin}
+                                  onChange={(e) => updateShift(dia.clave, turno.id, 'fin', e.target.value)}
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
                                   size="small"
@@ -434,8 +434,8 @@ const AssignSchedule = ({ onCancel }) => {
                                 <TextField
                                   label="Descanso Inicio"
                                   type="time"
-                                  value={shift.break.start}
-                                  onChange={(e) => updateShift(day.key, shift.id, 'break', { ...shift.break, start: e.target.value })}
+                                  value={turno.descanso.inicio}
+                                  onChange={(e) => updateShift(dia.clave, turno.id, 'descanso', { ...turno.descanso, inicio: e.target.value })}
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
                                   size="small"
@@ -445,8 +445,8 @@ const AssignSchedule = ({ onCancel }) => {
                                 <TextField
                                   label="Descanso Fin"
                                   type="time"
-                                  value={shift.break.end}
-                                  onChange={(e) => updateShift(day.key, shift.id, 'break', { ...shift.break, end: e.target.value })}
+                                  value={turno.descanso.fin}
+                                  onChange={(e) => updateShift(dia.clave, turno.id, 'descanso', { ...turno.descanso, fin: e.target.value })}
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
                                   size="small"
@@ -457,27 +457,27 @@ const AssignSchedule = ({ onCancel }) => {
                         </Grid>
                       ))}
 
-                      {weeklySchedule[day.key].shifts.length === 0 && (
+                      {weeklySchedule[dia.clave].turnos.length === 0 && (
                         <Grid item xs={12}>
                           <Box sx={{ textAlign: 'center', py: 2 }}>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                               No hay turnos asignados para este día
                             </Typography>
                             <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
-                              {Object.entries(shiftTemplates).map(([key, template]) => (
+                              {Object.entries(plantillasTurnos).map(([clave, plantilla]) => (
                                 <Button
-                                  key={key}
+                                  key={clave}
                                   size="small"
                                   variant="outlined"
-                                  startIcon={template.icon}
-                                  onClick={() => addShiftToDay(day.key, template)}
+                                  startIcon={plantilla.icono}
+                                  onClick={() => addShiftToDay(dia.clave, plantilla)}
                                   sx={{ 
-                                    borderColor: template.color,
-                                    color: template.color,
+                                    borderColor: plantilla.color,
+                                    color: plantilla.color,
                                     fontSize: '0.75rem'
                                   }}
                                 >
-                                  {template.name}
+                                  {plantilla.nombre}
                                 </Button>
                               ))}
                             </Box>
@@ -487,7 +487,7 @@ const AssignSchedule = ({ onCancel }) => {
                     </Grid>
                   )}
 
-                  {!weeklySchedule[day.key].active && (
+                  {!weeklySchedule[dia.clave].activo && (
                     <Box sx={{ textAlign: 'center', py: 2, opacity: 0.5 }}>
                       <Typography variant="body2" color="text.secondary">
                         Día de descanso
@@ -516,49 +516,49 @@ const AssignSchedule = ({ onCancel }) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {daysOfWeek.map((day) => {
-                      const daySchedule = weeklySchedule[day.key];
-                      const dayHours = daySchedule.active ? daySchedule.shifts.reduce((sum, shift) => {
-                        const startTime = new Date(`2000-01-01 ${shift.start}`);
-                        const endTime = new Date(`2000-01-01 ${shift.end}`);
-                        const breakStart = new Date(`2000-01-01 ${shift.break.start}`);
-                        const breakEnd = new Date(`2000-01-01 ${shift.break.end}`);
+                    {diasSemana.map((dia) => {
+                      const horarioDia = weeklySchedule[dia.clave];
+                      const horasDia = horarioDia.activo ? horarioDia.turnos.reduce((suma, turno) => {
+                        const horaInicio = new Date(`2000-01-01 ${turno.inicio}`);
+                        const horaFin = new Date(`2000-01-01 ${turno.fin}`);
+                        const inicioDescanso = new Date(`2000-01-01 ${turno.descanso.inicio}`);
+                        const finDescanso = new Date(`2000-01-01 ${turno.descanso.fin}`);
                         
-                        const workHours = (endTime - startTime) / (1000 * 60 * 60);
-                        const breakHours = (breakEnd - breakStart) / (1000 * 60 * 60);
-                        return sum + workHours - breakHours;
+                        const horasTrabajo = (horaFin - horaInicio) / (1000 * 60 * 60);
+                        const horasDescanso = (finDescanso - inicioDescanso) / (1000 * 60 * 60);
+                        return suma + horasTrabajo - horasDescanso;
                       }, 0) : 0;
 
                       return (
-                        <TableRow key={day.key}>
+                        <TableRow key={dia.clave}>
                           <TableCell>
                             <Typography variant="body2" fontWeight={500}>
-                              {day.short}
+                              {dia.corto}
                             </Typography>
                           </TableCell>
                           <TableCell>
                             <Chip 
-                              label={daySchedule.active ? 'Activo' : 'Descanso'} 
+                              label={horarioDia.activo ? 'Activo' : 'Descanso'} 
                               size="small"
-                              color={daySchedule.active ? 'success' : 'default'}
+                              color={horarioDia.activo ? 'success' : 'default'}
                             />
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {daySchedule.shifts.length} turno{daySchedule.shifts.length !== 1 ? 's' : ''}
+                              {horarioDia.turnos.length} turno{horarioDia.turnos.length !== 1 ? 's' : ''}
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            {daySchedule.shifts.map((shift, index) => (
-                              <Typography key={shift.id} variant="caption" sx={{ display: 'block' }}>
-                                {shift.start} - {shift.end}
-                                {index < daySchedule.shifts.length - 1 && ', '}
+                            {horarioDia.turnos.map((turno, index) => (
+                              <Typography key={turno.id} variant="caption" sx={{ display: 'block' }}>
+                                {turno.inicio} - {turno.fin}
+                                {index < horarioDia.turnos.length - 1 && ', '}
                               </Typography>
                             ))}
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" fontWeight={500}>
-                              {dayHours.toFixed(1)}h
+                              {horasDia.toFixed(1)}h
                             </Typography>
                           </TableCell>
                         </TableRow>
