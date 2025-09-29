@@ -1,4 +1,4 @@
-// src/shared/components/LoginPage.jsx
+// src/shared/components/LoginPage.jsx - Rediseño profesional con identidad Farma Dinámica
 import React, { useState } from 'react'
 import {
   Box,
@@ -7,22 +7,23 @@ import {
   TextField,
   Button,
   Typography,
-  Avatar,
   Container,
   Alert,
   InputAdornment,
-  IconButton
+  IconButton,
+  Paper
 } from '@mui/material'
 import {
   Person,
   Lock,
   Visibility,
   VisibilityOff,
-  Business
+  LocalPharmacy
 } from '@mui/icons-material'
 import NetworkValidationService from '../../services/networkValidation'
 import DeviceValidationModal from '../../components/DeviceValidationModal'
 import { validateCredentials } from '../../modules/user-management/constants/userConstants'
+import { farmaColors } from '/src/app/theme' // Importar colores corporativos
 
 function LoginPage({ onLogin }) {
   const [usuario, setUsuario] = useState('')
@@ -101,7 +102,7 @@ function LoginPage({ onLogin }) {
       <Box
         sx={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: '#f8f9fa',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -109,52 +110,140 @@ function LoginPage({ onLogin }) {
         }}
       >
         <Container maxWidth="sm">
-          <Card 
-            sx={{ 
-              borderRadius: 4,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-              overflow: 'hidden'
-            }}
-          >
-            <Box
-              sx={{
-                background: 'linear-gradient(135deg, #4A5FFF 0%, #667EEA 100%)',
-                p: 4,
-                textAlign: 'center',
-                color: 'white'
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            {/* Logo corporativo */}
+            <Box 
+              sx={{ 
+                display: 'inline-flex',
+                alignItems: 'center',
+                mb: 2
               }}
             >
-              <Avatar
+              {/* Icono de cruz médica inspirado en el logo */}
+              <Box
                 sx={{
-                  width: 80,
-                  height: 80,
-                  margin: '0 auto',
-                  mb: 2,
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  backdropFilter: 'blur(10px)'
+                  position: 'relative',
+                  width: 60,
+                  height: 60,
+                  mr: 2
                 }}
               >
-                <Business sx={{ fontSize: 40 }} />
-              </Avatar>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                SIFARMA
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Sistema Integral de Farmacia
+                {/* Cruz naranja */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 10,
+                    left: 20,
+                    width: 20,
+                    height: 40,
+                    bgcolor: farmaColors.primary,
+                    borderRadius: '10px'
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 20,
+                    left: 10,
+                    width: 40,
+                    height: 20,
+                    bgcolor: farmaColors.primary,
+                    borderRadius: '10px'
+                  }}
+                />
+                {/* Cruz azul entrelazada */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 15,
+                    left: 25,
+                    width: 20,
+                    height: 30,
+                    bgcolor: farmaColors.secondary,
+                    borderRadius: '10px',
+                    opacity: 0.9
+                  }}
+                />
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 25,
+                    left: 15,
+                    width: 30,
+                    height: 20,
+                    bgcolor: farmaColors.secondary,
+                    borderRadius: '10px',
+                    opacity: 0.9
+                  }}
+                />
+              </Box>
+              
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontWeight: 700,
+                  color: farmaColors.secondary,
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }}
+              >
+                FARMA{' '}
+                <Box component="span" sx={{ color: farmaColors.primary }}>
+                  DINÁMICA
+                </Box>
               </Typography>
             </Box>
 
-            <CardContent sx={{ p: 4 }}>
-              <Typography variant="h5" sx={{ textAlign: 'center', mb: 1, fontWeight: 600, color: '#333' }}>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                color: '#6c757d',
+                fontSize: '1.1rem',
+                fontWeight: 400
+              }}
+            >
+              Sistema Integral de Farmacia
+            </Typography>
+          </Box>
+
+          <Card 
+            sx={{ 
+              borderRadius: 3,
+              boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+              border: '1px solid #e9ecef',
+              overflow: 'hidden'
+            }}
+          >
+            <CardContent sx={{ p: 5 }}>
+              <Typography variant="h5" sx={{ 
+                textAlign: 'center', 
+                mb: 1, 
+                fontWeight: 600, 
+                color: farmaColors.secondary
+              }}>
                 Iniciar Sesión
               </Typography>
-              <Typography variant="body2" sx={{ textAlign: 'center', mb: 3, color: '#666' }}>
-                Ingresa tus credenciales para continuar
+              <Typography variant="body2" sx={{ 
+                textAlign: 'center', 
+                mb: 4, 
+                color: '#6c757d'
+              }}>
+                Ingresa tus credenciales para acceder al sistema
               </Typography>
 
               <Box component="form" onSubmit={handleLogin}>
                 {error && (
-                  <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                  <Alert 
+                    severity="error" 
+                    sx={{ 
+                      mb: 3, 
+                      borderRadius: 2,
+                      bgcolor: '#fff5f5',
+                      border: '1px solid #fed7d7',
+                      '& .MuiAlert-icon': {
+                        color: '#e53e3e'
+                      }
+                    }}
+                  >
                     {error}
                   </Alert>
                 )}
@@ -165,12 +254,31 @@ function LoginPage({ onLogin }) {
                   variant="outlined"
                   value={usuario}
                   onChange={(e) => setUsuario(e.target.value)}
-                  sx={{ mb: 3 }}
+                  sx={{ 
+                    mb: 3,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      bgcolor: '#f8f9fa',
+                      '&.Mui-focused': {
+                        bgcolor: 'white',
+                        '& fieldset': {
+                          borderColor: farmaColors.primary,
+                          borderWidth: '2px'
+                        }
+                      },
+                      '&:hover:not(.Mui-focused) fieldset': {
+                        borderColor: farmaColors.primaryLight,
+                      }
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: farmaColors.primary
+                    }
+                  }}
                   required
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Person color="action" />
+                        <Person sx={{ color: farmaColors.secondary, fontSize: '1.2rem' }} />
                       </InputAdornment>
                     )
                   }}
@@ -183,12 +291,31 @@ function LoginPage({ onLogin }) {
                   variant="outlined"
                   value={contrasena}
                   onChange={(e) => setContrasena(e.target.value)}
-                  sx={{ mb: 4 }}
+                  sx={{ 
+                    mb: 4,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      bgcolor: '#f8f9fa',
+                      '&.Mui-focused': {
+                        bgcolor: 'white',
+                        '& fieldset': {
+                          borderColor: farmaColors.primary,
+                          borderWidth: '2px'
+                        }
+                      },
+                      '&:hover:not(.Mui-focused) fieldset': {
+                        borderColor: farmaColors.primaryLight,
+                      }
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: farmaColors.primary
+                    }
+                  }}
                   required
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Lock color="action" />
+                        <Lock sx={{ color: farmaColors.secondary, fontSize: '1.2rem' }} />
                       </InputAdornment>
                     ),
                     endAdornment: (
@@ -196,6 +323,12 @@ function LoginPage({ onLogin }) {
                         <IconButton
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
+                          sx={{
+                            color: farmaColors.secondary,
+                            '&:hover': {
+                              bgcolor: farmaColors.alpha.secondary10
+                            }
+                          }}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
@@ -211,15 +344,23 @@ function LoginPage({ onLogin }) {
                   size="large"
                   disabled={loading}
                   sx={{
-                    py: 2,
-                    background: 'linear-gradient(135deg, #4A5FFF 0%, #667EEA 100%)',
-                    boxShadow: '0 4px 20px rgba(74,95,255,0.3)',
-                    fontSize: '1rem',
+                    py: 2.5,
+                    background: farmaColors.primary,
+                    fontSize: '1.1rem',
                     fontWeight: 600,
                     borderRadius: 2,
+                    textTransform: 'none',
+                    boxShadow: `0 4px 20px ${farmaColors.alpha.primary20}`,
                     '&:hover': {
-                      boxShadow: '0 6px 30px rgba(74,95,255,0.4)',
+                      background: farmaColors.primaryDark,
+                      boxShadow: `0 6px 30px ${farmaColors.alpha.primary30}`,
                       transform: 'translateY(-1px)'
+                    },
+                    '&:disabled': {
+                      background: farmaColors.alpha.primary20,
+                      color: 'rgba(255,255,255,0.8)',
+                      transform: 'none',
+                      boxShadow: 'none'
                     }
                   }}
                 >
@@ -227,13 +368,42 @@ function LoginPage({ onLogin }) {
                 </Button>
               </Box>
 
-              <Box sx={{ mt: 3, textAlign: 'center' }}>
-                <Typography variant="caption" color="text.secondary">
-                  SIFARMA v1.0 - Sistema seguro
+              <Box sx={{ mt: 4, textAlign: 'center' }}>
+                <Typography variant="caption" sx={{ 
+                  color: farmaColors.secondary,
+                  fontSize: '0.9rem'
+                }}>
+                  Farma Dinámica v1.0 • Sistema seguro
                 </Typography>
               </Box>
             </CardContent>
           </Card>
+
+          {/* Elementos decorativos minimalistas */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 20,
+              right: 20,
+              width: 100,
+              height: 60,
+              background: `linear-gradient(135deg, ${farmaColors.alpha.primary10} 0%, transparent 70%)`,
+              borderRadius: '20px 0 0 20px',
+              zIndex: -1
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 20,
+              left: 20,
+              width: 80,
+              height: 80,
+              background: `linear-gradient(135deg, ${farmaColors.alpha.secondary10} 0%, transparent 70%)`,
+              borderRadius: '0 20px 20px 0',
+              zIndex: -1
+            }}
+          />
         </Container>
       </Box>
 

@@ -1,4 +1,4 @@
-// EditUserForm.jsx - Formulario de edición completo con nombreEquipo
+// EditUserForm.jsx - Formulario de edición con colores corporativos Farma Dinámica
 
 import React from 'react';
 import {
@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import { useUsers } from '../context/UserContext'; 
 import { sucursales, roles, deviceIPMapping } from '../constants/userConstants';
+import { farmaColors } from '/src/app/theme'; // Importar colores corporativos
 
 const EditUserForm = ({ onCancel }) => {
   const {
@@ -97,9 +98,18 @@ const EditUserForm = ({ onCancel }) => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Encabezado amarillo con nombre del usuario - exacto del monolítico */}
-      <Paper sx={{ p: 3, mb: 3, bgcolor: '#fff3cd', borderLeft: '4px solid #ffc107' }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#1A202C', mb: 1 }}>
+      {/* Encabezado con colores corporativos para edición */}
+      <Paper sx={{ 
+        p: 3, 
+        mb: 3, 
+        background: `linear-gradient(135deg, ${farmaColors.alpha.primary10} 0%, ${farmaColors.alpha.primary20} 100%)`,
+        borderLeft: `4px solid ${farmaColors.primary}` // Borde naranja corporativo
+      }}>
+        <Typography variant="h5" sx={{ 
+          fontWeight: 600, 
+          color: farmaColors.secondary, // Azul corporativo para el título
+          mb: 1 
+        }}>
           EDITAR USUARIO: {userToEdit.nombreCompleto}
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -107,22 +117,48 @@ const EditUserForm = ({ onCancel }) => {
         </Typography>
       </Paper>
 
-      <Card sx={{ p: 4 }}>
+      <Card sx={{ p: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
         <Grid container spacing={3}>
           {/* 1. Sucursal */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, // Naranja corporativo
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               1.- Sucursal:
             </Typography>
             <FormControl fullWidth>
-              <InputLabel>SELECCIONAR SUCURSAL</InputLabel>
+              <InputLabel sx={{ color: 'text.secondary' }}>SELECCIONAR SUCURSAL</InputLabel>
               <Select
                 value={userForm.sucursal}
                 onChange={handleFormChange('sucursal')}
                 label="SELECCIONAR SUCURSAL"
+                sx={{
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }}
               >
                 {sucursales.map((sucursal) => (
-                  <MenuItem key={sucursal} value={sucursal}>
+                  <MenuItem 
+                    key={sucursal} 
+                    value={sucursal}
+                    sx={{
+                      '&:hover': {
+                        bgcolor: farmaColors.alpha.primary10
+                      },
+                      '&.Mui-selected': {
+                        bgcolor: farmaColors.alpha.primary20,
+                        '&:hover': {
+                          bgcolor: farmaColors.alpha.primary30
+                        }
+                      }
+                    }}
+                  >
                     {sucursal}
                   </MenuItem>
                 ))}
@@ -132,19 +168,45 @@ const EditUserForm = ({ onCancel }) => {
 
           {/* 2. Nombre de equipo - CAMBIADO A SELECT FILTRADO POR SUCURSAL */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               2.- Nombre de equipo:
             </Typography>
             <FormControl fullWidth>
-              <InputLabel>SELECCIONAR EQUIPO</InputLabel>
+              <InputLabel sx={{ color: 'text.secondary' }}>SELECCIONAR EQUIPO</InputLabel>
               <Select
                 value={userForm.nombreEquipo}
                 onChange={handleFormChange('nombreEquipo')}
                 label="SELECCIONAR EQUIPO"
                 disabled={!userForm.sucursal} // Deshabilitar hasta seleccionar sucursal
+                sx={{
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }}
               >
                 {equiposDisponibles.map((equipo) => (
-                  <MenuItem key={equipo} value={equipo}>
+                  <MenuItem 
+                    key={equipo} 
+                    value={equipo}
+                    sx={{
+                      '&:hover': {
+                        bgcolor: farmaColors.alpha.primary10
+                      },
+                      '&.Mui-selected': {
+                        bgcolor: farmaColors.alpha.primary20,
+                        '&:hover': {
+                          bgcolor: farmaColors.alpha.primary30
+                        }
+                      }
+                    }}
+                  >
                     {equipo}
                   </MenuItem>
                 ))}
@@ -159,18 +221,44 @@ const EditUserForm = ({ onCancel }) => {
 
           {/* 3. Tipo de usuario */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               3.- Tipo de usuario:
             </Typography>
             <FormControl fullWidth>
-              <InputLabel>TIPO DE USUARIO</InputLabel>
+              <InputLabel sx={{ color: 'text.secondary' }}>TIPO DE USUARIO</InputLabel>
               <Select
                 value={userForm.tipoUsuario}
                 onChange={handleFormChange('tipoUsuario')}
                 label="TIPO DE USUARIO"
+                sx={{
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }}
               >
                 {roles.map((role) => (
-                  <MenuItem key={role} value={role}>
+                  <MenuItem 
+                    key={role} 
+                    value={role}
+                    sx={{
+                      '&:hover': {
+                        bgcolor: farmaColors.alpha.primary10
+                      },
+                      '&.Mui-selected': {
+                        bgcolor: farmaColors.alpha.primary20,
+                        '&:hover': {
+                          bgcolor: farmaColors.alpha.primary30
+                        }
+                      }
+                    }}
+                  >
                     {role}
                   </MenuItem>
                 ))}
@@ -180,7 +268,11 @@ const EditUserForm = ({ onCancel }) => {
 
           {/* 4. Usuario */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               4.- Usuario:
             </Typography>
             <TextField
@@ -188,14 +280,28 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Ingrese Usuario"
               value={userForm.usuario}
               onChange={handleFormChange('usuario')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
               required
             />
           </Grid>
 
           {/* 5. Nueva Password (opcional) */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               5.- Nueva Password (opcional):
             </Typography>
             <TextField
@@ -204,10 +310,29 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Dejar vacío para mantener contraseña actual"
               value={userForm.password}
               onChange={handleFormChange('password')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
               InputProps={{
                 endAdornment: (
-                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                  <IconButton 
+                    onClick={() => setShowPassword(!showPassword)} 
+                    edge="end"
+                    sx={{
+                      color: farmaColors.secondary,
+                      '&:hover': {
+                        bgcolor: farmaColors.alpha.secondary10
+                      }
+                    }}
+                  >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 )
@@ -220,7 +345,11 @@ const EditUserForm = ({ onCancel }) => {
 
           {/* 6. Cédula de identidad */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               6.- Cédula de identidad:
             </Typography>
             <TextField
@@ -228,13 +357,27 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Ingrese Cedula de identidad"
               value={userForm.cedula}
               onChange={handleFormChange('cedula')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
             />
           </Grid>
 
           {/* 7. Nombre completo */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               7.- Nombre completo:
             </Typography>
             <TextField
@@ -242,14 +385,28 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Ingrese Nombre Completo"
               value={userForm.nombreCompleto}
               onChange={handleFormChange('nombreCompleto')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
               required
             />
           </Grid>
 
           {/* 8. Apellidos */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               8.- Apellidos:
             </Typography>
             <TextField
@@ -257,13 +414,27 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Ingrese Apellido"
               value={userForm.apellidos}
               onChange={handleFormChange('apellidos')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
             />
           </Grid>
 
           {/* 9. Título */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               9.- Título:
             </Typography>
             <TextField
@@ -271,19 +442,43 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Ingrese el Titulo"
               value={userForm.titulo}
               onChange={handleFormChange('titulo')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
             />
           </Grid>
 
           {/* 10. Género */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               10.- Género:
             </Typography>
             <RadioGroup
               value={userForm.genero}
               onChange={handleFormChange('genero')}
               row
+              sx={{
+                '& .MuiFormControlLabel-root': {
+                  '& .MuiRadio-root': {
+                    color: 'text.secondary',
+                    '&.Mui-checked': {
+                      color: farmaColors.primary,
+                    }
+                  }
+                }
+              }}
             >
               <FormControlLabel value="Masculino" control={<Radio />} label="Masculino" />
               <FormControlLabel value="Femenino" control={<Radio />} label="Femenino" />
@@ -292,7 +487,11 @@ const EditUserForm = ({ onCancel }) => {
 
           {/* 11. Celular */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               11.- Celular:
             </Typography>
             <TextField
@@ -300,13 +499,27 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Ingrese Numero de celular"
               value={userForm.telefono}
               onChange={handleFormChange('telefono')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
             />
           </Grid>
 
           {/* 12. Email */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               12.- Email:
             </Typography>
             <TextField
@@ -314,7 +527,17 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Ingrese dirección de correo electrónico"
               value={userForm.email}
               onChange={handleFormChange('email')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
               type="email"
               required
             />
@@ -322,7 +545,11 @@ const EditUserForm = ({ onCancel }) => {
 
           {/* 13. Dirección */}
           <Grid item xs={12}>
-            <Typography variant="body2" sx={{ color: '#ffc107', mb: 1, fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ 
+              color: farmaColors.primary, 
+              mb: 1, 
+              fontWeight: 600 
+            }}>
               13.- Dirección:
             </Typography>
             <TextField
@@ -330,13 +557,33 @@ const EditUserForm = ({ onCancel }) => {
               placeholder="Ingrese dirección actual"
               value={userForm.direccion}
               onChange={handleFormChange('direccion')}
-              sx={{ bgcolor: 'white' }}
+              sx={{ 
+                bgcolor: 'white',
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                }
+              }}
             />
           </Grid>
 
-          {/* Información adicional del usuario - exacta del monolítico */}
+          {/* Información adicional del usuario con colores corporativos */}
           <Grid item xs={12}>
-            <Alert severity="info" sx={{ mb: 2 }}>
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 2,
+                bgcolor: farmaColors.alpha.secondary10, // Fondo azul muy sutil
+                borderLeft: `4px solid ${farmaColors.secondary}`, // Borde azul corporativo
+                '& .MuiAlert-icon': {
+                  color: farmaColors.secondary
+                }
+              }}
+            >
               <Typography variant="body2">
                 <strong>Información del usuario:</strong><br />
                 • Creado: {userToEdit.fechaCreacion}<br />
@@ -346,18 +593,20 @@ const EditUserForm = ({ onCancel }) => {
             </Alert>
           </Grid>
 
-          {/* Botones de acción - exactos del monolítico */}
+          {/* Botones de acción con colores corporativos */}
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
             <Button
               variant="outlined"
               onClick={handleCancel}
               startIcon={<Cancel />}
               sx={{
-                borderColor: '#6c757d',
-                color: '#6c757d',
+                borderColor: farmaColors.secondary,
+                color: farmaColors.secondary,
+                px: 3,
+                py: 1.5,
                 '&:hover': {
-                  borderColor: '#5a6268',
-                  bgcolor: 'rgba(108, 117, 125, 0.04)'
+                  borderColor: farmaColors.secondaryDark,
+                  bgcolor: farmaColors.alpha.secondary10
                 }
               }}
             >
@@ -368,14 +617,17 @@ const EditUserForm = ({ onCancel }) => {
               onClick={handleSave}
               startIcon={<Save />}
               sx={{
-                bgcolor: '#ffc107',
-                color: '#212529',
+                background: farmaColors.gradients.primary, // Gradiente naranja corporativo
+                color: 'white',
                 fontWeight: 600,
                 px: 4,
                 py: 1.5,
                 fontSize: '1rem',
+                boxShadow: `0 4px 20px ${farmaColors.alpha.primary30}`,
                 '&:hover': {
-                  bgcolor: '#e0a800'
+                  background: farmaColors.gradients.primary,
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 6px 25px ${farmaColors.alpha.primary30}`,
                 }
               }}
             >

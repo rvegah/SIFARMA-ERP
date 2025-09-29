@@ -18,12 +18,13 @@ import {
   Inventory,
   Warning
 } from '@mui/icons-material'
+import { farmaColors } from '/src/app/theme'
 
 const tarjetasEstadisticas = [
   {
     titulo: 'Ventas del día',
     valor: '393',
-    color: '#00BCD4',
+    color: farmaColors.primary,           // #CC6C06 - Naranja corporativo
     icono: <TrendingUp />,
     cambio: '+12.5%',
     tipoCambio: 'positive'
@@ -31,7 +32,7 @@ const tarjetasEstadisticas = [
   {
     titulo: 'Compras del día',
     valor: '91',
-    color: '#4CAF50',
+    color: farmaColors.secondary,         // #05305A - Azul corporativo
     icono: <ShoppingCart />,
     cambio: '+8.2%',
     tipoCambio: 'positive'
@@ -39,7 +40,7 @@ const tarjetasEstadisticas = [
   {
     titulo: 'Traspasos del día',
     valor: '27',
-    color: '#FF9800',
+    color: farmaColors.primaryLight,      // #E6854D - Naranja claro
     icono: <SwapHoriz />,
     cambio: '-2.1%',
     tipoCambio: 'negative'
@@ -47,7 +48,7 @@ const tarjetasEstadisticas = [
   {
     titulo: 'Compras a crédito por pagar',
     valor: '1',
-    color: '#F44336',
+    color: farmaColors.secondaryDark,     // #032240 - Azul más oscuro
     icono: <CreditCard />,
     cambio: 'Urgente',
     tipoCambio: 'warning'
@@ -138,7 +139,7 @@ function Dashboard() {
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Inventory color="primary" />
+              <Inventory sx={{ color: farmaColors.primary }} />
               Sistema SIFARMA funcionando correctamente
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -150,10 +151,10 @@ function Dashboard() {
               sx={{ 
                 height: 8, 
                 borderRadius: 4,
-                bgcolor: 'rgba(74,95,255,0.1)',
+                bgcolor: farmaColors.alpha.primary10,
                 '& .MuiLinearProgress-bar': {
                   borderRadius: 4,
-                  background: 'linear-gradient(135deg, #4A5FFF 0%, #667EEA 100%)'
+                  background: farmaColors.gradients.primary
                 }
               }} 
             />
@@ -166,15 +167,18 @@ function Dashboard() {
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Warning color="warning" />
+              <Warning sx={{ color: farmaColors.primary }} />
               Próximos pasos
             </Typography>
             <Box sx={{ mb: 2 }}>
               <Chip 
                 label="En desarrollo" 
                 size="small" 
-                color="warning" 
-                sx={{ mb: 1 }}
+                sx={{ 
+                  mb: 1,
+                  bgcolor: farmaColors.alpha.primary20,
+                  color: farmaColors.primaryDark
+                }}
               />
               <Typography variant="body2" color="text.secondary">
                 Módulo de Gestión de Acceso y Seguridad
@@ -184,10 +188,10 @@ function Dashboard() {
               variant="contained" 
               size="small"
               sx={{ 
-                background: 'linear-gradient(135deg, #4A5FFF 0%, #667EEA 100%)',
-                boxShadow: '0 4px 15px rgba(74,95,255,0.3)',
+                background: farmaColors.gradients.corporate,
+                boxShadow: `0 4px 15px ${farmaColors.alpha.primary30}`,
                 '&:hover': {
-                  boxShadow: '0 6px 25px rgba(74,95,255,0.4)'
+                  boxShadow: `0 6px 25px ${farmaColors.alpha.primary30}`
                 }
               }}
             >

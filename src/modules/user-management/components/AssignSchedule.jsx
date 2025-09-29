@@ -1,4 +1,4 @@
-// AssignSchedule.jsx - Interfaz mejorada para asignar horarios de trabajo
+// AssignSchedule.jsx - Interfaz con colores corporativos Farma Dinámica para asignar horarios
 
 import React, { useState } from 'react';
 import {
@@ -45,6 +45,7 @@ import {
   WorkOutline
 } from '@mui/icons-material';
 import { useUsers } from '../context/UserContext';
+import { farmaColors } from '/src/app/theme'; // Importar colores corporativos
 
 // Configuración de días de la semana
 const diasSemana = [
@@ -57,12 +58,12 @@ const diasSemana = [
   { clave: 'domingo', nombre: 'Domingo', corto: 'DOM' }
 ];
 
-// Turnos predefinidos
+// Turnos predefinidos con colores corporativos
 const plantillasTurnos = {
   manana: {
     nombre: 'Turno Mañana',
     icono: <WbSunny />,
-    color: '#FF9800',
+    color: farmaColors.primary, // Naranja corporativo
     horario: {
       inicio: '07:00',
       fin: '15:00',
@@ -72,7 +73,7 @@ const plantillasTurnos = {
   tarde: {
     nombre: 'Turno Tarde',
     icono: <NightsStay />,
-    color: '#3F51B5',
+    color: farmaColors.secondary, // Azul corporativo
     horario: {
       inicio: '15:00',
       fin: '23:00',
@@ -82,7 +83,7 @@ const plantillasTurnos = {
   completo: {
     nombre: 'Turno Completo',
     icono: <WorkOutline />,
-    color: '#4CAF50',
+    color: farmaColors.primaryDark, // Naranja oscuro
     horario: {
       inicio: '08:00',
       fin: '18:00',
@@ -92,7 +93,7 @@ const plantillasTurnos = {
   nocturno: {
     nombre: 'Turno Nocturno',
     icono: <NightsStay />,
-    color: '#9C27B0',
+    color: farmaColors.secondaryDark, // Azul oscuro
     horario: {
       inicio: '22:00',
       fin: '06:00',
@@ -133,7 +134,7 @@ const AssignSchedule = ({ onCancel }) => {
       fin: '17:00',
       descanso: { inicio: '12:00', fin: '13:00' },
       nombre: 'Turno Personalizado',
-      color: '#6B7280'
+      color: farmaColors.primaryLight
     };
 
     setWeeklySchedule(prev => ({
@@ -230,9 +231,18 @@ const AssignSchedule = ({ onCancel }) => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      {/* Encabezado */}
-      <Paper sx={{ p: 3, mb: 3, bgcolor: '#e3f2fd', borderLeft: '4px solid #2196f3' }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#1A202C', mb: 1 }}>
+      {/* Encabezado con colores corporativos */}
+      <Paper sx={{ 
+        p: 3, 
+        mb: 3, 
+        background: `linear-gradient(135deg, ${farmaColors.alpha.secondary10} 0%, ${farmaColors.alpha.secondary20} 100%)`,
+        borderLeft: `4px solid ${farmaColors.secondary}` // Azul corporativo
+      }}>
+        <Typography variant="h5" sx={{ 
+          fontWeight: 600, 
+          color: farmaColors.secondary, // Azul corporativo
+          mb: 1 
+        }}>
           HORARIOS DE TRABAJO
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -243,28 +253,65 @@ const AssignSchedule = ({ onCancel }) => {
       <Grid container spacing={3}>
         {/* Panel izquierdo: Selección y plantillas */}
         <Grid item xs={12} lg={3}>
-          <Card sx={{ mb: 3 }}>
+          <Card sx={{ 
+            mb: 3, 
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)' 
+          }}>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h6" sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                color: farmaColors.secondary
+              }}>
                 <Person />
                 Usuario
               </Typography>
               
               <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Seleccionar Usuario</InputLabel>
+                <InputLabel sx={{ color: 'text.secondary' }}>Seleccionar Usuario</InputLabel>
                 <Select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
                   label="Seleccionar Usuario"
+                  sx={{
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: farmaColors.primary,
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: farmaColors.primaryLight,
+                    }
+                  }}
                 >
                   {users.map((user) => (
-                    <MenuItem key={user.id} value={user.id}>
+                    <MenuItem 
+                      key={user.id} 
+                      value={user.id}
+                      sx={{
+                        '&:hover': {
+                          bgcolor: farmaColors.alpha.primary10
+                        }
+                      }}
+                    >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem', bgcolor: '#2196f3' }}>
+                        <Avatar sx={{ 
+                          width: 24, 
+                          height: 24, 
+                          fontSize: '0.75rem', 
+                          background: farmaColors.gradients.secondary
+                        }}>
                           {user.nombreCompleto.split(' ').map(n => n[0]).join('')}
                         </Avatar>
                         {user.nombreCompleto}
-                        <Chip label={user.rol} size="small" />
+                        <Chip 
+                          label={user.rol} 
+                          size="small" 
+                          sx={{
+                            bgcolor: farmaColors.alpha.primary20,
+                            color: farmaColors.primary
+                          }}
+                        />
                       </Box>
                     </MenuItem>
                   ))}
@@ -272,7 +319,16 @@ const AssignSchedule = ({ onCancel }) => {
               </FormControl>
 
               {currentUser && (
-                <Alert severity="info" sx={{ mb: 3 }}>
+                <Alert 
+                  severity="info" 
+                  sx={{ 
+                    mb: 3,
+                    bgcolor: farmaColors.alpha.secondary10,
+                    '& .MuiAlert-icon': {
+                      color: farmaColors.secondary
+                    }
+                  }}
+                >
                   <Typography variant="body2">
                     <strong>{currentUser.nombreCompleto}</strong><br />
                     {currentUser.rol} - {currentUser.sucursal}
@@ -280,7 +336,7 @@ const AssignSchedule = ({ onCancel }) => {
                 </Alert>
               )}
 
-              <Typography variant="h6" sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2, color: farmaColors.secondary }}>
                 Plantillas de Turno
               </Typography>
               
@@ -308,14 +364,23 @@ const AssignSchedule = ({ onCancel }) => {
           </Card>
 
           {/* Resumen semanal */}
-          <Card>
+          <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h6" sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                color: farmaColors.secondary
+              }}>
                 <AccessTime />
                 Resumen Semanal
               </Typography>
               <Box sx={{ mb: 2 }}>
-                <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" sx={{ 
+                  color: farmaColors.primary,
+                  fontWeight: 'bold' 
+                }}>
                   {calculateWeeklyHours()}h
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -338,29 +403,47 @@ const AssignSchedule = ({ onCancel }) => {
 
         {/* Panel principal: Calendario semanal */}
         <Grid item xs={12} lg={9}>
-          <Card>
+          <Card sx={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 3, color: farmaColors.secondary }}>
                 Configuración Semanal
               </Typography>
 
               {diasSemana.map((dia) => (
-                <Paper key={dia.clave} sx={{ mb: 2, p: 2, bgcolor: weeklySchedule[dia.clave].activo ? '#f8f9fa' : '#fafafa' }}>
+                <Paper key={dia.clave} sx={{ 
+                  mb: 2, 
+                  p: 2, 
+                  bgcolor: weeklySchedule[dia.clave].activo ? farmaColors.alpha.primary10 : '#fafafa',
+                  border: weeklySchedule[dia.clave].activo ? `1px solid ${farmaColors.alpha.primary30}` : '1px solid #e0e0e0'
+                }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Typography variant="h6" sx={{ minWidth: 100 }}>
+                      <Typography variant="h6" sx={{ 
+                        minWidth: 100,
+                        color: weeklySchedule[dia.clave].activo ? farmaColors.secondary : 'text.secondary'
+                      }}>
                         {dia.nombre}
                       </Typography>
                       <Switch
                         checked={weeklySchedule[dia.clave].activo}
                         onChange={() => toggleDay(dia.clave)}
-                        color="primary"
+                        sx={{
+                          '& .MuiSwitch-switchBase.Mui-checked': {
+                            color: farmaColors.primary,
+                          },
+                          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                            backgroundColor: farmaColors.primary,
+                          },
+                        }}
                       />
                       {weeklySchedule[dia.clave].activo && (
                         <Chip 
                           label={`${weeklySchedule[dia.clave].turnos.length} turno${weeklySchedule[dia.clave].turnos.length !== 1 ? 's' : ''}`}
                           size="small"
-                          color="primary"
+                          sx={{
+                            bgcolor: farmaColors.primary,
+                            color: 'white'
+                          }}
                         />
                       )}
                     </Box>
@@ -372,7 +455,13 @@ const AssignSchedule = ({ onCancel }) => {
                             <IconButton
                               size="small"
                               onClick={() => copyDaySchedule(dia.clave)}
-                              sx={{ mr: 1 }}
+                              sx={{ 
+                                mr: 1,
+                                color: farmaColors.secondary,
+                                '&:hover': {
+                                  bgcolor: farmaColors.alpha.secondary10
+                                }
+                              }}
                             >
                               <Copy />
                             </IconButton>
@@ -381,6 +470,12 @@ const AssignSchedule = ({ onCancel }) => {
                             size="small"
                             startIcon={<Add />}
                             onClick={() => addShiftToDay(dia.clave)}
+                            sx={{
+                              color: farmaColors.primary,
+                              '&:hover': {
+                                bgcolor: farmaColors.alpha.primary10
+                              }
+                            }}
                           >
                             Agregar Turno
                           </Button>
@@ -393,7 +488,12 @@ const AssignSchedule = ({ onCancel }) => {
                     <Grid container spacing={2}>
                       {weeklySchedule[dia.clave].turnos.map((turno, index) => (
                         <Grid item xs={12} key={turno.id}>
-                          <Paper sx={{ p: 2, bgcolor: 'white', border: `2px solid ${turno.color}20` }}>
+                          <Paper sx={{ 
+                            p: 2, 
+                            bgcolor: 'white', 
+                            border: `2px solid ${turno.color}30`,
+                            borderLeft: `4px solid ${turno.color}`
+                          }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                               <Typography variant="subtitle1" sx={{ color: turno.color, fontWeight: 600 }}>
                                 {turno.nombre}
@@ -417,6 +517,13 @@ const AssignSchedule = ({ onCancel }) => {
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
                                   size="small"
+                                  sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                      '&.Mui-focused fieldset': {
+                                        borderColor: farmaColors.primary,
+                                      }
+                                    }
+                                  }}
                                 />
                               </Grid>
                               <Grid item xs={12} sm={6} md={3}>
@@ -428,6 +535,13 @@ const AssignSchedule = ({ onCancel }) => {
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
                                   size="small"
+                                  sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                      '&.Mui-focused fieldset': {
+                                        borderColor: farmaColors.primary,
+                                      }
+                                    }
+                                  }}
                                 />
                               </Grid>
                               <Grid item xs={12} sm={6} md={3}>
@@ -439,6 +553,13 @@ const AssignSchedule = ({ onCancel }) => {
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
                                   size="small"
+                                  sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                      '&.Mui-focused fieldset': {
+                                        borderColor: farmaColors.primary,
+                                      }
+                                    }
+                                  }}
                                 />
                               </Grid>
                               <Grid item xs={12} sm={6} md={3}>
@@ -450,6 +571,13 @@ const AssignSchedule = ({ onCancel }) => {
                                   InputLabelProps={{ shrink: true }}
                                   fullWidth
                                   size="small"
+                                  sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                      '&.Mui-focused fieldset': {
+                                        borderColor: farmaColors.primary,
+                                      }
+                                    }
+                                  }}
                                 />
                               </Grid>
                             </Grid>
@@ -500,19 +628,19 @@ const AssignSchedule = ({ onCancel }) => {
               {/* Vista resumen en tabla */}
               <Divider sx={{ my: 3 }} />
               
-              <Typography variant="h6" sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 2, color: farmaColors.secondary }}>
                 Resumen Semanal
               </Typography>
               
               <TableContainer component={Paper} sx={{ mb: 3 }}>
                 <Table size="small">
-                  <TableHead>
+                  <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
                     <TableRow>
-                      <TableCell><strong>Día</strong></TableCell>
-                      <TableCell><strong>Estado</strong></TableCell>
-                      <TableCell><strong>Turnos</strong></TableCell>
-                      <TableCell><strong>Horario</strong></TableCell>
-                      <TableCell><strong>Horas</strong></TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: farmaColors.secondary }}>Día</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: farmaColors.secondary }}>Estado</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: farmaColors.secondary }}>Turnos</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: farmaColors.secondary }}>Horario</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: farmaColors.secondary }}>Horas</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -557,7 +685,7 @@ const AssignSchedule = ({ onCancel }) => {
                             ))}
                           </TableCell>
                           <TableCell>
-                            <Typography variant="body2" fontWeight={500}>
+                            <Typography variant="body2" fontWeight={500} sx={{ color: farmaColors.primary }}>
                               {horasDia.toFixed(1)}h
                             </Typography>
                           </TableCell>
@@ -568,12 +696,22 @@ const AssignSchedule = ({ onCancel }) => {
                 </Table>
               </TableContainer>
 
-              {/* Botones de acción */}
+              {/* Botones de acción con colores corporativos */}
               <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   startIcon={<Cancel />}
+                  sx={{
+                    borderColor: farmaColors.secondary,
+                    color: farmaColors.secondary,
+                    px: 3,
+                    py: 1.5,
+                    '&:hover': {
+                      borderColor: farmaColors.secondaryDark,
+                      bgcolor: farmaColors.alpha.secondary10
+                    }
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -581,8 +719,16 @@ const AssignSchedule = ({ onCancel }) => {
                   variant="contained"
                   startIcon={<Save />}
                   sx={{
-                    bgcolor: '#2196f3',
-                    '&:hover': { bgcolor: '#1976d2' }
+                    background: farmaColors.gradients.primary,
+                    color: 'white',
+                    px: 4,
+                    py: 1.5,
+                    boxShadow: `0 4px 20px ${farmaColors.alpha.primary30}`,
+                    '&:hover': {
+                      background: farmaColors.gradients.primary,
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 6px 25px ${farmaColors.alpha.primary30}`,
+                    }
                   }}
                 >
                   Guardar Horario

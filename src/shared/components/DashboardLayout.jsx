@@ -38,6 +38,7 @@ import {
   Edit,
   KeyboardArrowDown
 } from '@mui/icons-material'
+import { farmaColors } from '/src/app/theme' // Importar colores corporativos
 
 const drawerWidth = 280
 const collapsedDrawerWidth = 60
@@ -225,7 +226,7 @@ function DashboardLayout({ children, onLogout }) {
   const drawer = (
     <Box sx={{ 
       height: '100%', 
-      background: 'linear-gradient(180deg, #2D3748 0%, #1A202C 100%)',
+      background: farmaColors.gradients.sidebar, // Gradiente azul oscuro profesional
       width: collapsed ? collapsedDrawerWidth : drawerWidth,
       transition: 'width 0.3s ease'
     }}>
@@ -251,12 +252,15 @@ function DashboardLayout({ children, onLogout }) {
         >
           <Avatar 
             sx={{ 
-              bgcolor: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)', 
+              bgcolor: '#FFFFFF', // Fondo blanco para mejor contraste
+              color: farmaColors.primary, // Texto naranja corporativo
               width: collapsed ? 40 : 64, 
               height: collapsed ? 40 : 64,
               mb: collapsed ? 0 : 2,
-              boxShadow: '0 4px 20px rgba(255,107,53,0.3)',
-              transition: 'all 0.3s ease'
+              boxShadow: '0 4px 20px rgba(255,255,255,0.2)', // Sombra blanca sutil
+              border: `2px solid ${farmaColors.alpha.primary30}`, // Borde naranja sutil
+              transition: 'all 0.3s ease',
+              fontWeight: 'bold'
             }}
           >
             <Typography variant={collapsed ? "body2" : "h6"} fontWeight="bold">
@@ -274,8 +278,9 @@ function DashboardLayout({ children, onLogout }) {
                   label={currentSucursal.nombre} 
                   size="small" 
                   sx={{ 
-                    bgcolor: 'rgba(255,255,255,0.1)', 
-                    color: 'white'
+                    bgcolor: 'rgba(255,255,255,0.15)', // Fondo blanco con transparencia
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.3)' // Borde blanco sutil
                   }} 
                 />
                 <KeyboardArrowDown />
@@ -334,9 +339,9 @@ function DashboardLayout({ children, onLogout }) {
                       cursor: 'pointer',
                       minHeight: 48,
                       background: isActive ? 
-                        'linear-gradient(135deg, rgba(74,95,255,0.2) 0%, rgba(42,63,223,0.2) 100%)' : 
+                        'rgba(255,255,255,0.12)' : // Fondo blanco sutil para item activo
                         'transparent',
-                      border: isActive ? '1px solid rgba(74,95,255,0.3)' : 'none',
+                      border: isActive ? '1px solid rgba(255,255,255,0.2)' : 'none', // Borde blanco sutil
                       '&:hover': { 
                         bgcolor: 'rgba(255,255,255,0.05)',
                         transform: collapsed ? 'none' : 'translateX(4px)',
@@ -348,7 +353,7 @@ function DashboardLayout({ children, onLogout }) {
                   >
                     <ListItemIcon 
                       sx={{ 
-                        color: isActive ? '#4A5FFF' : 'rgba(255,255,255,0.7)',
+                        color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.7)', // Blanco puro para activos
                         minWidth: collapsed ? 'unset' : 56,
                         mr: collapsed ? 0 : 2,
                         justifyContent: 'center'
@@ -439,10 +444,10 @@ function DashboardLayout({ children, onLogout }) {
         sx={{
           width: { md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth}px)` },
           ml: { md: `${collapsed ? collapsedDrawerWidth : drawerWidth}px` },
-          background: 'linear-gradient(135deg, #4A5FFF 0%, #667EEA 100%)',
+          background: farmaColors.gradients.primary, // Gradiente naranja corporativo elegante
           backdropFilter: 'blur(10px)',
           borderBottom: 'none',
-          boxShadow: '0 4px 20px rgba(74,95,255,0.15)',
+          boxShadow: `0 4px 20px ${farmaColors.alpha.primary20}`, // Sombra naranja sutil
           transition: 'all 0.3s ease'
         }}
       >
@@ -465,7 +470,7 @@ function DashboardLayout({ children, onLogout }) {
               }}
               onClick={() => navigate('/dashboard')}
             >
-              Sifarm
+              Farma Dinámica
             </Typography>
           </Box>
 
@@ -499,7 +504,7 @@ function DashboardLayout({ children, onLogout }) {
             >
               <Avatar 
                 sx={{ 
-                  bgcolor: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)',
+                  background: farmaColors.gradients.secondary, // Avatar con gradiente azul corporativo
                   width: 40,
                   height: 40
                 }}
@@ -528,11 +533,11 @@ function DashboardLayout({ children, onLogout }) {
         }}
       >
         <MenuItem onClick={handleEditProfile}>
-          <Edit sx={{ mr: 2 }} />
+          <Edit sx={{ mr: 2, color: farmaColors.primary }} /> {/* Icono naranja corporativo */}
           Editar Perfil
         </MenuItem>
         <MenuItem onClick={onLogout}>
-          <ExitToApp sx={{ mr: 2 }} />
+          <ExitToApp sx={{ mr: 2, color: farmaColors.secondary }} /> {/* Icono azul corporativo */}
           Salir
         </MenuItem>
       </Menu>
@@ -550,6 +555,14 @@ function DashboardLayout({ children, onLogout }) {
             key={index}
             onClick={() => handleSucursalChange(sucursal)}
             selected={currentSucursal.nombre === sucursal.nombre}
+            sx={{
+              '&.Mui-selected': {
+                bgcolor: 'rgba(255,255,255,0.08)', // Fondo blanco muy sutil para seleccionado
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.12)'
+                }
+              }
+            }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
               <Typography>{sucursal.nombre}</Typography>

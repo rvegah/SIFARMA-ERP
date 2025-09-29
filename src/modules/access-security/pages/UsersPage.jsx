@@ -33,6 +33,7 @@ import {
   CameraAlt
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
+import { farmaColors } from '/src/app/theme'; // Importar colores corporativos
 
 // Datos del usuario actual (simulando datos del perfil)
 const usuarioActual = {
@@ -104,28 +105,28 @@ const opcionesMenu = [
     descripcion: 'Ver y editar información personal',
     icono: <AccountCircle />,
     accion: 'perfil',
-    color: '#4A5FFF'
+    color: farmaColors.secondary
   },
   {
     titulo: 'Gestión de Usuarios',
     descripcion: 'Administrar usuarios del sistema',
     icono: <Group />,
     accion: 'usuarios',
-    color: '#00BCD4'
+    color: farmaColors.primary
   },
   {
     titulo: 'Roles y Permisos',
     descripcion: 'Configurar roles y permisos',
     icono: <AdminPanelSettings />,
     accion: 'roles',
-    color: '#4CAF50'
+    color: farmaColors.secondaryLight
   },
   {
     titulo: 'Configuración de Seguridad',
     descripcion: 'Políticas de seguridad y acceso',
     icono: <Security />,
     accion: 'seguridad',
-    color: '#FF9800'
+    color: farmaColors.primaryDark
   }
 ];
 
@@ -202,10 +203,11 @@ const UsersPage = () => {
       <Paper 
         sx={{ 
           p: 3, 
-          background: 'linear-gradient(135deg, #4A5FFF 0%, #667EEA 100%)',
+          background: farmaColors.gradients.secondary, // Gradiente azul corporativo
           color: 'white',
           borderRadius: 3,
-          mb: 4
+          mb: 4,
+          boxShadow: `0 8px 32px ${farmaColors.alpha.secondary20}`
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -222,7 +224,7 @@ const UsersPage = () => {
       </Paper>
 
       {/* Formulario de edición */}
-      <Card sx={{ p: 4 }}>
+      <Card sx={{ p: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
         <Grid container spacing={3}>
           {/* Nombre Completo */}
           <Grid item xs={12} md={6}>
@@ -231,8 +233,21 @@ const UsersPage = () => {
               label="Nombre Completo *"
               value={formularioEdicion.nombre}
               onChange={manejarCambioFormulario('nombre')}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: farmaColors.primary
+                }
+              }}
               InputProps={{
-                startAdornment: <Person sx={{ color: 'action.active', mr: 1 }} />
+                startAdornment: <Person sx={{ color: farmaColors.secondary, mr: 1 }} />
               }}
             />
           </Grid>
@@ -244,8 +259,21 @@ const UsersPage = () => {
               label="Apellidos *"
               value={formularioEdicion.apellido}
               onChange={manejarCambioFormulario('apellido')}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: farmaColors.primary
+                }
+              }}
               InputProps={{
-                startAdornment: <Person sx={{ color: 'action.active', mr: 1 }} />
+                startAdornment: <Person sx={{ color: farmaColors.secondary, mr: 1 }} />
               }}
             />
           </Grid>
@@ -257,8 +285,21 @@ const UsersPage = () => {
               label="Celular *"
               value={formularioEdicion.numeroTelefono}
               onChange={manejarCambioFormulario('numeroTelefono')}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: farmaColors.primary
+                }
+              }}
               InputProps={{
-                startAdornment: <Phone sx={{ color: 'action.active', mr: 1 }} />
+                startAdornment: <Phone sx={{ color: farmaColors.secondary, mr: 1 }} />
               }}
             />
           </Grid>
@@ -271,8 +312,21 @@ const UsersPage = () => {
               type="email"
               value={formularioEdicion.correo}
               onChange={manejarCambioFormulario('correo')}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: farmaColors.primary
+                }
+              }}
               InputProps={{
-                startAdornment: <Email sx={{ color: 'action.active', mr: 1 }} />
+                startAdornment: <Email sx={{ color: farmaColors.secondary, mr: 1 }} />
               }}
             />
           </Grid>
@@ -280,15 +334,24 @@ const UsersPage = () => {
           {/* Foto de perfil */}
           <Grid item xs={12}>
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ color: '#4A5FFF', mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ 
+                color: farmaColors.secondary,
+                mb: 2,
+                fontWeight: 600
+              }}>
                 Foto de perfil:
               </Typography>
               <Button
                 variant="contained"
                 startIcon={<CameraAlt />}
                 sx={{
-                  bgcolor: '#4CAF50',
-                  '&:hover': { bgcolor: '#45A049' }
+                  background: farmaColors.gradients.primary,
+                  color: 'white',
+                  '&:hover': { 
+                    background: farmaColors.gradients.primary,
+                    transform: 'translateY(-1px)',
+                    boxShadow: `0 6px 20px ${farmaColors.alpha.primary30}`
+                  }
                 }}
               >
                 Cargar Imagen
@@ -305,8 +368,21 @@ const UsersPage = () => {
               value={formularioEdicion.contrasena}
               onChange={manejarCambioFormulario('contrasena')}
               placeholder="••••••••••••••"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: farmaColors.primary
+                }
+              }}
               InputProps={{
-                startAdornment: <Lock sx={{ color: 'action.active', mr: 1 }} />
+                startAdornment: <Lock sx={{ color: farmaColors.secondary, mr: 1 }} />
               }}
             />
           </Grid>
@@ -320,8 +396,21 @@ const UsersPage = () => {
               value={formularioEdicion.confirmarContrasena}
               onChange={manejarCambioFormulario('confirmarContrasena')}
               placeholder="••••••••••••••"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: farmaColors.primary
+                }
+              }}
               InputProps={{
-                startAdornment: <Lock sx={{ color: 'action.active', mr: 1 }} />
+                startAdornment: <Lock sx={{ color: farmaColors.secondary, mr: 1 }} />
               }}
             />
           </Grid>
@@ -334,9 +423,33 @@ const UsersPage = () => {
               label="Punto de venta *"
               value={formularioEdicion.sucursal}
               onChange={manejarCambioFormulario('sucursal')}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&.Mui-focused fieldset': {
+                    borderColor: farmaColors.primary,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: farmaColors.primaryLight,
+                  }
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: farmaColors.primary
+                }
+              }}
             >
               {puntosVenta.map((punto) => (
-                <MenuItem key={punto} value={punto}>
+                <MenuItem 
+                  key={punto} 
+                  value={punto}
+                  sx={{
+                    '&:hover': {
+                      bgcolor: farmaColors.alpha.primary10
+                    },
+                    '&.Mui-selected': {
+                      bgcolor: farmaColors.alpha.primary20
+                    }
+                  }}
+                >
                   {punto}
                 </MenuItem>
               ))}
@@ -345,12 +458,27 @@ const UsersPage = () => {
 
           {/* Notas importantes */}
           <Grid item xs={12}>
-            <Alert severity="warning" sx={{ mb: 2 }}>
+            <Alert 
+              severity="warning" 
+              sx={{ 
+                mb: 2,
+                '& .MuiAlert-icon': {
+                  color: farmaColors.primary
+                }
+              }}
+            >
               <Typography variant="body2">
                 <strong>Nota Importante (1):</strong> No puede existir el mismo PUNTO DE VENTA trabajando al mismo tiempo.
               </Typography>
             </Alert>
-            <Alert severity="info">
+            <Alert 
+              severity="info"
+              sx={{
+                '& .MuiAlert-icon': {
+                  color: farmaColors.secondary
+                }
+              }}
+            >
               <Typography variant="body2">
                 <strong>Nota Importante (2):</strong> Para que se aplique la actualización de PUNTO DE VENTA debe volver a iniciar sesión.
               </Typography>
@@ -365,11 +493,11 @@ const UsersPage = () => {
                 startIcon={<Cancel />}
                 onClick={manejarCancelarEdicion}
                 sx={{
-                  borderColor: '#F44336',
-                  color: '#F44336',
+                  borderColor: farmaColors.secondary,
+                  color: farmaColors.secondary,
                   '&:hover': {
-                    borderColor: '#D32F2F',
-                    bgcolor: 'rgba(244, 67, 54, 0.04)'
+                    borderColor: farmaColors.secondaryDark,
+                    bgcolor: farmaColors.alpha.secondary10
                   }
                 }}
               >
@@ -380,8 +508,13 @@ const UsersPage = () => {
                 startIcon={<Save />}
                 onClick={manejarGuardarPerfil}
                 sx={{
-                  bgcolor: '#4CAF50',
-                  '&:hover': { bgcolor: '#45A049' }
+                  background: farmaColors.gradients.primary,
+                  color: 'white',
+                  '&:hover': { 
+                    background: farmaColors.gradients.primary,
+                    transform: 'translateY(-1px)',
+                    boxShadow: `0 6px 20px ${farmaColors.alpha.primary30}`
+                  }
                 }}
               >
                 Guardar
@@ -398,10 +531,11 @@ const UsersPage = () => {
       <Paper 
         sx={{ 
           p: 4, 
-          background: 'linear-gradient(135deg, #4A5FFF 0%, #667EEA 100%)',
+          background: farmaColors.gradients.primary, // Gradiente naranja corporativo
           color: 'white',
           borderRadius: 3,
-          mb: 3
+          mb: 3,
+          boxShadow: `0 8px 32px ${farmaColors.alpha.primary20}`
         }}
       >
         <Avatar
@@ -436,7 +570,8 @@ const UsersPage = () => {
               bgcolor: 'rgba(255,255,255,0.2)',
               color: 'white',
               '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.3)'
+                bgcolor: 'rgba(255,255,255,0.3)',
+                transform: 'translateY(-1px)'
               }
             }}
           >
@@ -463,7 +598,11 @@ const UsersPage = () => {
 
   const renderizarMenuPrincipal = () => (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700, color: '#1A202C', mb: 1 }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ 
+        fontWeight: 700, 
+        color: farmaColors.secondary, // Azul corporativo
+        mb: 1 
+      }}>
         Configuración
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
@@ -479,6 +618,7 @@ const UsersPage = () => {
               sx={{
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: `0 8px 32px ${opcion.color}30`
@@ -502,7 +642,10 @@ const UsersPage = () => {
                     {opcion.icono}
                   </Box>
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      color: farmaColors.secondary
+                    }}>
                       {opcion.titulo}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -516,18 +659,33 @@ const UsersPage = () => {
         ))}
       </Grid>
 
-      <Divider sx={{ my: 4 }} />
+      <Divider sx={{ 
+        my: 4,
+        borderColor: farmaColors.alpha.secondary20
+      }} />
 
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+      <Typography variant="h6" sx={{ 
+        fontWeight: 600, 
+        mb: 3,
+        color: farmaColors.secondary
+      }}>
         Usuarios Activos Recientes
       </Typography>
 
       <Grid container spacing={2}>
         {usuariosMock.slice(0, 3).map((usuario) => (
           <Grid item xs={12} md={4} key={usuario.id}>
-            <Card sx={{ p: 2 }}>
+            <Card sx={{ 
+              p: 2,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              '&:hover': {
+                boxShadow: '0 4px 16px rgba(0,0,0,0.12)'
+              }
+            }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: '#4A5FFF' }}>
+                <Avatar sx={{ 
+                  background: farmaColors.gradients.secondary
+                }}>
                   {usuario.avatar}
                 </Avatar>
                 <Box sx={{ flexGrow: 1 }}>
@@ -540,8 +698,11 @@ const UsersPage = () => {
                   <Chip
                     label={usuario.estado}
                     size="small"
-                    color={usuario.estado === 'Activo' ? 'success' : 'default'}
-                    sx={{ ml: 1 }}
+                    sx={{
+                      ml: 1,
+                      bgcolor: usuario.estado === 'Activo' ? '#4CAF50' : farmaColors.alpha.secondary20,
+                      color: usuario.estado === 'Activo' ? 'white' : farmaColors.secondary
+                    }}
                   />
                 </Box>
               </Box>
@@ -567,13 +728,19 @@ const UsersPage = () => {
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Button
         onClick={() => setVistaActiva('menu')}
-        sx={{ mb: 3 }}
+        sx={{ 
+          mb: 3,
+          color: farmaColors.primary,
+          '&:hover': {
+            bgcolor: farmaColors.alpha.primary10
+          }
+        }}
         startIcon={<Settings />}
       >
         Volver al Menú Principal
       </Button>
       
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" gutterBottom sx={{ color: farmaColors.secondary }}>
         {vistaActiva === 'perfil' && 'Datos del Usuario'}
         {vistaActiva === 'usuarios' && 'Gestión de Usuarios'}
         {vistaActiva === 'roles' && 'Roles y Permisos'}
