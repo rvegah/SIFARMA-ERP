@@ -1,4 +1,4 @@
-// useUsers.js - Hook completo con toda la lógica del monolítico + nombreEquipo
+// useUsers.js - Hook con gestión completa de permisos
 
 import { useState, useMemo } from 'react';
 import { useSnackbar } from 'notistack';
@@ -7,28 +7,29 @@ import {
   currentUserConfig, 
   initialFormState, 
   requiredFields, 
-  requiredFieldsEdit 
+  requiredFieldsEdit,
+  getDefaultPermissionsByRole
 } from '../constants/userConstants';
 
 export const useUsers = () => {
-  // Estados principales - exactos del monolítico
+  // Estados principales
   const [users, setUsers] = useState(allUsers);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedTab, setSelectedTab] = useState(0); // 0 = Mi Sucursal, 1 = Todas las Sucursales
+  const [selectedTab, setSelectedTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
-  // Formulario de usuario - exacto del monolítico
+  // Formulario de usuario
   const [userForm, setUserForm] = useState(initialFormState);
   
   const { enqueueSnackbar } = useSnackbar();
 
-  // Configuración de usuario actual - del monolítico
+  // Configuración de usuario actual
   const currentUserSucursal = currentUserConfig.sucursal;
   const isAdmin = currentUserConfig.isAdmin;
 
-  // Función para manejar cambios en el formulario - exacta del monolítico
+  // Función para manejar cambios en el formulario
   const handleFormChange = (field) => (event) => {
     setUserForm({
       ...userForm,
@@ -36,18 +37,16 @@ export const useUsers = () => {
     });
   };
 
-  // Filtrar usuarios según la pestaña seleccionada - exacto del monolítico
+  // Filtrar usuarios según la pestaña seleccionada
   const getFilteredUsersByTab = useMemo(() => {
     if (selectedTab === 0) {
-      // Mi Sucursal
       return users.filter(user => user.sucursal === currentUserSucursal);
     } else {
-      // Todas las Sucursales (solo si es admin)
       return isAdmin ? users : users.filter(user => user.sucursal === currentUserSucursal);
     }
   }, [users, selectedTab, currentUserSucursal, isAdmin]);
 
-  // Usuarios filtrados por búsqueda y rol - ACTUALIZADO para incluir nombreEquipo
+  // Usuarios filtrados por búsqueda y rol
   const filteredUsers = useMemo(() => {
     return getFilteredUsersByTab.filter(user => {
       const matchesSearch = user.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -59,13 +58,40 @@ export const useUsers = () => {
     });
   }, [getFilteredUsersByTab, searchTerm, filterRole]);
 
-  // Función para crear usuario - ACTUALIZADA con nombreEquipo
+  // NUEVO: Función para actualizar permisos de un usuario
+  const updateUserPermissions = (userId, newPermissions) => {
+    const updatedUsers = users.map(user => 
+      user.id === userId 
+        ? { ...user, permisos: newPermissions }
+        : user
+    );
+
+    setUsers(updatedUsers);
+    enqueueSnackbar('Permisos actualizados correctamente', { variant: 'success' });
+    return true;
+  };
+
+  // NUEVO: Función para verificar si un usuario tiene un permiso específico
+  const hasPermission = (userId, permission) => {
+    const user = users.find(u => u.id === userId);
+    return user?.permisos?.includes(permission) || false;
+  };
+
+  // NUEVO: Función para obtener todos los permisos de un usuario
+  const getUserPermissions = (userId) => {
+    const user = users.find(u => u.id === userId);
+    return user?.permisos || [];
+  };
+
+  // Función para crear usuario
   const handleCreateUser = () => {
-    // Validación - exacta del monolítico
     if (!userForm.usuario || !userForm.password || !userForm.nombreCompleto || !userForm.email) {
       enqueueSnackbar('Por favor complete todos los campos obligatorios', { variant: 'error' });
       return false;
     }
+
+    // Obtener permisos por defecto según el rol
+    const defaultPermissions = getDefaultPermissionsByRole(userForm.tipoUsuario);
 
     const newUser = {
       id: users.length + 1,
@@ -81,17 +107,17 @@ export const useUsers = () => {
       direccion: userForm.direccion,
       estado: 'Activo',
       fechaCreacion: new Date().toISOString().split('T')[0],
-      ultimoAcceso: 'Nunca'
+      ultimoAcceso: 'Nunca',
+      permisos: defaultPermissions // Asignar permisos por defecto
     };
 
     setUsers([...users, newUser]);
-    enqueueSnackbar('Usuario creado correctamente', { variant: 'success' });
+    enqueueSnackbar('Usuario creado correctamente con permisos por defecto', { variant: 'success' });
     return true;
   };
 
-  // Función para actualizar usuario - ACTUALIZADA con nombreEquipo  
+  // Función para actualizar usuario
   const handleUpdateUser = () => {
-    // Validación - exacta del monolítico
     if (!userForm.usuario || !userForm.nombreCompleto || !userForm.email) {
       enqueueSnackbar('Por favor complete todos los campos obligatorios', { variant: 'error' });
       return false;
@@ -112,7 +138,9 @@ export const useUsers = () => {
             genero: userForm.genero,
             direccion: userForm.direccion,
             // Si se proporciona nueva contraseña, la actualizamos
-            ...(userForm.password && { password: userForm.password })
+            ...(userForm.password && { password: userForm.password }),
+            // Mantener los permisos existentes
+            permisos: user.permisos
           }
         : user
     );
@@ -122,27 +150,26 @@ export const useUsers = () => {
     return true;
   };
 
-  // Función para eliminar usuario - del monolítico
+  // Función para eliminar usuario
   const handleDeleteUser = (userId) => {
     setUsers(users.filter(user => user.id !== userId));
     enqueueSnackbar('Usuario eliminado correctamente', { variant: 'success' });
   };
 
-  // Función para preparar edición de usuario - ACTUALIZADA con nombreEquipo
+  // Función para preparar edición de usuario
   const prepareEditUser = (user) => {
     console.log('Preparando usuario para edición:', user);
     setSelectedUser(user);
-    // Pre-poblar el formulario con los datos del usuario - ACTUALIZADO con nombreEquipo
     setUserForm({
       sucursal: user.sucursal,
       nombreEquipo: user.nombreEquipo || '',
       tipoUsuario: user.rol,
       usuario: user.usuario,
-      password: '', // Por seguridad, no pre-poblar contraseña
+      password: '',
       cedula: user.cedula || '',
       nombreCompleto: user.nombreCompleto.split(' ')[0] || '',
       apellidos: user.nombreCompleto.split(' ').slice(1).join(' ') || '',
-      titulo: '', // Campo adicional que no tenemos en mock
+      titulo: '',
       telefono: user.telefono || '',
       email: user.email,
       genero: user.genero || 'Masculino',
@@ -150,14 +177,14 @@ export const useUsers = () => {
     });
   };
 
-  // Función para limpiar formulario - del monolítico
+  // Función para limpiar formulario
   const clearForm = () => {
     setUserForm(initialFormState);
     setSelectedUser(null);
     setShowPassword(false);
   };
 
-  // Cambio de pestaña - del monolítico
+  // Cambio de pestaña
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue);
   };
@@ -186,6 +213,11 @@ export const useUsers = () => {
     handleCreateUser,
     handleUpdateUser,
     handleDeleteUser,
+    
+    // NUEVAS: Funciones de permisos
+    updateUserPermissions,
+    hasPermission,
+    getUserPermissions,
     
     // Funciones de UI
     handleTabChange,

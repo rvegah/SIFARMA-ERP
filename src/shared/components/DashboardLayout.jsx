@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import React, { useState, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   AppBar,
@@ -19,8 +19,8 @@ import {
   Collapse,
   Menu,
   MenuItem,
-  Button
-} from '@mui/material'
+  Button,
+} from "@mui/material";
 import {
   Security,
   Inventory,
@@ -36,252 +36,182 @@ import {
   ExpandMore,
   Group,
   Edit,
-  KeyboardArrowDown
-} from '@mui/icons-material'
-import { farmaColors } from '/src/app/theme' // Importar colores corporativos
+  KeyboardArrowDown,
+} from "@mui/icons-material";
+import { farmaColors } from "/src/app/theme";
+import { getFilteredMenuItems } from "/src/config/menuPermissions";
 
-const drawerWidth = 280
-const collapsedDrawerWidth = 60
-
-// Configuración completa de menús con submenús
-const elementosMenu = [
-   {
-    texto: 'Usuarios',
-    icono: <Group />,
-    ruta: '/users',  // Ruta original mantenida
-    subElementos: [
-      { texto: 'Nuevo Usuario', ruta: '/users/new' },
-      { texto: 'Lista de Usuarios', ruta: '/users/list' }
-    ]
-  },
-  {
-    texto: 'Productos',
-    icono: <Inventory />,
-    ruta: '/productos',
-    subElementos: [
-      { texto: 'Ver Productos', ruta: '/productos/ver' },
-      { texto: 'Agregar Producto', ruta: '/productos/agregar' }
-    ]
-  },
-  {
-    texto: 'Compras',
-    icono: <ShoppingCart />,
-    ruta: '/compras',
-    subElementos: [
-      { texto: 'Nueva Compra', ruta: '/compras/nueva' },
-      { texto: 'Nueva Salida', ruta: '/compras/salida' },
-      { texto: 'Compras a Credito', ruta: '/compras/credito' },
-      { texto: 'Ingresos del Día', ruta: '/compras/ingresos' }
-    ]
-  },
-  {
-    texto: 'Proveedor',
-    icono: <Warehouse />,
-    ruta: '/proveedor',
-    subElementos: [
-      { texto: 'Nuevo Proveedor', ruta: '/proveedor/nuevo' }
-    ]
-  },
-  {
-    texto: 'Ventas',
-    icono: <PointOfSale />,
-    ruta: '/ventas',
-    subElementos: [
-      { texto: 'Nueva Venta', ruta: '/ventas/nueva' },
-      { texto: 'Realizar Pedidos', ruta: '/ventas/pedidos' },
-      { texto: 'Mis Pedidos', ruta: '/ventas/mis-pedidos' }
-    ]
-  },
-  {
-    texto: 'Traspasos',
-    icono: <SwapHoriz />,
-    ruta: '/traspasos',
-    subElementos: [
-      { texto: 'Nuevo Traspaso', ruta: '/traspasos/nuevo' }
-    ]
-  },
-  {
-    texto: 'Reportes',
-    icono: <Assessment />,
-    ruta: '/reportes',
-    subElementos: [
-      { texto: 'Reporte Diario', ruta: '/reportes/diario' },
-      { texto: 'Reporte Mensual', ruta: '/reportes/mensual' },
-      { texto: 'Reporte Todos', ruta: '/reportes/todos' },
-      { texto: 'Reporte Productos', ruta: '/reportes/productos' },
-      { texto: 'Control de sistema', ruta: '/reportes/control' },
-      { texto: 'Reporte H. Ventas', ruta: '/reportes/horario-ventas' },
-      { texto: 'Reporte por sucursales', ruta: '/reportes/sucursales' },
-      { texto: 'Reporte Vencimientos', ruta: '/reportes/vencimientos' },
-      { texto: 'Reporte Stock Almacenes', ruta: '/reportes/stock' },
-      { texto: 'Productos mas vendidos', ruta: '/reportes/mas-vendidos' },
-      { texto: 'Inventario Diario', ruta: '/reportes/inventario-diario' },
-      { texto: 'Inventario por Líneas', ruta: '/reportes/inventario-lineas' },
-      { texto: 'Kardex', ruta: '/reportes/kardex' },
-      { texto: 'Reporte Pedidos', ruta: '/reportes/pedidos' }
-    ]
-  },
-  {
-    texto: 'Configuracion',
-    icono: <Security />,
-    ruta: '/configuracion',
-    subElementos: [
-      { texto: 'Ordenar sucursales', ruta: '/configuracion/sucursales' }
-    ]
-  }
-]
+const drawerWidth = 280;
+const collapsedDrawerWidth = 60;
 
 // Sucursales disponibles
 const sucursales = [
-  { nombre: 'SAN MARTIN', codigo: 'SM', porcentaje: '[15.56%]' },
-  { nombre: 'BRASIL', codigo: 'BR', porcentaje: '[-1.11%]' },
-  { nombre: 'URUGUAY', codigo: 'UY', porcentaje: '[-37.78%]' },
-  { nombre: 'TIQUIPAYA', codigo: 'TQ', porcentaje: '[7.78%]' }
-]
+  { nombre: "SAN MARTIN", codigo: "SM", porcentaje: "[15.56%]" },
+  { nombre: "BRASIL", codigo: "BR", porcentaje: "[-1.11%]" },
+  { nombre: "URUGUAY", codigo: "UY", porcentaje: "[-37.78%]" },
+  { nombre: "TIQUIPAYA", codigo: "TQ", porcentaje: "[7.78%]" },
+];
 
-function DashboardLayout({ children, onLogout }) {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
-  const [openSubMenus, setOpenSubMenus] = useState({})
-  const [currentSucursal, setCurrentSucursal] = useState(sucursales[1]) // BRASIL por defecto
-  const [userMenuAnchor, setUserMenuAnchor] = useState(null)
-  const [sucursalMenuAnchor, setSucursalMenuAnchor] = useState(null)
-  
-  const navigate = useNavigate()
-  const location = useLocation()
+function DashboardLayout({ children, onLogout, currentUser }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [openSubMenus, setOpenSubMenus] = useState({});
+  const [currentSucursal, setCurrentSucursal] = useState(sucursales[1]);
+  const [userMenuAnchor, setUserMenuAnchor] = useState(null);
+  const [sucursalMenuAnchor, setSucursalMenuAnchor] = useState(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Obtener menú filtrado según permisos del usuario
+  const elementosMenu = useMemo(() => {
+    if (!currentUser || !currentUser.permisos) {
+      console.warn("No hay usuario o permisos disponibles");
+      return [];
+    }
+    console.log("Permisos del usuario:", currentUser.permisos);
+    const filtered = getFilteredMenuItems(currentUser.permisos);
+    console.log("Menús filtrados:", filtered);
+    return filtered;
+  }, [currentUser]);
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
+    setMobileOpen(!mobileOpen);
+  };
 
   const handleCollapseToggle = () => {
-    setCollapsed(!collapsed)
+    setCollapsed(!collapsed);
     if (!collapsed) {
-      setOpenSubMenus({}) // Cerrar submenús al colapsar
+      setOpenSubMenus({});
     }
-  }
+  };
 
-  // FUNCIÓN ACORDEÓN CORREGIDA
   const handleSubMenuToggle = (menuIndex) => {
-    if (collapsed) return
-    
-    setOpenSubMenus(prev => {
-      const newState = {}
-      // Si el menú clickeado ya está abierto, lo cerramos (todos quedan cerrados)
+    if (collapsed) return;
+
+    setOpenSubMenus((prev) => {
+      const newState = {};
       if (prev[menuIndex]) {
-        return {}
+        return {};
       }
-      // Si no está abierto, cerramos todos y abrimos solo este
-      newState[menuIndex] = true
-      return newState
-    })
-  }
+      newState[menuIndex] = true;
+      return newState;
+    });
+  };
 
   const handleMenuClick = (path, hasSubItems = false, menuIndex = null) => {
     if (hasSubItems && !collapsed) {
-      handleSubMenuToggle(menuIndex)
+      handleSubMenuToggle(menuIndex);
     } else {
-      navigate(path)
+      navigate(path);
       if (isMobile) {
-        setMobileOpen(false)
+        setMobileOpen(false);
       }
     }
-  }
+  };
 
   const handleUserMenuClick = (event) => {
-    setUserMenuAnchor(event.currentTarget)
-  }
+    setUserMenuAnchor(event.currentTarget);
+  };
 
   const handleUserMenuClose = () => {
-    setUserMenuAnchor(null)
-  }
+    setUserMenuAnchor(null);
+  };
 
   const handleSucursalMenuClick = (event) => {
-    setSucursalMenuAnchor(event.currentTarget)
-  }
+    setSucursalMenuAnchor(event.currentTarget);
+  };
 
   const handleSucursalMenuClose = () => {
-    setSucursalMenuAnchor(null)
-  }
+    setSucursalMenuAnchor(null);
+  };
 
   const handleSucursalChange = (sucursal) => {
-    setCurrentSucursal(sucursal)
-    handleSucursalMenuClose()
-  }
+    setCurrentSucursal(sucursal);
+    handleSucursalMenuClose();
+  };
 
   const handleEditProfile = () => {
-    navigate('/profile')  // Ruta para perfil personal separada
-    handleUserMenuClose()
-  }
+    navigate("/profile");
+    handleUserMenuClose();
+  };
 
   const isActiveItem = (itemPath) => {
-    if (itemPath === '/users') {
-      return location.pathname === '/users' || location.pathname.startsWith('/users')
+    if (itemPath === "/users") {
+      return (
+        location.pathname === "/users" || location.pathname.startsWith("/users")
+      );
     }
-    return location.pathname.startsWith(itemPath)
-  }
+    return location.pathname.startsWith(itemPath);
+  };
 
   const drawer = (
-    <Box sx={{ 
-      height: '100%', 
-      background: farmaColors.gradients.sidebar, // Gradiente azul oscuro profesional
-      width: collapsed ? collapsedDrawerWidth : drawerWidth,
-      transition: 'width 0.3s ease'
-    }}>
+    <Box
+      sx={{
+        height: "100%",
+        background: farmaColors.gradients.sidebar,
+        width: collapsed ? collapsedDrawerWidth : drawerWidth,
+        transition: "width 0.3s ease",
+      }}
+    >
       {/* Profile Section */}
-      <Box sx={{ 
-        p: collapsed ? 1 : 3, 
-        textAlign: 'center', 
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-        transition: 'all 0.3s ease'
-      }}>
+      <Box
+        sx={{
+          p: collapsed ? 1 : 3,
+          textAlign: "center",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          transition: "all 0.3s ease",
+        }}
+      >
         <Button
           onClick={!collapsed ? handleSucursalMenuClick : undefined}
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            color: 'white',
-            textTransform: 'none',
-            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-            width: '100%',
-            p: collapsed ? 0.5 : 2
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            color: "white",
+            textTransform: "none",
+            "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
+            width: "100%",
+            p: collapsed ? 0.5 : 2,
           }}
         >
-          <Avatar 
-            sx={{ 
-              bgcolor: '#FFFFFF', // Fondo blanco para mejor contraste
-              color: farmaColors.primary, // Texto naranja corporativo
-              width: collapsed ? 40 : 64, 
+          <Avatar
+            sx={{
+              bgcolor: "#FFFFFF",
+              color: farmaColors.primary,
+              width: collapsed ? 40 : 64,
               height: collapsed ? 40 : 64,
               mb: collapsed ? 0 : 2,
-              boxShadow: '0 4px 20px rgba(255,255,255,0.2)', // Sombra blanca sutil
-              border: `2px solid ${farmaColors.alpha.primary30}`, // Borde naranja sutil
-              transition: 'all 0.3s ease',
-              fontWeight: 'bold'
+              boxShadow: "0 4px 20px rgba(255,255,255,0.2)",
+              border: `2px solid ${farmaColors.alpha.primary30}`,
+              transition: "all 0.3s ease",
+              fontWeight: "bold",
             }}
           >
             <Typography variant={collapsed ? "body2" : "h6"} fontWeight="bold">
               {currentSucursal.codigo}
             </Typography>
           </Avatar>
-          
+
           {!collapsed && (
             <>
-              <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
-                Brasil Admin
+              <Typography variant="h6" sx={{ color: "white", fontWeight: 600 }}>
+                {currentUser?.nombreCompleto || "Brasil Admin"}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                <Chip 
-                  label={currentSucursal.nombre} 
-                  size="small" 
-                  sx={{ 
-                    bgcolor: 'rgba(255,255,255,0.15)', // Fondo blanco con transparencia
-                    color: 'white',
-                    border: '1px solid rgba(255,255,255,0.3)' // Borde blanco sutil
-                  }} 
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
+              >
+                <Chip
+                  label={currentSucursal.nombre}
+                  size="small"
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.15)",
+                    color: "white",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                  }}
                 />
                 <KeyboardArrowDown />
               </Box>
@@ -291,93 +221,104 @@ function DashboardLayout({ children, onLogout }) {
       </Box>
 
       {/* Navigation */}
-      <Box sx={{ 
-        px: collapsed ? 0.5 : 2, 
-        py: 1,
-        height: 'calc(100vh - 160px)',
-        overflow: 'hidden'
-      }}>
+      <Box
+        sx={{
+          px: collapsed ? 0.5 : 2,
+          py: 1,
+          height: "calc(100vh - 160px)",
+          overflow: "hidden",
+        }}
+      >
         {!collapsed && (
           <Typography
             variant="overline"
-            sx={{ 
-              px: 2, 
-              py: 1, 
-              color: 'rgba(255,255,255,0.6)',
+            sx={{
+              px: 2,
+              py: 1,
+              color: "rgba(255,255,255,0.6)",
               fontWeight: 600,
               letterSpacing: 1.2,
-              fontSize: '0.7rem'
+              fontSize: "0.7rem",
             }}
           >
             NAVEGACIÓN PRINCIPAL
           </Typography>
         )}
 
-        <Box sx={{ 
-          px: collapsed ? 0 : 1,
-          height: 'calc(100% - 40px)',
-          overflowY: 'auto',
-          '&::-webkit-scrollbar': {
-            display: 'none'
-          },
-          msOverflowStyle: 'none',
-          scrollbarWidth: 'none'
-        }}>
+        <Box
+          sx={{
+            px: collapsed ? 0 : 1,
+            height: "calc(100% - 40px)",
+            overflowY: "auto",
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+            msOverflowStyle: "none",
+            scrollbarWidth: "none",
+          }}
+        >
           <List sx={{ py: 0 }}>
             {elementosMenu.map((item, index) => {
-              const isActive = isActiveItem(item.ruta)
-              const hasSubItems = item.subElementos && item.subElementos.length > 0
-              const isSubMenuOpen = openSubMenus[index]
-              
+              const isActive = isActiveItem(item.ruta);
+              const hasSubItems =
+                item.subElementos && item.subElementos.length > 0;
+              const isSubMenuOpen = openSubMenus[index];
+
               return (
                 <React.Fragment key={index}>
                   <ListItem
-                    onClick={() => handleMenuClick(item.ruta, hasSubItems, index)}
+                    onClick={() =>
+                      handleMenuClick(item.ruta, hasSubItems, index)
+                    }
                     sx={{
                       borderRadius: collapsed ? 1 : 2,
                       mb: 0.5,
-                      cursor: 'pointer',
+                      cursor: "pointer",
                       minHeight: 48,
-                      background: isActive ? 
-                        'rgba(255,255,255,0.12)' : // Fondo blanco sutil para item activo
-                        'transparent',
-                      border: isActive ? '1px solid rgba(255,255,255,0.2)' : 'none', // Borde blanco sutil
-                      '&:hover': { 
-                        bgcolor: 'rgba(255,255,255,0.05)',
-                        transform: collapsed ? 'none' : 'translateX(4px)',
-                        transition: 'all 0.2s ease'
+                      background: isActive
+                        ? "rgba(255,255,255,0.12)"
+                        : "transparent",
+                      border: isActive
+                        ? "1px solid rgba(255,255,255,0.2)"
+                        : "none",
+                      "&:hover": {
+                        bgcolor: "rgba(255,255,255,0.05)",
+                        transform: collapsed ? "none" : "translateX(4px)",
+                        transition: "all 0.2s ease",
                       },
-                      justifyContent: collapsed ? 'center' : 'flex-start',
-                      px: collapsed ? 1 : 2
+                      justifyContent: collapsed ? "center" : "flex-start",
+                      px: collapsed ? 1 : 2,
                     }}
                   >
-                    <ListItemIcon 
-                      sx={{ 
-                        color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.7)', // Blanco puro para activos
-                        minWidth: collapsed ? 'unset' : 56,
+                    <ListItemIcon
+                      sx={{
+                        color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.7)",
+                        minWidth: collapsed ? "unset" : 56,
                         mr: collapsed ? 0 : 2,
-                        justifyContent: 'center'
+                        justifyContent: "center",
                       }}
                     >
-                      {item.icono}
+                      {React.createElement(item.icono)}
                     </ListItemIcon>
-                    
+
                     {!collapsed && (
                       <>
-                        <ListItemText 
+                        <ListItemText
                           primary={item.texto}
-                          primaryTypographyProps={{ 
-                            variant: 'body2',
-                            sx: { 
-                              color: isActive ? 'white' : 'rgba(255,255,255,0.8)',
-                              fontWeight: isActive ? 600 : 400
-                            }
+                          primaryTypographyProps={{
+                            variant: "body2",
+                            sx: {
+                              color: isActive
+                                ? "white"
+                                : "rgba(255,255,255,0.8)",
+                              fontWeight: isActive ? 600 : 400,
+                            },
                           }}
                         />
                         {hasSubItems && (
-                          <IconButton 
-                            size="small" 
-                            sx={{ color: 'rgba(255,255,255,0.7)' }}
+                          <IconButton
+                            size="small"
+                            sx={{ color: "rgba(255,255,255,0.7)" }}
                           >
                             {isSubMenuOpen ? <ExpandLess /> : <ExpandMore />}
                           </IconButton>
@@ -397,29 +338,31 @@ function DashboardLayout({ children, onLogout }) {
                             sx={{
                               borderRadius: 1,
                               mb: 0.5,
-                              cursor: 'pointer',
+                              cursor: "pointer",
                               minHeight: 40,
-                              '&:hover': { 
-                                bgcolor: 'rgba(255,255,255,0.05)'
-                              }
+                              "&:hover": {
+                                bgcolor: "rgba(255,255,255,0.05)",
+                              },
                             }}
                           >
-                            <ListItemIcon 
-                              sx={{ 
-                                color: 'rgba(255,255,255,0.5)',
-                                minWidth: 32
+                            <ListItemIcon
+                              sx={{
+                                color: "rgba(255,255,255,0.5)",
+                                minWidth: 32,
                               }}
                             >
-                              <Typography sx={{ fontSize: '1rem' }}>›</Typography>
+                              <Typography sx={{ fontSize: "1rem" }}>
+                                ›
+                              </Typography>
                             </ListItemIcon>
-                            <ListItemText 
+                            <ListItemText
                               primary={subItem.texto}
-                              primaryTypographyProps={{ 
-                                variant: 'body2',
-                                sx: { 
-                                  color: 'rgba(255,255,255,0.7)',
-                                  fontSize: '0.85rem'
-                                }
+                              primaryTypographyProps={{
+                                variant: "body2",
+                                sx: {
+                                  color: "rgba(255,255,255,0.7)",
+                                  fontSize: "0.85rem",
+                                },
                               }}
                             />
                           </ListItem>
@@ -428,31 +371,47 @@ function DashboardLayout({ children, onLogout }) {
                     </Collapse>
                   )}
                 </React.Fragment>
-              )
+              );
             })}
           </List>
+
+          {/* Mensaje si no hay menús disponibles */}
+          {elementosMenu.length === 0 && (
+            <Box sx={{ textAlign: "center", py: 4, px: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{ color: "rgba(255,255,255,0.6)" }}
+              >
+                No tienes permisos asignados
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>
-  )
+  );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
       {/* App Bar */}
       <AppBar
         position="fixed"
         sx={{
-          width: { md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth}px)` },
+          width: {
+            md: `calc(100% - ${
+              collapsed ? collapsedDrawerWidth : drawerWidth
+            }px)`,
+          },
           ml: { md: `${collapsed ? collapsedDrawerWidth : drawerWidth}px` },
-          background: farmaColors.gradients.primary, // Gradiente naranja corporativo elegante
-          backdropFilter: 'blur(10px)',
-          borderBottom: 'none',
-          boxShadow: `0 4px 20px ${farmaColors.alpha.primary20}`, // Sombra naranja sutil
-          transition: 'all 0.3s ease'
+          background: farmaColors.gradients.primary,
+          backdropFilter: "blur(10px)",
+          borderBottom: "none",
+          boxShadow: `0 4px 20px ${farmaColors.alpha.primary20}`,
+          transition: "all 0.3s ease",
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
               color="inherit"
               edge="start"
@@ -461,30 +420,30 @@ function DashboardLayout({ children, onLogout }) {
             >
               <MenuIcon />
             </IconButton>
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                fontWeight: 700, 
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
                 letterSpacing: 1,
-                cursor: 'pointer'
+                cursor: "pointer",
               }}
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate("/dashboard")}
             >
               Farma Dinámica
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Chip
               label="Facturación electrónica en línea: (Activada)"
               size="small"
               sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                display: { xs: 'none', sm: 'flex' }
+                bgcolor: "rgba(255,255,255,0.2)",
+                color: "white",
+                display: { xs: "none", sm: "flex" },
               }}
             />
-            
+
             <IconButton color="inherit">
               <Badge badgeContent={14} color="error">
                 <Notifications />
@@ -494,26 +453,29 @@ function DashboardLayout({ children, onLogout }) {
             <Button
               onClick={handleUserMenuClick}
               sx={{
-                display: 'flex',
-                alignItems: 'center',
+                display: "flex",
+                alignItems: "center",
                 gap: 1,
-                color: 'white',
-                textTransform: 'none',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+                color: "white",
+                textTransform: "none",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
               }}
             >
-              <Avatar 
-                sx={{ 
-                  background: farmaColors.gradients.secondary, // Avatar con gradiente azul corporativo
+              <Avatar
+                sx={{
+                  background: farmaColors.gradients.secondary,
                   width: 40,
-                  height: 40
+                  height: 40,
                 }}
               >
-                BA
+                {currentUser?.nombreCompleto
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("") || "BA"}
               </Avatar>
-              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+              <Box sx={{ display: { xs: "none", sm: "block" } }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  Brasil Admin
+                  {currentUser?.nombreCompleto || "Brasil Admin"}
                 </Typography>
               </Box>
               <KeyboardArrowDown />
@@ -529,15 +491,15 @@ function DashboardLayout({ children, onLogout }) {
         onClose={handleUserMenuClose}
         disableScrollLock={true}
         PaperProps={{
-          sx: { mt: 1, minWidth: 180 }
+          sx: { mt: 1, minWidth: 180 },
         }}
       >
         <MenuItem onClick={handleEditProfile}>
-          <Edit sx={{ mr: 2, color: farmaColors.primary }} /> {/* Icono naranja corporativo */}
+          <Edit sx={{ mr: 2, color: farmaColors.primary }} />
           Editar Perfil
         </MenuItem>
         <MenuItem onClick={onLogout}>
-          <ExitToApp sx={{ mr: 2, color: farmaColors.secondary }} /> {/* Icono azul corporativo */}
+          <ExitToApp sx={{ mr: 2, color: farmaColors.secondary }} />
           Salir
         </MenuItem>
       </Menu>
@@ -547,28 +509,36 @@ function DashboardLayout({ children, onLogout }) {
         open={Boolean(sucursalMenuAnchor)}
         onClose={handleSucursalMenuClose}
         PaperProps={{
-          sx: { mt: 1, minWidth: 200 }
+          sx: { mt: 1, minWidth: 200 },
         }}
       >
         {sucursales.map((sucursal, index) => (
-          <MenuItem 
+          <MenuItem
             key={index}
             onClick={() => handleSucursalChange(sucursal)}
             selected={currentSucursal.nombre === sucursal.nombre}
             sx={{
-              '&.Mui-selected': {
-                bgcolor: 'rgba(255,255,255,0.08)', // Fondo blanco muy sutil para seleccionado
-                '&:hover': {
-                  bgcolor: 'rgba(255,255,255,0.12)'
-                }
-              }
+              "&.Mui-selected": {
+                bgcolor: "rgba(255,255,255,0.08)",
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.12)",
+                },
+              },
             }}
           >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
               <Typography>{sucursal.nombre}</Typography>
-              <Typography 
-                variant="caption" 
-                color={sucursal.porcentaje.includes('-') ? 'error' : 'success.main'}
+              <Typography
+                variant="caption"
+                color={
+                  sucursal.porcentaje.includes("-") ? "error" : "success.main"
+                }
               >
                 {sucursal.porcentaje}
               </Typography>
@@ -580,10 +550,10 @@ function DashboardLayout({ children, onLogout }) {
       {/* Sidebar */}
       <Box
         component="nav"
-        sx={{ 
-          width: { md: collapsed ? collapsedDrawerWidth : drawerWidth }, 
+        sx={{
+          width: { md: collapsed ? collapsedDrawerWidth : drawerWidth },
           flexShrink: { md: 0 },
-          transition: 'width 0.3s ease'
+          transition: "width 0.3s ease",
         }}
       >
         <Drawer
@@ -592,12 +562,12 @@ function DashboardLayout({ children, onLogout }) {
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
           sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
+            display: { xs: "block", md: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
               width: drawerWidth,
-              overflow: 'hidden' // Sin scroll
-            }
+              overflow: "hidden",
+            },
           }}
         >
           {drawer}
@@ -605,13 +575,13 @@ function DashboardLayout({ children, onLogout }) {
         <Drawer
           variant="permanent"
           sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
+            display: { xs: "none", md: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
               width: collapsed ? collapsedDrawerWidth : drawerWidth,
-              transition: 'width 0.3s ease',
-              overflow: 'hidden' // Sin scroll
-            }
+              transition: "width 0.3s ease",
+              overflow: "hidden",
+            },
           }}
           open
         >
@@ -625,17 +595,21 @@ function DashboardLayout({ children, onLogout }) {
         sx={{
           flexGrow: 1,
           p: { xs: 2, sm: 3 },
-          width: { md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth}px)` },
-          minHeight: '100vh',
-          bgcolor: '#F8FAFC',
+          width: {
+            md: `calc(100% - ${
+              collapsed ? collapsedDrawerWidth : drawerWidth
+            }px)`,
+          },
+          minHeight: "100vh",
+          bgcolor: "#F8FAFC",
           mt: 8,
-          transition: 'all 0.3s ease'
+          transition: "all 0.3s ease",
         }}
       >
         {children}
       </Box>
     </Box>
-  )
+  );
 }
 
-export default DashboardLayout
+export default DashboardLayout;

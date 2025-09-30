@@ -1,6 +1,6 @@
 // AssignPermissions.jsx - Interfaz mejorada para asignar permisos
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -217,15 +217,10 @@ const roleTemplates = {
     nombre: 'Farmacéutico',
     descripcion: 'Acceso a farmacia, ventas, productos e inventario',
     permisos: [
-      // Productos
       'producto_ver', 'producto_editar', 'producto_inventario',
-      // Ventas
       'venta_crear', 'venta_pedidos', 'venta_devoluciones',
-      // Farmacia
       'farmacia_recetas', 'farmacia_controlados', 'farmacia_preparaciones', 'farmacia_consulta', 'farmacia_control_inventario',
-      // Clientes
       'cliente_ver', 'cliente_historial',
-      // Reportes básicos
       'reporte_diario', 'reporte_inventario', 'reporte_vencidos', 'reporte_kardex'
     ]
   },
@@ -233,13 +228,9 @@ const roleTemplates = {
     nombre: 'Vendedor',
     descripcion: 'Acceso básico a ventas y productos',
     permisos: [
-      // Productos (solo lectura)
       'producto_ver',
-      // Ventas
       'venta_crear', 'venta_mis_pedidos',
-      // Clientes
       'cliente_crear', 'cliente_ver', 'cliente_historial',
-      // Reportes básicos
       'reporte_diario'
     ]
   },
@@ -247,17 +238,11 @@ const roleTemplates = {
     nombre: 'Supervisor',
     descripcion: 'Acceso a reportes, supervisión y operaciones',
     permisos: [
-      // Productos
       'producto_ver', 'producto_editar',
-      // Ventas
       'venta_crear', 'venta_pedidos', 'venta_cancelar',
-      // Compras
       'compra_crear', 'compra_editar',
-      // Traspasos
       'traspaso_crear', 'traspaso_aprobar', 'traspaso_historial',
-      // Clientes
       'cliente_ver', 'cliente_editar', 'cliente_historial', 'cliente_credito',
-      // Reportes avanzados
       'reporte_diario', 'reporte_mensual', 'reporte_ventas', 'reporte_inventario', 'reporte_compras', 'reporte_sucursales', 'reporte_asistencia'
     ]
   },
@@ -265,13 +250,9 @@ const roleTemplates = {
     nombre: 'Contador',
     descripcion: 'Acceso a finanzas, reportes contables y administrativos',
     permisos: [
-      // Finanzas
       'finanzas_ingresos_diarios', 'finanzas_ingresos_mensuales', 'finanzas_gastos', 'finanzas_flujo_caja', 'finanzas_cuentas', 'finanzas_pagos',
-      // Reportes financieros
       'reporte_diario', 'reporte_mensual', 'reporte_ventas', 'reporte_compras', 'reporte_sucursales',
-      // Proveedores
       'proveedor_ver',
-      // Clientes (cuentas)
       'cliente_ver', 'cliente_credito'
     ]
   },
@@ -279,30 +260,38 @@ const roleTemplates = {
     nombre: 'Laboratorista',
     descripcion: 'Acceso específico para laboratorio médico',
     permisos: [
-      // Laboratorio
       'laboratorio_examenes', 'laboratorio_resultados', 'laboratorio_equipos', 'laboratorio_muestras', 'laboratorio_programacion',
-      // Clientes
       'cliente_ver', 'cliente_historial',
-      // Reportes específicos
       'reporte_diario'
     ]
   }
 };
 
 const AssignPermissions = ({ onCancel }) => {
-  const { selectedUser, users } = useUsers();
+  const { selectedUser, users, updateUserPermissions, getUserPermissions } = useUsers();
   const [selectedUserId, setSelectedUserId] = useState(selectedUser?.id || '');
   const [userPermissions, setUserPermissions] = useState(new Set());
   const [expandedPanels, setExpandedPanels] = useState(['usuarios']);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Obtener usuario seleccionado
   const currentUser = users.find(u => u.id === parseInt(selectedUserId));
+
+  // Cargar permisos cuando se selecciona un usuario
+  useEffect(() => {
+    if (selectedUserId) {
+      const permissions = getUserPermissions(parseInt(selectedUserId));
+      setUserPermissions(new Set(permissions));
+      setHasChanges(false);
+    }
+  }, [selectedUserId, getUserPermissions]);
 
   // Función para aplicar plantilla de rol
   const applyRoleTemplate = (roleKey) => {
     const template = roleTemplates[roleKey];
     if (template) {
       setUserPermissions(new Set(template.permisos));
+      setHasChanges(true);
     }
   };
 
@@ -315,6 +304,7 @@ const AssignPermissions = ({ onCancel }) => {
       newPermissions.add(permissionId);
     }
     setUserPermissions(newPermissions);
+    setHasChanges(true);
   };
 
   // Función para alternar todos los permisos de un módulo
@@ -329,6 +319,7 @@ const AssignPermissions = ({ onCancel }) => {
       modulePermissions.forEach(p => newPermissions.add(p));
     }
     setUserPermissions(newPermissions);
+    setHasChanges(true);
   };
 
   // Función para alternar panel expandido
@@ -344,6 +335,21 @@ const AssignPermissions = ({ onCancel }) => {
   const totalPermissions = Object.values(permissionsConfig)
     .reduce((sum, module) => sum + module.permisos.length, 0);
   const selectedPermissions = userPermissions.size;
+
+  // Función para guardar permisos
+  const handleSavePermissions = () => {
+    if (!selectedUserId) {
+      alert('Por favor seleccione un usuario');
+      return;
+    }
+
+    const permissionsArray = Array.from(userPermissions);
+    const success = updateUserPermissions(parseInt(selectedUserId), permissionsArray);
+    
+    if (success) {
+      setHasChanges(false);
+    }
+  };
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -398,6 +404,12 @@ const AssignPermissions = ({ onCancel }) => {
                 </Alert>
               )}
 
+              {hasChanges && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  Hay cambios sin guardar
+                </Alert>
+              )}
+
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Plantillas de Roles
               </Typography>
@@ -440,7 +452,7 @@ const AssignPermissions = ({ onCancel }) => {
         <Grid item xs={12} md={8}>
           <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'between', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6">
                   Permisos por Módulo
                 </Typography>
@@ -452,6 +464,7 @@ const AssignPermissions = ({ onCancel }) => {
                       const allPermissions = Object.values(permissionsConfig)
                         .flatMap(module => module.permisos.map(p => p.id));
                       setUserPermissions(new Set(allPermissions));
+                      setHasChanges(true);
                     }}
                   >
                     Todos
@@ -459,7 +472,10 @@ const AssignPermissions = ({ onCancel }) => {
                   <Button
                     startIcon={<DeselectAll />}
                     size="small"
-                    onClick={() => setUserPermissions(new Set())}
+                    onClick={() => {
+                      setUserPermissions(new Set());
+                      setHasChanges(true);
+                    }}
                   >
                     Ninguno
                   </Button>
@@ -544,9 +560,15 @@ const AssignPermissions = ({ onCancel }) => {
             <Button
               variant="contained"
               startIcon={<Save />}
+              onClick={handleSavePermissions}
+              disabled={!hasChanges || !selectedUserId}
               sx={{
                 bgcolor: '#9c27b0',
-                '&:hover': { bgcolor: '#7b1fa2' }
+                '&:hover': { bgcolor: '#7b1fa2' },
+                '&:disabled': {
+                  bgcolor: '#e0e0e0',
+                  color: '#9e9e9e'
+                }
               }}
             >
               Guardar Permisos

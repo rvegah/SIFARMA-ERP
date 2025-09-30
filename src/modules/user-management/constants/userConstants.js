@@ -1,4 +1,4 @@
-// src/modules/user-management/constants/userConstants.js - Actualizado con validación IP
+// src/modules/user-management/constants/userConstants.js - Con sistema de permisos
 
 // Constantes de configuración
 export const sucursales = ['BRASIL', 'SAN MARTIN', 'URUGUAY', 'TIQUIPAYA'];
@@ -6,17 +6,17 @@ export const roles = ['ADMIN', 'FARMACEUTICO', 'VENDEDOR', 'SUPERVISOR', 'CONTAD
 export const tiposUsuario = ['ADMINISTRADOR', 'USUARIO NORMAL', 'INVITADO'];
 export const generos = ['Masculino', 'Femenino'];
 
-// NUEVO: Mapeo de equipos a IPs autorizadas
+// Mapeo de equipos a IPs autorizadas
 export const deviceIPMapping = {
   'PC-BRASIL-01': ['192.168.0.8', '192.168.1.101'],
   'PC-BRASIL-02': ['192.168.0.8', '192.168.1.102'],  
   'PC-SANMARTIN-01': ['192.168.1.201'],
-  'PC-SANMARTIN-02': ['192.168.1.202'],
+  'PC-SANMARTIN-02': ['192.168.0.8'],
   'PC-URUGUAY-01': ['192.168.1.301'],
   'PC-TIQUIPAYA-01': ['192.168.1.401']
 };
 
-// NUEVO: Credenciales de usuarios para login (separado de allUsers para seguridad)
+// Credenciales de usuarios para login
 export const loginCredentials = [
   { usuario: 'brasil_admin', password: '123', nombreEquipo: 'PC-BRASIL-01' },
   { usuario: 'brasil_farm01', password: '123', nombreEquipo: 'PC-BRASIL-02' },
@@ -26,9 +26,63 @@ export const loginCredentials = [
   { usuario: 'xinienio_xinienito', password: '123', nombreEquipo: 'PC-TIQUIPAYA-01' }
 ];
 
-// Datos completos de usuarios - EXACTAMENTE como en el monolítico + nombreEquipo
+// NUEVO: Permisos por defecto según rol
+const defaultPermissionsByRole = {
+  ADMIN: [
+    // Usuarios
+    'usuario_crear', 'usuario_lista', 'usuario_editar', 'usuario_eliminar', 'usuario_permisos',
+    // Productos
+    'producto_ver', 'producto_crear', 'producto_editar', 'producto_eliminar', 'producto_categorias', 'producto_inventario',
+    // Compras
+    'compra_crear', 'compra_editar', 'compra_salida', 'compra_credito', 'compra_ingresos', 'compra_almacen', 'compra_ordenes',
+    // Proveedor
+    'proveedor_crear', 'proveedor_editar', 'proveedor_ver', 'proveedor_eliminar',
+    // Ventas
+    'venta_crear', 'venta_editar', 'venta_pedidos', 'venta_mis_pedidos', 'venta_cancelar', 'venta_devoluciones',
+    // Traspasos
+    'traspaso_crear', 'traspaso_aprobar', 'traspaso_recibir', 'traspaso_historial',
+    // Reportes (todos)
+    'reporte_diario', 'reporte_mensual', 'reporte_productos', 'reporte_ventas', 'reporte_compras', 
+    'reporte_inventario', 'reporte_vencidos', 'reporte_stock', 'reporte_sucursales', 
+    'reporte_productos_vencidos', 'reporte_categorias', 'reporte_proveedores', 
+    'reporte_mas_vendidos', 'reporte_asistencia', 'reporte_kardex', 'reporte_pedidos',
+    // Sistema
+    'sistema_respaldos', 'sistema_configuracion', 'sistema_sucursales', 'sistema_logs', 
+    'sistema_mantenimiento', 'sistema_actualizaciones', 'sistema_seguridad', 'sistema_base_datos'
+  ],
+  FARMACEUTICO: [
+    'producto_ver', 'producto_editar', 'producto_inventario',
+    'venta_crear', 'venta_pedidos', 'venta_devoluciones',
+    'farmacia_recetas', 'farmacia_controlados', 'farmacia_preparaciones', 'farmacia_consulta', 'farmacia_control_inventario',
+    'cliente_ver', 'cliente_historial',
+    'reporte_diario', 'reporte_inventario', 'reporte_vencidos', 'reporte_kardex'
+  ],
+  VENDEDOR: [
+    'producto_ver',
+    'venta_crear', 'venta_mis_pedidos',
+    'cliente_crear', 'cliente_ver', 'cliente_historial',
+    'reporte_diario'
+  ],
+  SUPERVISOR: [
+    'producto_ver', 'producto_editar',
+    'venta_crear', 'venta_pedidos', 'venta_cancelar',
+    'compra_crear', 'compra_editar',
+    'traspaso_crear', 'traspaso_aprobar', 'traspaso_historial',
+    'cliente_ver', 'cliente_editar', 'cliente_historial', 'cliente_credito',
+    'reporte_diario', 'reporte_mensual', 'reporte_ventas', 'reporte_inventario', 
+    'reporte_compras', 'reporte_sucursales', 'reporte_asistencia'
+  ],
+  CONTADOR: [
+    'finanzas_ingresos_diarios', 'finanzas_ingresos_mensuales', 'finanzas_gastos', 
+    'finanzas_flujo_caja', 'finanzas_cuentas', 'finanzas_pagos',
+    'reporte_diario', 'reporte_mensual', 'reporte_ventas', 'reporte_compras', 'reporte_sucursales',
+    'proveedor_ver',
+    'cliente_ver', 'cliente_credito'
+  ]
+};
+
+// Datos completos de usuarios - CON PERMISOS
 export const allUsers = [
-  // Usuarios de BRASIL
   {
     id: 1,
     usuario: 'brasil_admin',
@@ -43,7 +97,8 @@ export const allUsers = [
     direccion: 'Av. Principal 123',
     estado: 'Activo',
     fechaCreacion: '2024-01-15',
-    ultimoAcceso: '2024-09-16 10:30'
+    ultimoAcceso: '2024-09-16 10:30',
+    permisos: defaultPermissionsByRole.ADMIN
   },
   {
     id: 2,
@@ -59,9 +114,9 @@ export const allUsers = [
     direccion: 'Calle Brasil 456',
     estado: 'Habilitado',
     fechaCreacion: '2024-02-10',
-    ultimoAcceso: '2024-09-15 16:45'
+    ultimoAcceso: '2024-09-15 16:45',
+    permisos: defaultPermissionsByRole.FARMACEUTICO
   },
-  // Usuarios de SAN MARTIN
   {
     id: 3,
     usuario: 'sanmartin_admin',
@@ -76,7 +131,8 @@ export const allUsers = [
     direccion: 'Av. San Martin 789',
     estado: 'Habilitado',
     fechaCreacion: '2024-03-05',
-    ultimoAcceso: '2024-09-10 14:20'
+    ultimoAcceso: '2024-09-10 14:20',
+    permisos: defaultPermissionsByRole.ADMIN
   },
   {
     id: 4,
@@ -92,9 +148,9 @@ export const allUsers = [
     direccion: 'Calle Veronica 321',
     estado: 'Habilitado',
     fechaCreacion: '2024-04-12',
-    ultimoAcceso: '2024-09-12 11:30'
+    ultimoAcceso: '2024-09-12 11:30',
+    permisos: defaultPermissionsByRole.VENDEDOR
   },
-  // Usuarios de URUGUAY
   {
     id: 5,
     usuario: 'valerio_valerolo',
@@ -109,9 +165,9 @@ export const allUsers = [
     direccion: 'Uruguay Central 654',
     estado: 'Deshabilitado',
     fechaCreacion: '2024-05-20',
-    ultimoAcceso: '2024-09-05 09:15'
+    ultimoAcceso: '2024-09-05 09:15',
+    permisos: defaultPermissionsByRole.SUPERVISOR
   },
-  // Usuarios de TIQUIPAYA
   {
     id: 6,
     usuario: 'xinienio_xinienito',
@@ -126,17 +182,18 @@ export const allUsers = [
     direccion: 'Tiquipaya Norte 987',
     estado: 'Deshabilitado',
     fechaCreacion: '2024-06-15',
-    ultimoAcceso: '2024-08-30 15:45'
+    ultimoAcceso: '2024-08-30 15:45',
+    permisos: defaultPermissionsByRole.FARMACEUTICO
   }
 ];
 
-// Configuración de usuario actual (simulando sesión) - del monolítico
+// Configuración de usuario actual (simulando sesión)
 export const currentUserConfig = {
   sucursal: 'BRASIL',
   isAdmin: true
 };
 
-// Estructura del formulario inicial - ACTUALIZADA con nombreEquipo
+// Estructura del formulario inicial
 export const initialFormState = {
   sucursal: '',
   nombreEquipo: '',
@@ -155,16 +212,32 @@ export const initialFormState = {
 
 // Campos obligatorios para validación
 export const requiredFields = ['usuario', 'password', 'nombreCompleto', 'email'];
-export const requiredFieldsEdit = ['usuario', 'nombreCompleto', 'email']; // Sin password en edición
+export const requiredFieldsEdit = ['usuario', 'nombreCompleto', 'email'];
 
-// NUEVO: Función helper para obtener IPs autorizadas de un equipo
+// Función helper para obtener IPs autorizadas de un equipo
 export const getAuthorizedIPs = (nombreEquipo) => {
   return deviceIPMapping[nombreEquipo] || [];
 };
 
-// NUEVO: Función helper para validar credenciales y obtener nombreEquipo
+// Función helper para validar credenciales y obtener nombreEquipo + PERMISOS
 export const validateCredentials = (usuario, password) => {
-  return loginCredentials.find(cred => 
+  const credentials = loginCredentials.find(cred => 
     cred.usuario === usuario && cred.password === password
   );
+  
+  if (credentials) {
+    // Buscar el usuario completo para obtener sus permisos
+    const fullUser = allUsers.find(u => u.usuario === usuario);
+    return {
+      ...credentials,
+      permisos: fullUser?.permisos || []
+    };
+  }
+  
+  return null;
+};
+
+// NUEVO: Función para obtener permisos por defecto según rol
+export const getDefaultPermissionsByRole = (rol) => {
+  return defaultPermissionsByRole[rol] || [];
 };

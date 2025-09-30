@@ -24,7 +24,7 @@ const tarjetasEstadisticas = [
   {
     titulo: 'Ventas del día',
     valor: '393',
-    color: farmaColors.primary,           // #CC6C06 - Naranja corporativo
+    color: farmaColors.primary, // #CC6C06 - Naranja corporativo
     icono: <TrendingUp />,
     cambio: '+12.5%',
     tipoCambio: 'positive'
