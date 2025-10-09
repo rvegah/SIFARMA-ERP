@@ -1,13 +1,16 @@
+// src/modules/sales/services/salesService.js
 // MOCK SERVICE - Reemplazar cuando tengas el API REST
 
 import { SPECIAL_NIT_CODES, SALE_STATUS } from "../constants/salesConstants";
+import { enviarFacturaSIAT, anularFacturaSIAT } from './siatMockService';
 
 // Simular base de datos en memoria
 let mockSalesDB = [];
 let mockClientsDB = [
   { nit: "4444", nombre: "SIN NOMBRE", tipo: "1" },
-  { nit: "99001", nombre: "Consulados, Embajadas", tipo: "1" },
-  { nit: "99002", nombre: "Control Tributario", tipo: "1" },
+  { nit: "99001", nombre: "Consulados, Embajadas", tipo: "5" },
+  { nit: "99002", nombre: "Control Tributario", tipo: "5" },
+  { nit: "99003", nombre: "Ventas menores del Día", tipo: "5" },
 ];
 let mockProductsDB = [
   {
@@ -216,41 +219,138 @@ class SalesService {
           ...saleData,
           status: SALE_STATUS.SAVED,
           fechaCreacion: new Date().toISOString(),
+          numeroFactura: null,
+          codigoAutorizacion: null,
         };
         mockSalesDB.push(newSale);
-        resolve({ success: true, sale: newSale });
+        
+        console.log('💾 Venta guardada (sin facturar):', newSale);
+        
+        resolve({ 
+          success: true, 
+          sale: newSale,
+          message: 'Venta guardada exitosamente (sin facturar)'
+        });
       }, 500);
     });
   }
 
-  // Facturar venta
+  // ============================================
+  // 🔥 NUEVA FUNCIÓN: Facturar con integración SIAT
+  // ============================================
   static async invoiceSale(saleData) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const invoice = {
-          id: Date.now(),
-          numeroFactura: `F-${Math.floor(100000 + Math.random() * 900000)}`,
-          codigoAutorizacion: this.generateAuthCode(),
-          ...saleData,
-          status: SALE_STATUS.INVOICED,
-          fechaEmision: new Date().toISOString(),
+    try {
+      console.log('📤 Iniciando facturación con SIAT...', saleData);
+
+      // 1. Validaciones previas
+      if (!saleData.cliente || !saleData.items || saleData.items.length === 0) {
+        return {
+          success: false,
+          message: 'Datos incompletos para facturar'
         };
-        mockSalesDB.push(invoice);
+      }
 
-        // Actualizar stock
-        saleData.items.forEach((item) => {
-          const product = mockProductsDB.find((p) => p.id === item.productId);
-          if (product) {
-            product.stock -= item.cantidad;
-          }
+      // 2. Enviar factura al SIAT (mock)
+      const siatResponse = await enviarFacturaSIAT(saleData);
+
+      if (!siatResponse.success) {
+        throw new Error('Error al registrar factura en SIAT');
+      }
+
+      console.log('✅ Respuesta del SIAT recibida:', siatResponse.data);
+
+      // 3. Crear registro de venta con datos del SIAT
+      const invoice = {
+        id: Date.now(),
+        // Datos del SIAT
+        numeroFactura: siatResponse.data.numeroFactura,
+        codigoAutorizacion: siatResponse.data.codigoAutorizacion,
+        cuf: siatResponse.data.cuf,
+        qrUrl: siatResponse.data.qrUrl,
+        codigoRecepcion: siatResponse.data.codigoRecepcion,
+        
+        // Datos de la venta
+        ...saleData,
+        
+        // Estado y fechas
+        status: SALE_STATUS.INVOICED,
+        fechaCreacion: new Date().toISOString(),
+        fechaEmision: siatResponse.data.fechaEmision,
+        
+        // Usuario (TODO: obtener del contexto)
+        usuarioFacturacion: saleData.userId || 1,
+        nombreUsuario: 'Usuario Sistema'
+      };
+
+      // 4. Guardar en "base de datos" mock
+      mockSalesDB.push(invoice);
+
+      // 5. Actualizar stock de productos
+      saleData.items.forEach((item) => {
+        const product = mockProductsDB.find((p) => p.id === item.productId);
+        if (product) {
+          const stockAnterior = product.stock;
+          product.stock -= item.cantidad;
+          console.log(
+            `📦 Stock actualizado: ${product.nombre} | ` +
+            `Anterior: ${stockAnterior} → Actual: ${product.stock} | ` +
+            `Vendido: ${item.cantidad}`
+          );
+        }
+      });
+
+      // 6. Guardar/Actualizar datos del cliente para futuras ventas
+      const existingClient = mockClientsDB.find(c => c.nit === saleData.cliente.nit);
+      if (existingClient) {
+        // Actualizar datos del cliente existente
+        Object.assign(existingClient, {
+          nombre: saleData.cliente.nombre,
+          celular: saleData.cliente.celular || existingClient.celular,
+          email: saleData.cliente.email || existingClient.email,
+          fechaNacimiento: saleData.cliente.fechaNacimiento || existingClient.fechaNacimiento,
+          ultimaCompra: new Date().toISOString()
         });
+        console.log('👤 Cliente actualizado:', existingClient);
+      } else {
+        // Agregar nuevo cliente
+        const newClient = {
+          nit: saleData.cliente.nit,
+          nombre: saleData.cliente.nombre,
+          tipo: saleData.cliente.tipoDocumento || '1',
+          celular: saleData.cliente.celular || '',
+          email: saleData.cliente.email || '',
+          fechaNacimiento: saleData.cliente.fechaNacimiento || '',
+          fechaRegistro: new Date().toISOString(),
+          ultimaCompra: new Date().toISOString()
+        };
+        mockClientsDB.push(newClient);
+        console.log('👤 Cliente nuevo registrado:', newClient);
+      }
 
-        resolve({ success: true, invoice });
-      }, 800);
-    });
+      console.log('✅ Factura generada exitosamente:', invoice.numeroFactura);
+
+      return { 
+        success: true, 
+        invoice,
+        message: 'Factura generada exitosamente',
+        // Datos adicionales para la impresión
+        siatData: siatResponse.data
+      };
+
+    } catch (error) {
+      console.error('❌ Error al facturar:', error);
+      return {
+        success: false,
+        message: error.message || 'Error al generar la factura',
+        error: error
+      };
+    }
   }
 
-  // Generar código de autorización simulado
+  // ============================================
+  // MANTENER COMPATIBILIDAD: Generar código de autorización
+  // (Ya no se usa, pero se mantiene por compatibilidad)
+  // ============================================
   static generateAuthCode() {
     return Array(40)
       .fill(0)
@@ -266,57 +366,221 @@ class SalesService {
   static async getUserSales(userId, filters = {}) {
     return new Promise((resolve) => {
       setTimeout(() => {
-        let sales = mockSalesDB.filter((sale) => sale.userId === userId);
+        let sales = [...mockSalesDB];
 
+        // Filtrar por usuario si se especifica
+        if (userId) {
+          sales = sales.filter((sale) => sale.userId === userId);
+        }
+
+        // Filtrar por fecha desde
         if (filters.fechaDesde) {
           sales = sales.filter(
             (s) => new Date(s.fechaCreacion) >= new Date(filters.fechaDesde)
           );
         }
+
+        // Filtrar por fecha hasta
         if (filters.fechaHasta) {
+          const fechaHasta = new Date(filters.fechaHasta);
+          fechaHasta.setHours(23, 59, 59);
           sales = sales.filter(
-            (s) => new Date(s.fechaCreacion) <= new Date(filters.fechaHasta)
+            (s) => new Date(s.fechaCreacion) <= fechaHasta
           );
         }
 
+        // Filtrar por estado
+        if (filters.status) {
+          sales = sales.filter((s) => s.status === filters.status);
+        }
+
+        // Filtrar por número de factura
+        if (filters.numeroFactura) {
+          sales = sales.filter((s) => 
+            s.numeroFactura?.includes(filters.numeroFactura)
+          );
+        }
+
+        console.log(`📋 Ventas encontradas: ${sales.length}`);
         resolve(sales);
       }, 300);
     });
   }
 
-  // Anular factura
+  // ============================================
+  // 🔥 ACTUALIZADA: Anular factura con SIAT
+  // ============================================
   static async cancelInvoice(invoiceId, motivo) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const sale = mockSalesDB.find((s) => s.id === invoiceId);
-        if (sale) {
-          sale.status = SALE_STATUS.CANCELLED;
-          sale.motivoAnulacion = motivo;
-          sale.fechaAnulacion = new Date().toISOString();
+    try {
+      console.log(`🗑️ Anulando factura ID: ${invoiceId}, Motivo: ${motivo}`);
 
-          // Restaurar stock
-          sale.items.forEach((item) => {
-            const product = mockProductsDB.find((p) => p.id === item.productId);
-            if (product) {
-              product.stock += item.cantidad;
-            }
-          });
+      // 1. Buscar la venta
+      const sale = mockSalesDB.find((s) => s.id === invoiceId);
+      
+      if (!sale) {
+        return {
+          success: false,
+          message: 'Venta no encontrada'
+        };
+      }
+
+      if (sale.status === SALE_STATUS.CANCELLED) {
+        return {
+          success: false,
+          message: 'Esta factura ya está anulada'
+        };
+      }
+
+      // 2. Anular en el SIAT (mock)
+      const siatResponse = await anularFacturaSIAT(sale.numeroFactura, motivo);
+
+      if (!siatResponse.success) {
+        throw new Error('Error al anular factura en SIAT');
+      }
+
+      console.log('✅ Factura anulada en SIAT:', siatResponse.data);
+
+      // 3. Actualizar estado de la venta
+      sale.status = SALE_STATUS.CANCELLED;
+      sale.motivoAnulacion = motivo;
+      sale.fechaAnulacion = siatResponse.data.fechaAnulacion;
+      sale.codigoAnulacion = siatResponse.data.codigoAnulacion;
+
+      // 4. Restaurar stock de productos
+      sale.items.forEach((item) => {
+        const product = mockProductsDB.find((p) => p.id === item.productId);
+        if (product) {
+          const stockAnterior = product.stock;
+          product.stock += item.cantidad;
+          console.log(
+            `📦 Stock restaurado: ${product.nombre} | ` +
+            `Anterior: ${stockAnterior} → Actual: ${product.stock} | ` +
+            `Devuelto: ${item.cantidad}`
+          );
         }
-        resolve({ success: true });
-      }, 500);
-    });
+      });
+
+      console.log('✅ Factura anulada completamente');
+
+      return { 
+        success: true,
+        message: 'Factura anulada exitosamente',
+        sale
+      };
+
+    } catch (error) {
+      console.error('❌ Error al anular factura:', error);
+      return {
+        success: false,
+        message: error.message || 'Error al anular la factura',
+        error: error
+      };
+    }
   }
 
   // Obtener stock en sucursales
   static async getStockBySucursal(productId) {
     return new Promise((resolve) => {
       setTimeout(() => {
+        // Mock de stock por sucursales
         resolve([
-          { sucursal: "SAN MARTIN", stock: 732, precio: 1.36 },
-          { sucursal: "BRASIL", stock: 521, precio: 1.36 },
-          { sucursal: "URUGUAY", stock: 89, precio: 1.36 },
-          { sucursal: "TIQUIPAYA", stock: 234, precio: 1.36 },
+          { 
+            sucursalId: 1,
+            sucursal: "SAN MARTIN", 
+            stock: 732, 
+            precio: 1.30,
+            ubicacion: "ESTANTE-A-12"
+          },
+          { 
+            sucursalId: 2,
+            sucursal: "BRASIL", 
+            stock: 450, 
+            precio: 1.30,
+            ubicacion: "ESTANTE-B-05"
+          },
+          { 
+            sucursalId: 3,
+            sucursal: "URUGUAY", 
+            stock: 280, 
+            precio: 1.35,
+            ubicacion: "ESTANTE-A-08"
+          },
+          { 
+            sucursalId: 4,
+            sucursal: "ALMACÉN/ANABARMÍN", 
+            stock: 5000, 
+            precio: 1.25,
+            ubicacion: "PALLET-15"
+          },
+          { 
+            sucursalId: 5,
+            sucursal: "AGRIPAFA", 
+            stock: 120, 
+            precio: 1.32,
+            ubicacion: "ESTANTE-C-03"
+          },
+          { 
+            sucursalId: 6,
+            sucursal: "FACHADA", 
+            stock: 185, 
+            precio: 1.30,
+            ubicacion: "ESTANTE-E-06"
+          }
         ]);
+      }, 300);
+    });
+  }
+
+  // ============================================
+  // 🔥 NUEVA: Obtener detalles de una venta específica
+  // ============================================
+  static async getSaleById(saleId) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const sale = mockSalesDB.find(s => s.id === saleId);
+        
+        if (sale) {
+          console.log('📄 Venta encontrada:', sale.numeroFactura || sale.id);
+          resolve({ success: true, sale });
+        } else {
+          resolve({ 
+            success: false, 
+            message: 'Venta no encontrada' 
+          });
+        }
+      }, 200);
+    });
+  }
+
+  // ============================================
+  // 🔥 NUEVA: Obtener lista de clientes
+  // ============================================
+  static async getClients() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(mockClientsDB);
+      }, 200);
+    });
+  }
+
+  // ============================================
+  // 🔥 NUEVA: Actualizar cliente
+  // ============================================
+  static async updateClient(nit, clientData) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const client = mockClientsDB.find(c => c.nit === nit);
+        
+        if (client) {
+          Object.assign(client, clientData);
+          console.log('👤 Cliente actualizado:', client);
+          resolve({ success: true, client });
+        } else {
+          resolve({ 
+            success: false, 
+            message: 'Cliente no encontrado' 
+          });
+        }
       }, 300);
     });
   }

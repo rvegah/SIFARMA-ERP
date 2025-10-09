@@ -13,6 +13,16 @@ Sistema Integral de Gestión Farmacéutica - Una solución ERP especializada par
 - **Contabilidad**: Sistema contable integrado
 - **Reportes**: Dashboard ejecutivo con KPIs
 
+## Nuevas Funcionalidades
+
+### Módulo de Ventas
+- ✅ Anulación de facturas con motivos oficiales
+- ✅ Formulario de cliente con códigos rápidos
+- ✅ Búsqueda de productos con navegación por teclado
+- ✅ Vista completa de inventario
+- ✅ Validaciones de stock y alertas
+- ✅ Integración con SIAT (simulado)
+
 ## 🛠️ Tecnologías
 
 - **Frontend**: React 18, Material-UI, Vite
@@ -85,6 +95,28 @@ src/
 ├── shared/        # Componentes compartidos
 └── main.jsx       # Punto de entrada
 \`\`\`
+
+## 📚 Opción de Ventas
+src/
+├── modules/
+│   └── sales/
+│       ├── components/
+│       │   ├── CancelInvoiceModal.jsx     # Actualizado
+│       │   ├── ClientForm.jsx             # Nuevo
+│       │   ├── SaleItemsTable.jsx         # Nuevo  
+│       │   ├── ProductsModal.jsx          # Nuevo
+│       │   ├── ProductSearch.jsx          # Existente
+│       │   ├── StockModal.jsx             # (si existe)
+│       │   ├── MySalesModal.jsx           # (si existe)
+│       │   └── PrintInvoiceModal.jsx      # (si existe)
+│       ├── pages/
+│       │   └── SalesPage.jsx              # Actualizado
+│       ├── services/
+│       │   └── cancelInvoiceService.js    # Nuevo
+│       ├── hooks/
+│       │   └── useSales.js                # (si existe)
+│       └── constants/
+│           └── salesConstants.js          # (si existe)
 
 ## 🤝 Contribuir
 

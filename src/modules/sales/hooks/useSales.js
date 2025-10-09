@@ -302,6 +302,49 @@ export const useSales = () => {
     [calculateTotals]
   );
 
+  // ============================================
+  // 🔥 NUEVA FUNCIÓN: Cargar venta completa
+  // ============================================
+  const loadSaleData = useCallback((saleData) => {
+    console.log("Cargando venta completa:", saleData);
+
+    // 1. Cargar datos del cliente
+    setClientForm({
+      nit: saleData.clientForm.nit || "",
+      nombre: saleData.clientForm.nombre || "",
+      tipoDocumento: saleData.clientForm.tipoDocumento || "1",
+      celular: saleData.clientForm.celular || "",
+      email: saleData.clientForm.email || "",
+      complemento: saleData.clientForm.complemento || "",
+      fechaNacimiento: saleData.clientForm.fechaNacimiento || "",
+      descuentoAdicional: saleData.clientForm.descuentoAdicional || 0,
+      pagado: saleData.clientForm.pagado || 0,
+      cambio: saleData.clientForm.cambio || 0,
+    });
+
+    // 2. 🔥 CRÍTICO: Cargar items/productos de la venta
+    // Mapear los items para asegurar que tienen el formato correcto
+    const mappedItems = saleData.items.map((item, index) => ({
+      id: Date.now() + index, // ID único para cada item
+      productId: item.productId || item.id,
+      codigo: item.codigo,
+      nombre: item.nombre,
+      linea: item.linea || "",
+      laboratorio: item.laboratorio || "",
+      presentacion: item.presentacion || "",
+      unidadMedida: item.unidadMedida || "UNIDAD",
+      stock: item.stock || 0,
+      cantidad: item.cantidad,
+      precio: item.precio,
+      descuento: item.descuento || 0,
+      subtotal: item.subtotal,
+    }));
+
+    setSaleItems(mappedItems);
+
+    console.log("Venta cargada - Items:", mappedItems.length);
+  }, []);
+
   return {
     // Estado
     clientForm,
@@ -324,6 +367,7 @@ export const useSales = () => {
     clearForm,
     setSearchQuery,
     updateDiscount,
-    updatePayment
+    updatePayment,
+    loadSaleData, 
   };
 };
