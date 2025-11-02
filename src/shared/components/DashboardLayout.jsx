@@ -39,7 +39,7 @@ import {
   KeyboardArrowDown,
 } from "@mui/icons-material";
 import { farmaColors } from "/src/app/theme";
-import { getFilteredMenuItems } from "/src/config/menuPermissions";
+import { getFilteredMenuItems } from "/src/config/menuBuilder";
 
 const drawerWidth = 280;
 const collapsedDrawerWidth = 60;
@@ -67,12 +67,12 @@ function DashboardLayout({ children, onLogout, currentUser }) {
 
   // Obtener menú filtrado según permisos del usuario
   const elementosMenu = useMemo(() => {
-    if (!currentUser || !currentUser.permisos) {
+    if (!currentUser || !currentUser.apiPermissions) {
       console.warn("No hay usuario o permisos disponibles");
       return [];
     }
-    console.log("Permisos del usuario:", currentUser.permisos);
-    const filtered = getFilteredMenuItems(currentUser.permisos);
+    console.log("Permisos del usuario (API):", currentUser.apiPermissions);
+    const filtered = getFilteredMenuItems(currentUser.apiPermissions);
     console.log("Menús filtrados:", filtered);
     return filtered;
   }, [currentUser]);

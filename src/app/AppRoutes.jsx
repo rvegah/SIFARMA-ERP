@@ -1,91 +1,118 @@
-import React, { useState } from 'react'
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
-import LoginPage from '../shared/components/LoginPage'
-import DashboardLayout from '../shared/components/DashboardLayout'
-import Dashboard from '../shared/components/Dashboard'
-import SalesPage from '../modules/sales/pages/SalesPage'
+// src/app/AppRoutes.jsx - MODIFICADO con AuthProvider y protección de rutas
 
-// Módulo de perfil personal (existente)
-import UsersPage from '../modules/access-security/pages/UsersPage'
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import LoginPage from '../shared/components/LoginPage';
+import DashboardLayout from '../shared/components/DashboardLayout';
+import Dashboard from '../shared/components/Dashboard';
+import SalesPage from '../modules/sales/pages/SalesPage';
 
-// NUEVO: Módulo de gestión de usuarios (administrativo)
-import UserManagementPage from '../modules/user-management/pages/UserManagementPage'
+// Módulo de perfil personal
+import UsersPage from '../modules/access-security/pages/UsersPage';
 
-function AppRoutes() {
-  // Estado para manejar si el usuario está logueado
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [justLoggedIn, setJustLoggedIn] = useState(false)
-  const navigate = useNavigate()
+// Módulo de gestión de usuarios (administrativo)
+import UserManagementPage from '../modules/user-management/pages/UserManagementPage';
 
-  // Función para manejar el login
-  const handleLogin = (usuario, contrasena) => {
-    // Por ahora, cualquier usuario/contraseña es válida
-    if (usuario && contrasena) {
-      setIsAuthenticated(true)
-      setJustLoggedIn(true)
-      return true
-    }
-    return false
-  }
+/**
+ * Componente de rutas protegidas
+ * Solo se renderiza si el usuario está autenticado
+ */
+function ProtectedRoutes() {
+  const { isAuthenticated, isLoading, logout, user, permissions } = useAuth();
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setJustLoggedIn(false)
-    // Limpiar cualquier estado persistente si lo hay
-    localStorage.removeItem('currentRoute')
-  }
-
-  if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />
-  }
-
-  // Si acabamos de hacer login, forzar render del dashboard
-  if (justLoggedIn) {
-    setTimeout(() => {
-      navigate('/dashboard', { replace: true })
-      setJustLoggedIn(false)
-    }, 0)
-    
+  // Mostrar loading mientras se verifica la autenticación
+  if (isLoading) {
     return (
-      <DashboardLayout onLogout={handleLogout}>
-        <Dashboard />
-      </DashboardLayout>
-    )
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#05305A'
+      }}>
+        Cargando...
+      </div>
+    );
   }
 
+  // Si no está autenticado, mostrar login
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  // Si está autenticado, mostrar dashboard con rutas
   return (
-    <DashboardLayout onLogout={handleLogout}>
+    <DashboardLayout 
+      onLogout={logout}
+      currentUser={user}
+      userPermissions={permissions}
+    >
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        
+
         {/* SEPARACIÓN CLARA DE FUNCIONALIDADES */}
-        
+
         {/* Editar Perfil Personal - acceso desde menú de usuario */}
         <Route path="/profile" element={<UsersPage />} />
-        
+
         {/* Gestión Administrativa de Usuarios - acceso desde sidebar "Usuarios" */}
         <Route path="/users" element={<UserManagementPage />} />
         <Route path="/users/list" element={<UserManagementPage />} />
         <Route path="/users/new" element={<UserManagementPage />} />
         <Route path="/users/*" element={<UserManagementPage />} />
-        
+
         {/* Rutas futuras de otros módulos */}
-        <Route path="/productos/*" element={<div>Módulo de Productos (próximamente)</div>} />
-        <Route path="/compras/*" element={<div>Módulo de Compras (próximamente)</div>} />
-        <Route path="/proveedor/*" element={<div>Módulo de Proveedores (próximamente)</div>} />
+        <Route
+          path="/productos/*"
+          element={<div>Módulo de Productos (próximamente)</div>}
+        />
+        <Route
+          path="/compras/*"
+          element={<div>Módulo de Compras (próximamente)</div>}
+        />
+        <Route
+          path="/proveedor/*"
+          element={<div>Módulo de Proveedores (próximamente)</div>}
+        />
         <Route path="/ventas/*" element={<SalesPage />} />
-        <Route path="/traspasos/*" element={<div>Módulo de Traspasos (próximamente)</div>} />
-        <Route path="/reportes/*" element={<div>Módulo de Reportes (próximamente)</div>} />
-        <Route path="/configuracion/*" element={<div>Módulo de Configuración (próximamente)</div>} />
-        
-        <Route path="/access-security/*" element={<div>Módulo de Seguridad (próximamente)</div>} />
+        <Route
+          path="/traspasos/*"
+          element={<div>Módulo de Traspasos (próximamente)</div>}
+        />
+        <Route
+          path="/reportes/*"
+          element={<div>Módulo de Reportes (próximamente)</div>}
+        />
+        <Route
+          path="/configuracion/*"
+          element={<div>Módulo de Configuración (próximamente)</div>}
+        />
+
+        <Route
+          path="/access-security/*"
+          element={<div>Módulo de Seguridad (próximamente)</div>}
+        />
         <Route path="*" element={<div>Página no encontrada</div>} />
-
-
       </Routes>
     </DashboardLayout>
-  )
+  );
 }
 
-export default AppRoutes
+/**
+ * Componente principal de rutas
+ * Envuelve todo en el AuthProvider
+ */
+function AppRoutes() {
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/*" element={<ProtectedRoutes />} />
+      </Routes>
+    </AuthProvider>
+  );
+}
+
+export default AppRoutes;

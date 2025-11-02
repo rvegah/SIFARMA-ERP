@@ -1,5 +1,6 @@
-// src/shared/components/LoginPage.jsx - Rediseño profesional con identidad Farma Dinámica
-import React, { useState } from 'react'
+// src/shared/components/LoginPage.jsx - CON ErrorDialog mejorado
+
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -8,94 +9,158 @@ import {
   Button,
   Typography,
   Container,
-  Alert,
   InputAdornment,
   IconButton,
-  Paper
-} from '@mui/material'
+  CircularProgress,
+} from '@mui/material';
 import {
   Person,
   Lock,
   Visibility,
   VisibilityOff,
-  LocalPharmacy
-} from '@mui/icons-material'
-import NetworkValidationService from '../../services/networkValidation'
-import DeviceValidationModal from '../../components/DeviceValidationModal'
-import { validateCredentials } from '../../modules/user-management/constants/userConstants'
-import { farmaColors } from '/src/app/theme' // Importar colores corporativos
+} from '@mui/icons-material';
+import NetworkValidationService from '../../services/networkValidation';
+import ErrorDialog from '../../components/ErrorDialog';
+import { farmaColors } from '../../app/theme';
+import { useAuth } from '../../context/AuthContext';
 
-function LoginPage({ onLogin }) {
-  const [usuario, setUsuario] = useState('')
-  const [contrasena, setContrasena] = useState('')
-  const [error, setError] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  
-  // Estados para validación de dispositivo
-  const [showValidationModal, setShowValidationModal] = useState(false)
-  const [validationResult, setValidationResult] = useState(null)
-  const [pendingLoginData, setPendingLoginData] = useState(null)
+function LoginPage() {
+  const [usuario, setUsuario] = useState('');
+  const [contrasena, setContrasena] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Estados para el ErrorDialog
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogConfig, setDialogConfig] = useState({
+    title: '',
+    message: '',
+    errorType: 'default',
+    autoClose: false,
+  });
+
+  const { login } = useAuth();
+
+  /**
+   * Función para analizar el error y configurar el dialog
+   */
+  const handleError = (error) => {
+    let config = {
+      title: 'Error',
+      message: '',
+      errorType: 'default',
+      autoClose: false,
+    };
+
+    // Analizar el mensaje de error
+    const errorMsg = error.message?.toLowerCase() || '';
+    
+    if (errorMsg.includes('contraseña') || errorMsg.includes('password') || error.code === 401) {
+      config = {
+        title: 'Contraseña Incorrecta',
+        message: 'La contraseña que ingresaste no es correcta. Por favor, verifica e intenta nuevamente.',
+        errorType: 'password',
+        autoClose: false,
+      };
+    } else if (errorMsg.includes('usuario') || errorMsg.includes('no encontrado') || errorMsg.includes('not found')) {
+      config = {
+        title: 'Usuario No Encontrado',
+        message: 'El usuario que ingresaste no existe en el sistema. Verifica que esté escrito correctamente.',
+        errorType: 'user',
+        autoClose: false,
+      };
+    } else if (errorMsg.includes('bloqueado') || errorMsg.includes('suspendido') || error.code === 403) {
+      config = {
+        title: 'Usuario Bloqueado',
+        message: 'Tu usuario ha sido bloqueado. Por favor, contacta al administrador del sistema.',
+        errorType: 'user',
+        autoClose: false,
+      };
+    } else if (errorMsg.includes('conexión') || errorMsg.includes('conectar') || error.code === 0) {
+      config = {
+        title: 'Sin Conexión',
+        message: 'No se pudo conectar con el servidor. Verifica tu conexión a internet e intenta nuevamente.',
+        errorType: 'connection',
+        autoClose: false,
+      };
+    } else if (errorMsg.includes('servidor') || error.code === 500) {
+      config = {
+        title: 'Error del Servidor',
+        message: 'El servidor está experimentando problemas. Por favor, intenta nuevamente en unos momentos.',
+        errorType: 'server',
+        autoClose: false,
+      };
+    } else if (error.code === 404) {
+      config = {
+        title: 'Servicio No Disponible',
+        message: 'El servicio de autenticación no está disponible. Contacta al administrador.',
+        errorType: 'server',
+        autoClose: false,
+      };
+    } else {
+      // Error genérico
+      config = {
+        title: 'Error al Iniciar Sesión',
+        message: error.message || 'Ocurrió un error inesperado. Por favor, intenta nuevamente.',
+        errorType: 'default',
+        autoClose: false,
+      };
+    }
+
+    setDialogConfig(config);
+    setDialogOpen(true);
+  };
 
   const handleLogin = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    
-    // Simular delay de autenticación
-    setTimeout(async () => {
-      // 1. Validar credenciales usando la función helper
-      const userCredentials = validateCredentials(usuario, contrasena);
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // 1. Detectar IP local
+      console.log('🔍 Detectando IP local...');
+      let localIP;
       
-      if (!userCredentials) {
-        setError('Credenciales incorrectas')
-        setLoading(false)
-        return
-      }
-
-      // 2. Si las credenciales son correctas, validar dispositivo
       try {
-        console.log('🔍 Validando dispositivo para:', userCredentials.nombreEquipo);
-        const deviceValidation = await NetworkValidationService.validateDeviceIP(userCredentials.nombreEquipo);
-        
-        console.log('📊 Resultado validación:', deviceValidation);
-        
-        // Guardar datos del login pendiente
-        setPendingLoginData({ usuario, contrasena });
-        setValidationResult(deviceValidation);
-        setShowValidationModal(true);
-        setLoading(false);
-        
-      } catch (error) {
-        console.error('❌ Error en validación de dispositivo:', error);
-        setError('Error validando dispositivo: ' + error.message);
-        setLoading(false);
+        localIP = await NetworkValidationService.getLocalIP();
+        console.log('✅ IP local detectada:', localIP);
+      } catch (ipError) {
+        console.warn('⚠️ No se pudo detectar IP, usando fallback');
+        localIP = '192.168.0.1';
       }
-    }, 800)
-  }
 
-  const handleValidationContinue = () => {
-    // Continuar con el login normal
-    if (pendingLoginData) {
-      const success = onLogin(pendingLoginData.usuario, pendingLoginData.contrasena);
-      if (success) {
-        setShowValidationModal(false);
-        setPendingLoginData(null);
-        setValidationResult(null);
+      // 2. Intentar login
+      console.log('🔐 Intentando login con API...');
+      const loginResult = await login({
+        nombreUsuario: usuario,
+        password: contrasena,
+        direccion_IP: localIP,
+      });
+
+      if (loginResult.success) {
+        // 3. Login exitoso - mostrar mensaje de éxito
+        setDialogConfig({
+          title: '¡Bienvenido!',
+          message: `Inicio de sesión exitoso.\nIP detectada: ${localIP}`,
+          errorType: 'success',
+          autoClose: true,
+        });
+        setDialogOpen(true);
+        
+        // El usuario será redirigido automáticamente
       } else {
-        setError('Error completando el login');
-        setShowValidationModal(false);
+        throw new Error(loginResult.message);
       }
+    } catch (error) {
+      console.error('❌ Error en login:', error);
+      handleError(error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const handleValidationCancel = () => {
-    // Volver al login sin proceder
-    setShowValidationModal(false);
-    setPendingLoginData(null);
-    setValidationResult(null);
-    setLoading(false);
-  }
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
 
   return (
     <>
@@ -106,26 +171,20 @@ function LoginPage({ onLogin }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: 2
+          padding: 2,
         }}
       >
         <Container maxWidth="sm">
+          {/* Logo y título */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
-            {/* Logo corporativo */}
-            <Box 
-              sx={{ 
-                display: 'inline-flex',
-                alignItems: 'center',
-                mb: 2
-              }}
-            >
-              {/* Icono de cruz médica inspirado en el logo */}
+            <Box sx={{ display: 'inline-flex', alignItems: 'center', mb: 2 }}>
+              {/* Logo de cruces médicas */}
               <Box
                 sx={{
                   position: 'relative',
                   width: 60,
                   height: 60,
-                  mr: 2
+                  mr: 2,
                 }}
               >
                 {/* Cruz naranja */}
@@ -137,7 +196,7 @@ function LoginPage({ onLogin }) {
                     width: 20,
                     height: 40,
                     bgcolor: farmaColors.primary,
-                    borderRadius: '10px'
+                    borderRadius: '10px',
                   }}
                 />
                 <Box
@@ -148,7 +207,7 @@ function LoginPage({ onLogin }) {
                     width: 40,
                     height: 20,
                     bgcolor: farmaColors.primary,
-                    borderRadius: '10px'
+                    borderRadius: '10px',
                   }}
                 />
                 {/* Cruz azul entrelazada */}
@@ -161,7 +220,7 @@ function LoginPage({ onLogin }) {
                     height: 30,
                     bgcolor: farmaColors.secondary,
                     borderRadius: '10px',
-                    opacity: 0.9
+                    opacity: 0.9,
                   }}
                 />
                 <Box
@@ -173,17 +232,17 @@ function LoginPage({ onLogin }) {
                     height: 20,
                     bgcolor: farmaColors.secondary,
                     borderRadius: '10px',
-                    opacity: 0.9
+                    opacity: 0.9,
                   }}
                 />
               </Box>
-              
-              <Typography 
-                variant="h4" 
-                sx={{ 
+
+              <Typography
+                variant="h4"
+                sx={{
                   fontWeight: 700,
                   color: farmaColors.secondary,
-                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
                 }}
               >
                 FARMA{' '}
@@ -193,94 +252,87 @@ function LoginPage({ onLogin }) {
               </Typography>
             </Box>
 
-            <Typography 
-              variant="body1" 
-              sx={{ 
+            <Typography
+              variant="body1"
+              sx={{
                 color: '#6c757d',
                 fontSize: '1.1rem',
-                fontWeight: 400
+                fontWeight: 400,
               }}
             >
               Sistema Integral de Farmacia
             </Typography>
           </Box>
 
-          <Card 
-            sx={{ 
+          {/* Card de login */}
+          <Card
+            sx={{
               borderRadius: 3,
               boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
               border: '1px solid #e9ecef',
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}
           >
             <CardContent sx={{ p: 5 }}>
-              <Typography variant="h5" sx={{ 
-                textAlign: 'center', 
-                mb: 1, 
-                fontWeight: 600, 
-                color: farmaColors.secondary
-              }}>
+              <Typography
+                variant="h5"
+                sx={{
+                  textAlign: 'center',
+                  mb: 1,
+                  fontWeight: 600,
+                  color: farmaColors.secondary,
+                }}
+              >
                 Iniciar Sesión
               </Typography>
-              <Typography variant="body2" sx={{ 
-                textAlign: 'center', 
-                mb: 4, 
-                color: '#6c757d'
-              }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  textAlign: 'center',
+                  mb: 4,
+                  color: '#6c757d',
+                }}
+              >
                 Ingresa tus credenciales para acceder al sistema
               </Typography>
 
               <Box component="form" onSubmit={handleLogin}>
-                {error && (
-                  <Alert 
-                    severity="error" 
-                    sx={{ 
-                      mb: 3, 
-                      borderRadius: 2,
-                      bgcolor: '#fff5f5',
-                      border: '1px solid #fed7d7',
-                      '& .MuiAlert-icon': {
-                        color: '#e53e3e'
-                      }
-                    }}
-                  >
-                    {error}
-                  </Alert>
-                )}
-
                 <TextField
                   fullWidth
                   label="Usuario"
                   variant="outlined"
                   value={usuario}
                   onChange={(e) => setUsuario(e.target.value)}
-                  sx={{ 
+                  disabled={loading}
+                  sx={{
                     mb: 3,
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
-                      bgcolor: '#f8f9fa',
+                      bgcolor: loading ? '#f5f5f5' : '#f8f9fa',
                       '&.Mui-focused': {
                         bgcolor: 'white',
                         '& fieldset': {
                           borderColor: farmaColors.primary,
-                          borderWidth: '2px'
-                        }
+                          borderWidth: '2px',
+                        },
                       },
                       '&:hover:not(.Mui-focused) fieldset': {
                         borderColor: farmaColors.primaryLight,
-                      }
+                      },
                     },
                     '& .MuiInputLabel-root.Mui-focused': {
-                      color: farmaColors.primary
-                    }
+                      color: farmaColors.primary,
+                    },
                   }}
                   required
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Person sx={{ color: farmaColors.secondary, fontSize: '1.2rem' }} />
+                        <Person
+                          sx={{ color: farmaColors.secondary, fontSize: '1.2rem' }}
+                        />
                       </InputAdornment>
-                    )
+                    ),
                   }}
                 />
 
@@ -291,25 +343,26 @@ function LoginPage({ onLogin }) {
                   variant="outlined"
                   value={contrasena}
                   onChange={(e) => setContrasena(e.target.value)}
-                  sx={{ 
+                  disabled={loading}
+                  sx={{
                     mb: 4,
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
-                      bgcolor: '#f8f9fa',
+                      bgcolor: loading ? '#f5f5f5' : '#f8f9fa',
                       '&.Mui-focused': {
                         bgcolor: 'white',
                         '& fieldset': {
                           borderColor: farmaColors.primary,
-                          borderWidth: '2px'
-                        }
+                          borderWidth: '2px',
+                        },
                       },
                       '&:hover:not(.Mui-focused) fieldset': {
                         borderColor: farmaColors.primaryLight,
-                      }
+                      },
                     },
                     '& .MuiInputLabel-root.Mui-focused': {
-                      color: farmaColors.primary
-                    }
+                      color: farmaColors.primary,
+                    },
                   }}
                   required
                   InputProps={{
@@ -323,17 +376,18 @@ function LoginPage({ onLogin }) {
                         <IconButton
                           onClick={() => setShowPassword(!showPassword)}
                           edge="end"
+                          disabled={loading}
                           sx={{
                             color: farmaColors.secondary,
                             '&:hover': {
-                              bgcolor: farmaColors.alpha.secondary10
-                            }
+                              bgcolor: farmaColors.alpha.secondary10,
+                            },
                           }}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
-                    )
+                    ),
                   }}
                 />
 
@@ -345,41 +399,49 @@ function LoginPage({ onLogin }) {
                   disabled={loading}
                   sx={{
                     py: 2.5,
-                    background: farmaColors.primary,
+                    background: loading ? '#cccccc' : farmaColors.primary,
                     fontSize: '1.1rem',
                     fontWeight: 600,
                     borderRadius: 2,
                     textTransform: 'none',
-                    boxShadow: `0 4px 20px ${farmaColors.alpha.primary20}`,
+                    boxShadow: loading ? 'none' : `0 4px 20px ${farmaColors.alpha.primary20}`,
                     '&:hover': {
-                      background: farmaColors.primaryDark,
-                      boxShadow: `0 6px 30px ${farmaColors.alpha.primary30}`,
-                      transform: 'translateY(-1px)'
+                      background: loading ? '#cccccc' : farmaColors.primaryDark,
+                      boxShadow: loading ? 'none' : `0 6px 30px ${farmaColors.alpha.primary30}`,
+                      transform: loading ? 'none' : 'translateY(-1px)',
                     },
                     '&:disabled': {
                       background: farmaColors.alpha.primary20,
                       color: 'rgba(255,255,255,0.8)',
-                      transform: 'none',
-                      boxShadow: 'none'
-                    }
+                    },
                   }}
                 >
-                  {loading ? 'Validando dispositivo...' : 'Ingresar al Sistema'}
+                  {loading ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <CircularProgress size={24} sx={{ color: 'white' }} />
+                      <span>Validando acceso...</span>
+                    </Box>
+                  ) : (
+                    'Ingresar al Sistema'
+                  )}
                 </Button>
               </Box>
 
               <Box sx={{ mt: 4, textAlign: 'center' }}>
-                <Typography variant="caption" sx={{ 
-                  color: farmaColors.secondary,
-                  fontSize: '0.9rem'
-                }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: farmaColors.secondary,
+                    fontSize: '0.9rem',
+                  }}
+                >
                   Farma Dinámica v1.0 • Sistema seguro
                 </Typography>
               </Box>
             </CardContent>
           </Card>
 
-          {/* Elementos decorativos minimalistas */}
+          {/* Elementos decorativos */}
           <Box
             sx={{
               position: 'absolute',
@@ -389,7 +451,7 @@ function LoginPage({ onLogin }) {
               height: 60,
               background: `linear-gradient(135deg, ${farmaColors.alpha.primary10} 0%, transparent 70%)`,
               borderRadius: '20px 0 0 20px',
-              zIndex: -1
+              zIndex: -1,
             }}
           />
           <Box
@@ -401,21 +463,24 @@ function LoginPage({ onLogin }) {
               height: 80,
               background: `linear-gradient(135deg, ${farmaColors.alpha.secondary10} 0%, transparent 70%)`,
               borderRadius: '0 20px 20px 0',
-              zIndex: -1
+              zIndex: -1,
             }}
           />
         </Container>
       </Box>
 
-      {/* Modal de validación de dispositivo */}
-      <DeviceValidationModal
-        open={showValidationModal}
-        validationResult={validationResult}
-        onContinue={handleValidationContinue}
-        onCancel={handleValidationCancel}
+      {/* Dialog de errores/éxito */}
+      <ErrorDialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        title={dialogConfig.title}
+        message={dialogConfig.message}
+        errorType={dialogConfig.errorType}
+        autoClose={dialogConfig.autoClose}
+        autoCloseDelay={2000}
       />
     </>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;
