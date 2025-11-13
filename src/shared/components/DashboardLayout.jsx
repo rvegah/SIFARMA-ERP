@@ -105,10 +105,16 @@ function DashboardLayout({ children, onLogout, currentUser }) {
     if (hasSubItems && !collapsed) {
       handleSubMenuToggle(menuIndex);
     } else {
-      navigate(path);
-      if (isMobile) {
-        setMobileOpen(false);
+      // 🚀 Forzar actualización aunque sea la misma ruta
+      if (location.pathname === path) {
+        navigate(path, { replace: true });
+        // 🔁 Forzar re-render del componente actual
+        window.dispatchEvent(new Event("forceReload"));
+      } else {
+        navigate(path);
       }
+
+      if (isMobile) setMobileOpen(false);
     }
   };
 

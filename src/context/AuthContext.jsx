@@ -151,6 +151,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     hasAccess,
     refreshPermissions,
+    codigoEmpleado: user?.codigoEmpleado || null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

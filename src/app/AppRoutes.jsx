@@ -1,18 +1,18 @@
 // src/app/AppRoutes.jsx - MODIFICADO con AuthProvider y protección de rutas
 
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from '../context/AuthContext';
-import LoginPage from '../shared/components/LoginPage';
-import DashboardLayout from '../shared/components/DashboardLayout';
-import Dashboard from '../shared/components/Dashboard';
-import SalesPage from '../modules/sales/pages/SalesPage';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import LoginPage from "../shared/components/LoginPage";
+import DashboardLayout from "../shared/components/DashboardLayout";
+import Dashboard from "../shared/components/Dashboard";
+import SalesPage from "../modules/sales/pages/SalesPage";
 
 // Módulo de perfil personal
-import UsersPage from '../modules/access-security/pages/UsersPage';
+import UsersPage from "../modules/access-security/pages/UsersPage";
 
 // Módulo de gestión de usuarios (administrativo)
-import UserManagementPage from '../modules/user-management/pages/UserManagementPage';
+import UserManagementPage from "../modules/user-management/pages/UserManagementPage";
 
 /**
  * Componente de rutas protegidas
@@ -24,14 +24,16 @@ function ProtectedRoutes() {
   // Mostrar loading mientras se verifica la autenticación
   if (isLoading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontSize: '1.2rem',
-        color: '#05305A'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          fontSize: "1.2rem",
+          color: "#05305A",
+        }}
+      >
         Cargando...
       </div>
     );
@@ -44,7 +46,7 @@ function ProtectedRoutes() {
 
   // Si está autenticado, mostrar dashboard con rutas
   return (
-    <DashboardLayout 
+    <DashboardLayout
       onLogout={logout}
       currentUser={user}
       userPermissions={permissions}
@@ -59,10 +61,19 @@ function ProtectedRoutes() {
         <Route path="/profile" element={<UsersPage />} />
 
         {/* Gestión Administrativa de Usuarios - acceso desde sidebar "Usuarios" */}
-        <Route path="/users" element={<UserManagementPage />} />
-        <Route path="/users/list" element={<UserManagementPage />} />
-        <Route path="/users/new" element={<UserManagementPage />} />
-        <Route path="/users/*" element={<UserManagementPage />} />
+        <Route path="/users" element={<UserManagementPage key="usersList" />} />
+        <Route
+          path="/users/list"
+          element={<UserManagementPage key="usersList" />}
+        />
+        <Route
+          path="/users/new"
+          element={<UserManagementPage key="usersNew" />}
+        />
+        <Route
+          path="/users/*"
+          element={<UserManagementPage key="usersAny" />}
+        />
 
         {/* Rutas futuras de otros módulos */}
         <Route

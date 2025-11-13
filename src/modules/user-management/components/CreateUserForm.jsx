@@ -1,6 +1,8 @@
-// CreateUserForm.jsx - Formulario completo con colores corporativos Farma Dinámica
+// src/modules/user-management/components/CreateUserForm.jsx
+// Formulario de creación de usuarios - CON LIMPIEZA FORZADA AL MONTAR
 
-import React from 'react';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -16,546 +18,711 @@ import {
   RadioGroup,
   Radio,
   FormControlLabel,
-  IconButton
-} from '@mui/material';
-import {
-  Save,
-  Visibility,
-  VisibilityOff
-} from '@mui/icons-material';
-import { useUsers } from '../hooks/useUsers';
-import { sucursales, roles, generos, deviceIPMapping } from '../constants/userConstants';
-import { farmaColors } from '/src/app/theme'; // Importar colores corporativos
+  IconButton,
+  CircularProgress,
+  Box,
+} from "@mui/material";
+import { Save, Visibility, VisibilityOff } from "@mui/icons-material";
+import { useUsers } from "../context/UserContext";
+import { farmaColors } from "/src/app/theme";
+
+// 🆕 Opciones de título (estáticas)
+const TITULOS = [
+  { codigo: "Tec", descripcion: "Técnico" },
+  { codigo: "Lic", descripcion: "Licenciado" },
+  { codigo: "Ing", descripcion: "Ingeniero" },
+  { codigo: "MSc", descripcion: "Master" },
+  { codigo: "Doc", descripcion: "Doctor" },
+  { codigo: "Phd", descripcion: "Doctor (PhD)" },
+];
+
+// 🆕 Opciones de género
+const GENEROS = [
+  { codigo: "M", descripcion: "Masculino" },
+  { codigo: "F", descripcion: "Femenino" },
+];
 
 const CreateUserForm = ({ onCancel }) => {
+  const navigate = useNavigate();
+
   const {
     // Estados del formulario
     userForm,
     showPassword,
-    
+
+    setUserForm,
+
+    // Catálogos desde el API
+    sucursales,
+    roles,
+    loading,
+
     // Funciones
     handleFormChange,
-    handleCreateUser,
+    handleCreateUserAPI,
     clearForm,
-    setShowPassword
+    setShowPassword,
+    tipoUsuarios,
+    setSelectedUser, // 🆕 IMPORTAR ESTA FUNCIÓN
   } = useUsers();
 
-  // Filtrar equipos según la sucursal seleccionada
-  const getEquiposPorSucursal = (sucursal) => {
-    if (!sucursal) return [];
-    
-    return Object.keys(deviceIPMapping).filter(equipo => {
-      if (sucursal === 'BRASIL') return equipo.includes('BRASIL');
-      if (sucursal === 'SAN MARTIN') return equipo.includes('SANMARTIN');
-      if (sucursal === 'URUGUAY') return equipo.includes('URUGUAY');
-      if (sucursal === 'TIQUIPAYA') return equipo.includes('TIQUIPAYA');
-      return false;
-    });
-  };
+  const [formKey, setFormKey] = useState(Date.now());
 
-  const equiposDisponibles = getEquiposPorSucursal(userForm.sucursal);
+  // 🔥 SOLUCIÓN: Limpiar SIEMPRE al montar y al cambiar activeView
+  useEffect(() => {
+    console.log("🧹 CreateUserForm montado → LIMPIANDO TODO");
+    clearForm();
+    setSelectedUser(null); // 🆕 CRÍTICO: Limpiar usuario seleccionado
+    setFormKey(Date.now());
+  }, []); // Sin dependencias = solo al montar
 
-  const handleSave = () => {
-    const success = handleCreateUser();
+  // Manejar guardado
+  const handleSave = async () => {
+    const success = await handleCreateUserAPI();
     if (success) {
       clearForm();
-      onCancel(); // Volver a la lista
+      setSelectedUser(null); // 🆕 Limpiar después de guardar
+      if (onCancel) {
+        onCancel();
+      } else {
+        navigate("/users/list");
+      }
     }
   };
 
+  // Manejar cancelación
   const handleCancel = () => {
     clearForm();
-    onCancel();
+    setSelectedUser(null); // 🆕 Limpiar al cancelar
+    if (onCancel) {
+      onCancel();
+    } else {
+      navigate("/users/list");
+    }
   };
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Encabezado con colores corporativos */}
-      <Paper sx={{ 
-        p: 3, 
-        mb: 3, 
-        bgcolor: '#f8f9fa', 
-        borderLeft: `4px solid ${farmaColors.secondary}`, // Azul corporativo
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}>
-        <Typography variant="h5" sx={{ 
-          fontWeight: 600, 
-          color: farmaColors.secondary, // Azul corporativo
-          mb: 1 
-        }}>
+      {/* Encabezado */}
+      <Paper
+        sx={{
+          p: 3,
+          mb: 3,
+          bgcolor: "#f8f9fa",
+          borderLeft: `4px solid ${farmaColors.secondary}`,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 600,
+            color: farmaColors.secondary,
+            mb: 1,
+          }}
+        >
           REGISTRAR USUARIO
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Formulario usuarios
+          Formulario de registro de usuarios del sistema
         </Typography>
       </Paper>
 
-      <Card sx={{ p: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+      <Card
+        key={formKey}
+        sx={{ p: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}
+      >
         <Grid container spacing={3}>
           {/* 1. Sucursal */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
-              1.- Sucursal:
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
+              1.- Sucursal: <span style={{ color: "red" }}>*</span>
             </Typography>
-            <FormControl fullWidth>
-              <InputLabel sx={{ color: 'text.secondary' }}>SELECCIONAR SUCURSAL</InputLabel>
+            <FormControl fullWidth required>
+              <InputLabel sx={{ color: "text.secondary" }}>
+                SELECCIONAR SUCURSAL
+              </InputLabel>
               <Select
-                value={userForm.sucursal}
-                onChange={handleFormChange('sucursal')}
+                value={userForm.sucursal_ID || ""}
+                onChange={handleFormChange("sucursal_ID")}
                 label="SELECCIONAR SUCURSAL"
+                disabled={loading}
                 sx={{
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: farmaColors.primary, // Borde naranja al enfocar
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: farmaColors.primaryLight,
-                  }
-                }}
-              >
-                {sucursales.map((sucursal) => (
-                  <MenuItem 
-                    key={sucursal} 
-                    value={sucursal}
-                    sx={{
-                      '&:hover': {
-                        bgcolor: farmaColors.alpha.primary10
-                      },
-                      '&.Mui-selected': {
-                        bgcolor: farmaColors.alpha.primary20,
-                        '&:hover': {
-                          bgcolor: farmaColors.alpha.primary30
-                        }
-                      }
-                    }}
-                  >
-                    {sucursal}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* 2. Nombre de equipo - CAMBIADO A SELECT FILTRADO POR SUCURSAL */}
-          <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
-              2.- Nombre de equipo:
-            </Typography>
-            <FormControl fullWidth>
-              <InputLabel sx={{ color: 'text.secondary' }}>SELECCIONAR EQUIPO</InputLabel>
-              <Select
-                value={userForm.nombreEquipo}
-                onChange={handleFormChange('nombreEquipo')}
-                label="SELECCIONAR EQUIPO"
-                disabled={!userForm.sucursal} // Deshabilitar hasta seleccionar sucursal
-                sx={{
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
                     borderColor: farmaColors.primaryLight,
-                  }
+                  },
                 }}
               >
-                {equiposDisponibles.map((equipo) => (
-                  <MenuItem 
-                    key={equipo} 
-                    value={equipo}
-                    sx={{
-                      '&:hover': {
-                        bgcolor: farmaColors.alpha.primary10
-                      },
-                      '&.Mui-selected': {
-                        bgcolor: farmaColors.alpha.primary20,
-                        '&:hover': {
-                          bgcolor: farmaColors.alpha.primary30
-                        }
-                      }
-                    }}
-                  >
-                    {equipo}
-                  </MenuItem>
-                ))}
+                {sucursales.length === 0 ? (
+                  <MenuItem disabled>Cargando sucursales...</MenuItem>
+                ) : (
+                  sucursales.map((sucursal) => (
+                    <MenuItem
+                      key={sucursal.sucursal_ID}
+                      value={sucursal.sucursal_ID}
+                      sx={{
+                        "&:hover": {
+                          bgcolor: farmaColors.alpha.primary10,
+                        },
+                        "&.Mui-selected": {
+                          bgcolor: farmaColors.alpha.primary20,
+                          "&:hover": {
+                            bgcolor: farmaColors.alpha.primary30,
+                          },
+                        },
+                      }}
+                    >
+                      {sucursal.nombreSucursal}
+                    </MenuItem>
+                  ))
+                )}
               </Select>
             </FormControl>
-            {!userForm.sucursal && (
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                * Primero seleccione una sucursal
-              </Typography>
-            )}
           </Grid>
 
-          {/* 3. Tipo de usuario */}
+          {/* 2. Tipo de usuario (ROL: Administrador, Farmacéutico, etc) */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
-              3.- Tipo de usuario:
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
+              2.- Rol de usuario: <span style={{ color: "red" }}>*</span>
             </Typography>
-            <FormControl fullWidth>
-              <InputLabel sx={{ color: 'text.secondary' }}>TIPO DE USUARIO</InputLabel>
+            <FormControl fullWidth required>
+              <InputLabel sx={{ color: "text.secondary" }}>
+                ROL DE USUARIO
+              </InputLabel>
               <Select
-                value={userForm.tipoUsuario}
-                onChange={handleFormChange('tipoUsuario')}
+                value={userForm.rol_ID || ""}
+                onChange={handleFormChange("rol_ID")}
                 label="TIPO DE USUARIO"
+                disabled={loading}
                 sx={{
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
                     borderColor: farmaColors.primaryLight,
-                  }
+                  },
                 }}
               >
-                {roles.map((role) => (
-                  <MenuItem 
-                    key={role} 
-                    value={role}
-                    sx={{
-                      '&:hover': {
-                        bgcolor: farmaColors.alpha.primary10
-                      },
-                      '&.Mui-selected': {
-                        bgcolor: farmaColors.alpha.primary20,
-                        '&:hover': {
-                          bgcolor: farmaColors.alpha.primary30
-                        }
-                      }
-                    }}
-                  >
-                    {role}
-                  </MenuItem>
-                ))}
+                {roles.length === 0 ? (
+                  <MenuItem disabled>Cargando roles...</MenuItem>
+                ) : (
+                  roles.map((role) => (
+                    <MenuItem
+                      key={role.rol_ID}
+                      value={role.rol_ID}
+                      sx={{
+                        "&:hover": {
+                          bgcolor: farmaColors.alpha.primary10,
+                        },
+                        "&.Mui-selected": {
+                          bgcolor: farmaColors.alpha.primary20,
+                          "&:hover": {
+                            bgcolor: farmaColors.alpha.primary30,
+                          },
+                        },
+                      }}
+                    >
+                      {role.nombre_Rol}
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* 3. Rol de usuario (INT, EXT, API) */}
+          <Grid item xs={12} md={6}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
+              3.- Tipo de usuario: <span style={{ color: "red" }}>*</span>
+            </Typography>
+            <FormControl fullWidth required>
+              <InputLabel sx={{ color: "text.secondary" }}>
+                TIPO DE USUARIO
+              </InputLabel>
+              <Select
+                value={userForm.tipoUsuarioInterno || ""}
+                onChange={handleFormChange("tipoUsuarioInterno")}
+                label="ROL DE USUARIO"
+                disabled={loading}
+                sx={{
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: farmaColors.primary,
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: farmaColors.primaryLight,
+                  },
+                }}
+              >
+                {tipoUsuarios.length === 0 ? (
+                  <MenuItem disabled>Cargando tipos...</MenuItem>
+                ) : (
+                  tipoUsuarios.map((tipo) => (
+                    <MenuItem
+                      key={tipo.codigo}
+                      value={tipo.codigo}
+                      sx={{
+                        "&:hover": {
+                          bgcolor: farmaColors.alpha.primary10,
+                        },
+                        "&.Mui-selected": {
+                          bgcolor: farmaColors.alpha.primary20,
+                          "&:hover": {
+                            bgcolor: farmaColors.alpha.primary30,
+                          },
+                        },
+                      }}
+                    >
+                      {tipo.descripcion}
+                    </MenuItem>
+                  ))
+                )}
               </Select>
             </FormControl>
           </Grid>
 
           {/* 4. Usuario */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
-              4.- Usuario:
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
+              4.- Usuario: <span style={{ color: "red" }}>*</span>
             </Typography>
             <TextField
               fullWidth
+              required
               placeholder="Ingrese Usuario"
-              value={userForm.usuario}
-              onChange={handleFormChange('usuario')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+              value={userForm.usuario || ""}
+              onChange={handleFormChange("usuario")}
+              disabled={loading}
+              sx={{
+                bgcolor: "white",
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover fieldset": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
+                  },
+                },
               }}
-              required
             />
           </Grid>
 
           {/* 5. Password */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
-              5.- Password:
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
+              5.- Password: <span style={{ color: "red" }}>*</span>
             </Typography>
             <TextField
               fullWidth
-              type={showPassword ? 'text' : 'password'}
+              required
+              type={showPassword ? "text" : "password"}
               placeholder="Ingrese Password"
-              value={userForm.password}
-              onChange={handleFormChange('password')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+              value={userForm.password || ""}
+              onChange={handleFormChange("password")}
+              disabled={loading}
+              sx={{
+                bgcolor: "white",
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover fieldset": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
+                  },
+                },
               }}
-              required
               InputProps={{
                 endAdornment: (
-                  <IconButton 
-                    onClick={() => setShowPassword(!showPassword)} 
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
                     edge="end"
                     sx={{
                       color: farmaColors.secondary,
-                      '&:hover': {
-                        bgcolor: farmaColors.alpha.secondary10
-                      }
+                      "&:hover": {
+                        bgcolor: farmaColors.alpha.secondary10,
+                      },
                     }}
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
-                )
+                ),
               }}
             />
           </Grid>
 
           {/* 6. Cédula de identidad */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
               6.- Cédula de identidad:
             </Typography>
             <TextField
               fullWidth
               placeholder="Ingrese Cedula de identidad"
-              value={userForm.cedula}
-              onChange={handleFormChange('cedula')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+              value={userForm.cedula || ""}
+              onChange={handleFormChange("cedula")}
+              disabled={loading}
+              sx={{
+                bgcolor: "white",
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover fieldset": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
+                  },
+                },
               }}
             />
           </Grid>
 
           {/* 7. Nombre completo */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
-              7.- Nombre completo:
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
+              7.- Nombre completo: <span style={{ color: "red" }}>*</span>
             </Typography>
             <TextField
               fullWidth
+              required
               placeholder="Ingrese Nombre Completo"
-              value={userForm.nombreCompleto}
-              onChange={handleFormChange('nombreCompleto')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+              value={userForm.nombreCompleto || ""}
+              onChange={handleFormChange("nombreCompleto")}
+              disabled={loading}
+              sx={{
+                bgcolor: "white",
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover fieldset": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
+                  },
+                },
               }}
-              required
             />
           </Grid>
 
           {/* 8. Apellidos */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
               8.- Apellidos:
             </Typography>
             <TextField
               fullWidth
               placeholder="Ingrese Apellido"
-              value={userForm.apellidos}
-              onChange={handleFormChange('apellidos')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+              value={userForm.apellidos || ""}
+              onChange={handleFormChange("apellidos")}
+              disabled={loading}
+              sx={{
+                bgcolor: "white",
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover fieldset": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
+                  },
+                },
               }}
             />
           </Grid>
 
-          {/* 9. Título */}
+          {/* 9. Título - COMBOBOX */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
               9.- Título:
             </Typography>
-            <TextField
-              fullWidth
-              placeholder="Ingrese el Titulo"
-              value={userForm.titulo}
-              onChange={handleFormChange('titulo')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+            <FormControl fullWidth>
+              <InputLabel sx={{ color: "text.secondary" }}>
+                SELECCIONAR TÍTULO
+              </InputLabel>
+              <Select
+                value={userForm.titulo || ""}
+                onChange={handleFormChange("titulo")}
+                label="SELECCIONAR TÍTULO"
+                disabled={loading}
+                sx={{
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
-              }}
-            />
+                  },
+                }}
+              >
+                <MenuItem value="">
+                  <em>Sin título</em>
+                </MenuItem>
+                {TITULOS.map((titulo) => (
+                  <MenuItem
+                    key={titulo.codigo}
+                    value={titulo.codigo}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: farmaColors.alpha.primary10,
+                      },
+                      "&.Mui-selected": {
+                        bgcolor: farmaColors.alpha.primary20,
+                        "&:hover": {
+                          bgcolor: farmaColors.alpha.primary30,
+                        },
+                      },
+                    }}
+                  >
+                    {titulo.descripcion}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
 
-          {/* 10. Género */}
+          {/* 10. Género - RADIO BUTTONS */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
               10.- Género:
             </Typography>
             <RadioGroup
-              value={userForm.genero}
-              onChange={handleFormChange('genero')}
+              value={userForm.genero || "M"}
+              onChange={handleFormChange("genero")}
               row
               sx={{
-                '& .MuiFormControlLabel-root': {
-                  '& .MuiRadio-root': {
-                    color: 'text.secondary',
-                    '&.Mui-checked': {
-                      color: farmaColors.primary, // Radio naranja cuando está seleccionado
-                    }
-                  }
-                }
+                "& .MuiFormControlLabel-root": {
+                  "& .MuiRadio-root": {
+                    color: "text.secondary",
+                    "&.Mui-checked": {
+                      color: farmaColors.primary,
+                    },
+                    "&.Mui-disabled": {
+                      color: "rgba(0, 0, 0, 0.26)",
+                    },
+                  },
+                },
               }}
             >
-              <FormControlLabel value="Masculino" control={<Radio />} label="Masculino" />
-              <FormControlLabel value="Femenino" control={<Radio />} label="Femenino" />
+              {GENEROS.map((genero) => (
+                <FormControlLabel
+                  key={genero.codigo}
+                  value={genero.codigo}
+                  control={<Radio disabled={loading} />}
+                  label={genero.descripcion}
+                />
+              ))}
             </RadioGroup>
           </Grid>
 
           {/* 11. Celular */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
               11.- Celular:
             </Typography>
             <TextField
               fullWidth
               placeholder="Ingrese Numero de celular"
-              value={userForm.telefono}
-              onChange={handleFormChange('telefono')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+              value={userForm.telefono || ""}
+              onChange={handleFormChange("telefono")}
+              disabled={loading}
+              sx={{
+                bgcolor: "white",
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover fieldset": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
+                  },
+                },
               }}
             />
           </Grid>
 
           {/* 12. Email */}
           <Grid item xs={12} md={6}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
-              12.- Email:
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
+              12.- Email: <span style={{ color: "red" }}>*</span>
             </Typography>
             <TextField
               fullWidth
+              required
+              type="email"
               placeholder="Ingrese dirección de correo electrónico"
-              value={userForm.email}
-              onChange={handleFormChange('email')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+              value={userForm.email || ""}
+              onChange={handleFormChange("email")}
+              disabled={loading}
+              sx={{
+                bgcolor: "white",
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover fieldset": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
+                  },
+                },
               }}
-              type="email"
-              required
             />
           </Grid>
 
           {/* 13. Dirección */}
           <Grid item xs={12}>
-            <Typography variant="body2" sx={{ 
-              color: farmaColors.primary, // Naranja corporativo
-              mb: 1, 
-              fontWeight: 600 
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: farmaColors.primary,
+                mb: 1,
+                fontWeight: 600,
+              }}
+            >
               13.- Dirección:
             </Typography>
             <TextField
               fullWidth
               placeholder="Ingrese dirección actual"
-              value={userForm.direccion}
-              onChange={handleFormChange('direccion')}
-              sx={{ 
-                bgcolor: 'white',
-                '& .MuiOutlinedInput-root': {
-                  '&.Mui-focused fieldset': {
+              value={userForm.direccion || ""}
+              onChange={handleFormChange("direccion")}
+              disabled={loading}
+              sx={{
+                bgcolor: "white",
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
                     borderColor: farmaColors.primary,
                   },
-                  '&:hover fieldset': {
+                  "&:hover fieldset": {
                     borderColor: farmaColors.primaryLight,
-                  }
-                }
+                  },
+                },
               }}
             />
           </Grid>
 
-          {/* Botones de acción con colores corporativos */}
-          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
+          {/* Indicador visual de carga */}
+          {loading && (
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 2,
+                  p: 2,
+                  bgcolor: farmaColors.alpha.primary10,
+                  borderRadius: 2,
+                }}
+              >
+                <CircularProgress
+                  size={24}
+                  sx={{ color: farmaColors.primary }}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  Cargando catálogos del sistema...
+                </Typography>
+              </Box>
+            </Grid>
+          )}
+
+          {/* Botones de acción */}
+          <Grid
+            item
+            xs={12}
+            sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}
+          >
             <Button
               variant="outlined"
               onClick={handleCancel}
+              disabled={loading}
               sx={{
                 borderColor: farmaColors.secondary,
                 color: farmaColors.secondary,
                 px: 3,
                 py: 1.5,
-                '&:hover': {
+                "&:hover": {
                   borderColor: farmaColors.secondaryDark,
-                  bgcolor: farmaColors.alpha.secondary10
-                }
+                  bgcolor: farmaColors.alpha.secondary10,
+                },
               }}
             >
               Cancelar
@@ -563,23 +730,34 @@ const CreateUserForm = ({ onCancel }) => {
             <Button
               variant="contained"
               onClick={handleSave}
-              startIcon={<Save />}
+              disabled={loading}
+              startIcon={
+                loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  <Save />
+                )
+              }
               sx={{
-                background: farmaColors.gradients.primary, // Gradiente naranja corporativo
-                color: 'white',
+                background: farmaColors.gradients.primary,
+                color: "white",
                 px: 4,
                 py: 1.5,
-                fontSize: '1rem',
+                fontSize: "1rem",
                 fontWeight: 600,
                 boxShadow: `0 4px 20px ${farmaColors.alpha.primary30}`,
-                '&:hover': {
+                "&:hover": {
                   background: farmaColors.gradients.primary,
-                  transform: 'translateY(-2px)',
+                  transform: "translateY(-2px)",
                   boxShadow: `0 6px 25px ${farmaColors.alpha.primary30}`,
-                }
+                },
+                "&:disabled": {
+                  background: "rgba(0, 0, 0, 0.12)",
+                  color: "rgba(0, 0, 0, 0.26)",
+                },
               }}
             >
-              Guardar usuario
+              {loading ? "Guardando..." : "Guardar"}
             </Button>
           </Grid>
         </Grid>

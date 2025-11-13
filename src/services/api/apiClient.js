@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // URL base del API
-const API_BASE_URL = 'http://api-core.farmadinamica.com.bo/api/farmalink-core';
+const API_BASE_URL = 'https://api-core.farmadinamica.com.bo/api/farmalink-core';
 
 // Crear instancia de Axios
 const apiClient = axios.create({

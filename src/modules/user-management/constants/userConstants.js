@@ -1,10 +1,20 @@
-// src/modules/user-management/constants/userConstants.js - Con sistema de permisos
+// src/modules/user-management/constants/userConstants.js - Con sistema de permisos Y TÍTULOS
 
 // Constantes de configuración
 export const sucursales = ['BRASIL', 'SAN MARTIN', 'URUGUAY', 'TIQUIPAYA'];
 export const roles = ['ADMIN', 'FARMACEUTICO', 'VENDEDOR', 'SUPERVISOR', 'CONTADOR'];
 export const tiposUsuario = ['ADMINISTRADOR', 'USUARIO NORMAL', 'INVITADO'];
 export const generos = ['Masculino', 'Femenino'];
+
+// 🆕 NUEVO: Títulos académicos con códigos para el API
+export const titulos = [
+  { codigo: "Tec", descripcion: "Técnico" },
+  { codigo: "Lic", descripcion: "Licenciado" },
+  { codigo: "Ing", descripcion: "Ingeniero" },
+  { codigo: "MSc", descripcion: "Master" },
+  { codigo: "Doc", descripcion: "Doctor" },
+  { codigo: "Phd", descripcion: "PhD" },
+];
 
 // Mapeo de equipos a IPs autorizadas
 export const deviceIPMapping = {
@@ -195,19 +205,23 @@ export const currentUserConfig = {
 
 // Estructura del formulario inicial
 export const initialFormState = {
-  sucursal: '',
-  nombreEquipo: '',
-  tipoUsuario: '',
-  usuario: '',
-  password: '',
-  cedula: '',
-  nombreCompleto: '',
-  apellidos: '',
-  titulo: '',
-  telefono: '',
-  email: '',
-  genero: 'Masculino',
-  direccion: ''
+  sucursal_ID: "",               // ID numérico o vacío
+  sucursal: "",                  // nombre opcional
+  rol_ID: "",                    // ID numérico o vacío
+  tipoUsuarioInterno: "",        // INT, EXT, API, etc.
+  tipoUsuarioDescripcion: "",    // descripción auxiliar
+  usuario: "",
+  password: "",
+  cedula: "",
+  nombreCompleto: "",
+  apellidos: "",
+  titulo: "",
+  genero: "M",                   // "M" = Masculino, "F" = Femenino
+  telefono: "",
+  email: "",
+  direccion: "",
+  nombreEquipo: "",
+  equipoComputo_ID: "",          // opcional
 };
 
 // Campos obligatorios para validación
