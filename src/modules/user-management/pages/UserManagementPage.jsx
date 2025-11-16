@@ -85,8 +85,9 @@ const UserManagementPageContent = () => {
   }
 
   if (activeView === "permissions") {
-    return <AssignPermissions onCancel={handleBackToList} />;
-  }
+  return (<AssignPermissions onCancel={handleBackToList} />
+  );
+}
 
   if (activeView === "schedule") {
     return <AssignSchedule onCancel={handleBackToList} />;

@@ -12,6 +12,7 @@ import {
 } from "../constants/userConstants";
 
 import userService from "../../../services/api/userService";
+import menuService from "../../../services/api/menuService";
 import { ORGANIZATION_CONFIG } from "../../../config/organizationConfig";
 
 import { useAuth } from "../../../context/AuthContext";
@@ -585,6 +586,126 @@ export const useUsers = () => {
     setSelectedTab(newValue);
   };
 
+  // Al final de useUsers.js, ANTES del return, agrega/reemplaza:
+
+  // ========================================
+  // FUNCIONES DE PERMISOS (VERSIÓN CORREGIDA)
+  // ========================================
+
+  /**
+   * 🆕 Obtener estructura del menú con permisos
+   */
+  const getMenuEstructura = async (usuarioId) => {
+    const usuario = users.find((u) => u.id === parseInt(usuarioId));
+
+    if (!usuario || !usuario.rol_ID) {
+      throw new Error("Usuario no encontrado o sin rol asignado");
+    }
+
+    // Llamar con el rol_ID numérico
+    const menuData = await menuService.getPermisosByRol(usuario.rol_ID);
+    return menuData;
+  };
+
+  /**
+   * 🆕 Obtener plantilla de permisos por rol
+   */
+  const getRoleTemplatePermissionsReal = async (nombreRol) => {
+    try {
+      console.log(
+        `📡 Obteniendo plantilla de permisos para rol: ${nombreRol}...`
+      );
+
+      const templateData = await menuService.getPermisosByRol(nombreRol);
+
+      const activePermissions = [];
+
+      templateData.forEach((modulo) => {
+        const opcionId = modulo.codigoOpcion_ID || modulo.opcion_ID;
+        const estado = modulo.estado || "ACT";
+
+        if (estado === "ACT" && opcionId) {
+          activePermissions.push(opcionId);
+        }
+
+        const subOpciones =
+          modulo.subOpcionesMenu || modulo.opcionesSubMenu || [];
+        subOpciones.forEach((subOpcion) => {
+          const subId = subOpcion.codigoOpcion_ID || subOpcion.opcion_ID;
+          const subEstado = subOpcion.estado || "ACT";
+
+          if (subEstado === "ACT" && subId) {
+            activePermissions.push(subId);
+          }
+        });
+      });
+
+      console.log(
+        `✅ Plantilla "${nombreRol}":`,
+        activePermissions.length,
+        "permisos"
+      );
+      return activePermissions;
+    } catch (error) {
+      console.error("❌ Error obteniendo plantilla:", error);
+      throw error;
+    }
+  };
+
+  /**
+   * 🆕 Guardar permisos
+   */
+  const saveUserPermissionsReal = async ({
+    usuario_ID,
+    rol_ID,
+    sucursal_ID,
+    permisoIDs,
+    codigoEmpleadoAlta,
+  }) => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        usuario_ID: Number(usuario_ID),
+        rol_ID: Number(rol_ID),
+        sucursal_ID: Number(sucursal_ID),
+        codigoEmpleadoAlta: codigoEmpleadoAlta || "SYSTEM",
+        permisosOpciones: permisoIDs.map((id) => ({
+          opcion_ID: Number(id),
+          estadoOpcion: "ACT",
+        })),
+      };
+
+      console.log("🧾 Payload:", JSON.stringify(payload, null, 2));
+
+      const apiClient = (await import("../../../services/api/apiClient"))
+        .default;
+
+      const response = await apiClient.put(
+        "/MenuOpciones/ActualizarPermisosOpciones",
+        payload
+      );
+
+      if (response.data?.exitoso) {
+        enqueueSnackbar("Permisos actualizados correctamente", {
+          variant: "success",
+        });
+        return true;
+      } else {
+        enqueueSnackbar(response.data?.mensaje || "Error al actualizar", {
+          variant: "error",
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("❌ Error guardando:", error);
+      enqueueSnackbar("Error al guardar permisos", { variant: "error" });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ========================================
   // RETURN
   // ========================================
@@ -629,6 +750,9 @@ export const useUsers = () => {
     updateUserPermissions,
     hasPermission,
     getUserPermissions,
+    getMenuEstructura,
+    getRoleTemplatePermissionsReal,
+    saveUserPermissionsReal,
 
     // Funciones de catálogos
     loadEquiposBySucursal,

@@ -54,7 +54,7 @@ export const buildMenuFromApi = (apiPermissions) => {
       const menuItem = {
         texto: module.nombreOpcion,
         icono: getIconComponent(module.icono),
-        ruta: module.descripcion || `/${module.nombreOpcion.toLowerCase()}`, // 🔥 Usar descripcion directamente
+        ruta: module.ruta || `/${module.nombreOpcion.toLowerCase()}`, // 🔥 Usar descripcion directamente
         color: module.color,
         subElementos: [],
       };
@@ -65,7 +65,7 @@ export const buildMenuFromApi = (apiPermissions) => {
           .sort((a, b) => (a.orden || 0) - (b.orden || 0))
           .map(subOption => {
             // 🔥 Usar descripcion directamente como ruta
-            const subRoute = subOption.descripcion || `${menuItem.ruta}/${subOption.nombreOpcion.toLowerCase()}`;
+            const subRoute = subOption.ruta || `${menuItem.ruta}/${subOption.nombreOpcion.toLowerCase()}`;
             
             console.log(`  └─ Subopción: ${subOption.nombreOpcion} → ${subRoute}`);
             

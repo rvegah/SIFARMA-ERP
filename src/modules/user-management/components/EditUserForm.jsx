@@ -223,7 +223,7 @@ const EditUserForm = ({ onCancel }) => {
                 value={userForm.rol_ID || ""}
                 onChange={handleFormChange("rol_ID")}
                 label="ROL DE USUARIO"
-                disabled={loading}
+                disabled //={loading}
                 sx={{
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                     borderColor: farmaColors.primary,

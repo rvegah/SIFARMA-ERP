@@ -1,6 +1,7 @@
-// AssignPermissions.jsx - Interfaz mejorada para asignar permisos
+// src/modules/user-management/components/AssignPermissions.jsx
+// VERSIÓN FINAL CORREGIDA - Con subopciones, plantillas dinámicas y carga completa de permisos
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -21,281 +22,289 @@ import {
   Box,
   Chip,
   Alert,
-  Divider,
   Switch,
   Avatar,
-  Badge
-} from '@mui/material';
+  Badge,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import {
   ExpandMore,
   Person,
-  Security,
   Save,
   Cancel,
   CheckCircle,
-  RadioButtonUnchecked,
   SelectAll,
-  ClearAll as DeselectAll
-} from '@mui/icons-material';
-import { useUsers } from '../context/UserContext';
+  ClearAll as DeselectAll,
+} from "@mui/icons-material";
+import { useUsers } from "../context/UserContext";
+import { farmaColors } from "/src/app/theme";
 
-// Configuración de módulos y permisos organizados por categorías - COMPLETA con 70+ permisos
-const permissionsConfig = {
-  usuarios: {
-    nombre: 'Usuarios',
-    icono: '👥',
-    color: '#4A5FFF',
-    permisos: [
-      { id: 'usuario_crear', nombre: 'Nuevo Usuario', descripcion: 'Crear nuevos usuarios' },
-      { id: 'usuario_lista', nombre: 'Lista de Usuarios', descripcion: 'Ver lista de usuarios' },
-      { id: 'usuario_editar', nombre: 'Editar Usuario', descripcion: 'Modificar datos de usuarios' },
-      { id: 'usuario_eliminar', nombre: 'Eliminar Usuario', descripcion: 'Eliminar usuarios del sistema' },
-      { id: 'usuario_permisos', nombre: 'Asignar Permisos', descripcion: 'Gestionar permisos de usuarios' }
-    ]
-  },
-  productos: {
-    nombre: 'Productos',
-    icono: '📦',
-    color: '#10B981',
-    permisos: [
-      { id: 'producto_ver', nombre: 'Ver Productos', descripcion: 'Consultar catálogo de productos' },
-      { id: 'producto_crear', nombre: 'Agregar Producto', descripcion: 'Añadir nuevos productos' },
-      { id: 'producto_editar', nombre: 'Editar Producto', descripcion: 'Modificar información de productos' },
-      { id: 'producto_eliminar', nombre: 'Eliminar Producto', descripcion: 'Eliminar productos del sistema' },
-      { id: 'producto_categorias', nombre: 'Gestionar Categorías', descripcion: 'Administrar categorías de productos' },
-      { id: 'producto_inventario', nombre: 'Control de Inventario', descripcion: 'Gestionar stock y existencias' }
-    ]
-  },
-  compras: {
-    nombre: 'Compras',
-    icono: '🛒',
-    color: '#F59E0B',
-    permisos: [
-      { id: 'compra_crear', nombre: 'Nueva Compra', descripcion: 'Registrar nuevas compras' },
-      { id: 'compra_editar', nombre: 'Editar Compras', descripcion: 'Modificar compras existentes' },
-      { id: 'compra_salida', nombre: 'Nueva Salida', descripcion: 'Registrar salidas de inventario' },
-      { id: 'compra_credito', nombre: 'Compras a Crédito', descripcion: 'Gestionar compras a crédito' },
-      { id: 'compra_ingresos', nombre: 'Ingresos del Día', descripcion: 'Ver ingresos diarios' },
-      { id: 'compra_almacen', nombre: 'Almacén Traspasos', descripcion: 'Gestionar traspasos entre almacenes' },
-      { id: 'compra_ordenes', nombre: 'Órdenes de Compra', descripcion: 'Crear y gestionar órdenes de compra' }
-    ]
-  },
-  proveedor: {
-    nombre: 'Proveedores',
-    icono: '🏢',
-    color: '#8B5CF6',
-    permisos: [
-      { id: 'proveedor_crear', nombre: 'Nuevo Proveedor', descripcion: 'Registrar nuevos proveedores' },
-      { id: 'proveedor_editar', nombre: 'Editar Proveedor', descripcion: 'Modificar datos de proveedores' },
-      { id: 'proveedor_ver', nombre: 'Ver Proveedores', descripcion: 'Consultar lista de proveedores' },
-      { id: 'proveedor_eliminar', nombre: 'Eliminar Proveedor', descripcion: 'Eliminar proveedores del sistema' }
-    ]
-  },
-  ventas: {
-    nombre: 'Ventas',
-    icono: '💰',
-    color: '#EF4444',
-    permisos: [
-      { id: 'venta_crear', nombre: 'Nueva Venta', descripcion: 'Registrar nuevas ventas' },
-      { id: 'venta_editar', nombre: 'Editar Venta', descripcion: 'Modificar ventas existentes' },
-      { id: 'venta_pedidos', nombre: 'Realizar Pedidos', descripcion: 'Gestionar pedidos de clientes' },
-      { id: 'venta_mis_pedidos', nombre: 'Mis Pedidos', descripcion: 'Ver mis pedidos personales' },
-      { id: 'venta_cancelar', nombre: 'Cancelar Ventas', descripcion: 'Cancelar ventas realizadas' },
-      { id: 'venta_devoluciones', nombre: 'Devoluciones', descripcion: 'Procesar devoluciones de productos' }
-    ]
-  },
-  traspasos: {
-    nombre: 'Traspasos',
-    icono: '🔄',
-    color: '#06B6D4',
-    permisos: [
-      { id: 'traspaso_crear', nombre: 'Nuevo Traspaso', descripcion: 'Crear traspasos entre sucursales' },
-      { id: 'traspaso_aprobar', nombre: 'Aprobar Traspasos', descripcion: 'Aprobar traspasos pendientes' },
-      { id: 'traspaso_recibir', nombre: 'Recibir Traspasos', descripcion: 'Confirmar recepción de traspasos' },
-      { id: 'traspaso_historial', nombre: 'Historial Traspasos', descripcion: 'Ver historial de traspasos' }
-    ]
-  },
-  reportes: {
-    nombre: 'Reportes',
-    icono: '📊',
-    color: '#8B5CF6',
-    permisos: [
-      { id: 'reporte_diario', nombre: 'Reporte Diario', descripcion: 'Generar reportes diarios' },
-      { id: 'reporte_mensual', nombre: 'Reporte Mensual', descripcion: 'Generar reportes mensuales' },
-      { id: 'reporte_productos', nombre: 'Reporte Productos', descripcion: 'Reportes de productos' },
-      { id: 'reporte_ventas', nombre: 'Reporte Ventas', descripcion: 'Reportes de ventas' },
-      { id: 'reporte_compras', nombre: 'Reporte Compras', descripcion: 'Reportes de compras' },
-      { id: 'reporte_inventario', nombre: 'Inventario Diario', descripcion: 'Control de inventario' },
-      { id: 'reporte_vencidos', nombre: 'Productos Vencidos', descripcion: 'Productos próximos a vencer' },
-      { id: 'reporte_stock', nombre: 'Stock Almacenes', descripcion: 'Estado de stock por almacén' },
-      { id: 'reporte_sucursales', nombre: 'Reporte por Sucursales', descripcion: 'Reportes específicos por sucursal' },
-      { id: 'reporte_productos_vencidos', nombre: 'Reporte Vencimientos', descripcion: 'Productos próximos a vencer' },
-      { id: 'reporte_categorias', nombre: 'Reporte Categorías', descripcion: 'Reportes por categorías de productos' },
-      { id: 'reporte_proveedores', nombre: 'Reporte Proveedores', descripcion: 'Reportes de proveedores' },
-      { id: 'reporte_mas_vendidos', nombre: 'Productos más vendidos', descripcion: 'Productos con mayor rotación' },
-      { id: 'reporte_asistencia', nombre: 'Reporte de Asistencia', descripcion: 'Control de asistencia del personal' },
-      { id: 'reporte_kardex', nombre: 'Kardex', descripcion: 'Movimientos detallados de productos' },
-      { id: 'reporte_pedidos', nombre: 'Reporte Pedidos', descripcion: 'Estado de pedidos y órdenes' }
-    ]
-  },
-  finanzas: {
-    nombre: 'Finanzas',
-    icono: '💳',
-    color: '#059669',
-    permisos: [
-      { id: 'finanzas_ingresos_diarios', nombre: 'Ingresos del Día', descripcion: 'Ver ingresos diarios' },
-      { id: 'finanzas_ingresos_mensuales', nombre: 'Ingresos Mensuales', descripcion: 'Ver ingresos mensuales' },
-      { id: 'finanzas_gastos', nombre: 'Gastos', descripcion: 'Gestionar gastos de la empresa' },
-      { id: 'finanzas_flujo_caja', nombre: 'Flujo de Caja', descripcion: 'Control de flujo de efectivo' },
-      { id: 'finanzas_cuentas', nombre: 'Cuentas por Cobrar', descripcion: 'Gestionar cuentas pendientes' },
-      { id: 'finanzas_pagos', nombre: 'Métodos de Pago', descripcion: 'Configurar métodos de pago' }
-    ]
-  },
-  clientes: {
-    nombre: 'Clientes',
-    icono: '👤',
-    color: '#DC2626',
-    permisos: [
-      { id: 'cliente_crear', nombre: 'Nuevo Cliente', descripcion: 'Registrar nuevos clientes' },
-      { id: 'cliente_editar', nombre: 'Editar Cliente', descripcion: 'Modificar datos de clientes' },
-      { id: 'cliente_ver', nombre: 'Ver Clientes', descripcion: 'Consultar lista de clientes' },
-      { id: 'cliente_historial', nombre: 'Historial Cliente', descripcion: 'Ver historial de compras del cliente' },
-      { id: 'cliente_credito', nombre: 'Crédito Cliente', descripcion: 'Gestionar créditos de clientes' }
-    ]
-  },
-  laboratorio: {
-    nombre: 'Laboratorio',
-    icono: '🧪',
-    color: '#7C3AED',
-    permisos: [
-      { id: 'laboratorio_examenes', nombre: 'Exámenes de Laboratorio', descripcion: 'Gestionar exámenes médicos' },
-      { id: 'laboratorio_resultados', nombre: 'Resultados', descripcion: 'Consultar y entregar resultados' },
-      { id: 'laboratorio_equipos', nombre: 'Equipos', descripcion: 'Gestionar equipos de laboratorio' },
-      { id: 'laboratorio_muestras', nombre: 'Muestras', descripcion: 'Control de muestras médicas' },
-      { id: 'laboratorio_programacion', nombre: 'Programación', descripcion: 'Programar citas de laboratorio' }
-    ]
-  },
-  farmacia: {
-    nombre: 'Farmacia',
-    icono: '💊',
-    color: '#16A34A',
-    permisos: [
-      { id: 'farmacia_recetas', nombre: 'Recetas Médicas', descripcion: 'Gestionar recetas médicas' },
-      { id: 'farmacia_controlados', nombre: 'Medicamentos Controlados', descripcion: 'Manejo de sustancias controladas' },
-      { id: 'farmacia_preparaciones', nombre: 'Preparaciones Magistrales', descripcion: 'Preparar fórmulas magistrales' },
-      { id: 'farmacia_consulta', nombre: 'Consulta Farmacéutica', descripcion: 'Brindar consultas farmacéuticas' },
-      { id: 'farmacia_control_inventario', nombre: 'Control Farmacéutico', descripcion: 'Control específico de medicamentos' }
-    ]
-  },
-  sistema: {
-    nombre: 'Sistema',
-    icono: '⚙️',
-    color: '#6B7280',
-    permisos: [
-      { id: 'sistema_respaldos', nombre: 'Respaldos', descripcion: 'Crear y restaurar respaldos' },
-      { id: 'sistema_configuracion', nombre: 'Configuración', descripcion: 'Configurar parámetros del sistema' },
-      { id: 'sistema_sucursales', nombre: 'Ordenar Sucursales', descripcion: 'Gestionar sucursales' },
-      { id: 'sistema_logs', nombre: 'Logs del Sistema', descripcion: 'Ver registros del sistema' },
-      { id: 'sistema_mantenimiento', nombre: 'Mantenimiento', descripcion: 'Realizar mantenimiento del sistema' },
-      { id: 'sistema_actualizaciones', nombre: 'Actualizaciones', descripcion: 'Gestionar actualizaciones del sistema' },
-      { id: 'sistema_seguridad', nombre: 'Seguridad', descripcion: 'Configurar parámetros de seguridad' },
-      { id: 'sistema_base_datos', nombre: 'Base de Datos', descripcion: 'Administrar base de datos' }
-    ]
-  }
-};
+// ========================================
+// CONSTANTES
+// ========================================
+const ROLES_ORDER = [
+  "Administrador",
+  "Contador",
+  "Farmacéutico",
+  "Vendedor",
+  "Bioquimico",
+  "Supervisor",
+  "Laboratorista",
+];
 
-// Roles predefinidos con permisos típicos - ACTUALIZADO con nuevos módulos
-const roleTemplates = {
-  ADMIN: {
-    nombre: 'Administrador',
-    descripcion: 'Acceso completo al sistema',
-    permisos: Object.keys(permissionsConfig).flatMap(module => 
-      permissionsConfig[module].permisos.map(p => p.id)
-    )
-  },
-  FARMACEUTICO: {
-    nombre: 'Farmacéutico',
-    descripcion: 'Acceso a farmacia, ventas, productos e inventario',
-    permisos: [
-      'producto_ver', 'producto_editar', 'producto_inventario',
-      'venta_crear', 'venta_pedidos', 'venta_devoluciones',
-      'farmacia_recetas', 'farmacia_controlados', 'farmacia_preparaciones', 'farmacia_consulta', 'farmacia_control_inventario',
-      'cliente_ver', 'cliente_historial',
-      'reporte_diario', 'reporte_inventario', 'reporte_vencidos', 'reporte_kardex'
-    ]
-  },
-  VENDEDOR: {
-    nombre: 'Vendedor',
-    descripcion: 'Acceso básico a ventas y productos',
-    permisos: [
-      'producto_ver',
-      'venta_crear', 'venta_mis_pedidos',
-      'cliente_crear', 'cliente_ver', 'cliente_historial',
-      'reporte_diario'
-    ]
-  },
-  SUPERVISOR: {
-    nombre: 'Supervisor',
-    descripcion: 'Acceso a reportes, supervisión y operaciones',
-    permisos: [
-      'producto_ver', 'producto_editar',
-      'venta_crear', 'venta_pedidos', 'venta_cancelar',
-      'compra_crear', 'compra_editar',
-      'traspaso_crear', 'traspaso_aprobar', 'traspaso_historial',
-      'cliente_ver', 'cliente_editar', 'cliente_historial', 'cliente_credito',
-      'reporte_diario', 'reporte_mensual', 'reporte_ventas', 'reporte_inventario', 'reporte_compras', 'reporte_sucursales', 'reporte_asistencia'
-    ]
-  },
-  CONTADOR: {
-    nombre: 'Contador',
-    descripcion: 'Acceso a finanzas, reportes contables y administrativos',
-    permisos: [
-      'finanzas_ingresos_diarios', 'finanzas_ingresos_mensuales', 'finanzas_gastos', 'finanzas_flujo_caja', 'finanzas_cuentas', 'finanzas_pagos',
-      'reporte_diario', 'reporte_mensual', 'reporte_ventas', 'reporte_compras', 'reporte_sucursales',
-      'proveedor_ver',
-      'cliente_ver', 'cliente_credito'
-    ]
-  },
-  LABORATORISTA: {
-    nombre: 'Laboratorista',
-    descripcion: 'Acceso específico para laboratorio médico',
-    permisos: [
-      'laboratorio_examenes', 'laboratorio_resultados', 'laboratorio_equipos', 'laboratorio_muestras', 'laboratorio_programacion',
-      'cliente_ver', 'cliente_historial',
-      'reporte_diario'
-    ]
-  }
-};
+const EXCLUDED_ROLES = ["SISTEMAS", "Sistemas", "IMPUESTOS", "Impuestos"];
 
 const AssignPermissions = ({ onCancel }) => {
-  const { selectedUser, users, updateUserPermissions, getUserPermissions } = useUsers();
-  const [selectedUserId, setSelectedUserId] = useState(selectedUser?.id || '');
+  const {
+    users,
+    sucursales,
+    roles,
+    loading,
+    selectedUser,
+    getMenuEstructura,
+    getRoleTemplatePermissionsReal,
+    saveUserPermissionsReal,
+    codigoEmpleado,
+  } = useUsers();
+
+  // ========================================
+  // ESTADOS
+  // ========================================
+  const [selectedUserId, setSelectedUserId] = useState(""); // ← Inicializa vacío
+  const [selectedSucursalId, setSelectedSucursalId] = useState("");
+  const [selectedRolId, setSelectedRolId] = useState("");
   const [userPermissions, setUserPermissions] = useState(new Set());
-  const [expandedPanels, setExpandedPanels] = useState(['usuarios']);
+  const [menuStructure, setMenuStructure] = useState([]);
+  const [expandedPanels, setExpandedPanels] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [loadingMenu, setLoadingMenu] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingRoleName, setPendingRoleName] = useState("");
 
-  // Obtener usuario seleccionado
-  const currentUser = users.find(u => u.id === parseInt(selectedUserId));
+  const currentUser = users.find((u) => u.id === parseInt(selectedUserId));
 
-  // Cargar permisos cuando se selecciona un usuario
+  // ✅ Y el useEffect de la línea 81 se encargará de setear el usuario
   useEffect(() => {
-    if (selectedUserId) {
-      const permissions = getUserPermissions(parseInt(selectedUserId));
-      setUserPermissions(new Set(permissions));
-      setHasChanges(false);
-    }
-  }, [selectedUserId, getUserPermissions]);
+    if (selectedUser?.id && selectedUserId === "") {
+      console.log(
+        "🎯 Auto-seleccionando usuario:",
+        selectedUser.nombreCompleto
+      );
+      setSelectedUserId(selectedUser.id.toString());
+      setSelectedSucursalId(selectedUser.sucursal_ID || "");
+      setSelectedRolId(selectedUser.rol_ID || "");
 
-  // Función para aplicar plantilla de rol
-  const applyRoleTemplate = (roleKey) => {
-    const template = roleTemplates[roleKey];
-    if (template) {
-      setUserPermissions(new Set(template.permisos));
-      setHasChanges(true);
+      if (selectedUser.rol) {
+        handleUserChange({ target: { value: selectedUser.id.toString() } });
+      }
+    }
+  }, [selectedUser]);
+
+  // ========================================
+  // CARGAR PERMISOS ACTUALES DEL USUARIO
+  // ========================================
+  const loadUserPermissions = async (usuarioId) => {
+    try {
+      setLoadingMenu(true);
+      console.log(`📡 Cargando permisos para usuario ID ${usuarioId}...`);
+
+      const menuData = await getMenuEstructura(usuarioId);
+
+      console.log(
+        "🔍 DATOS CRUDOS DEL API:",
+        JSON.stringify(menuData, null, 2)
+      );
+
+      // ✅ NORMALIZAR estructura del API a formato esperado
+      const normalizedData = menuData.map((modulo) => ({
+        opcion_ID: modulo.codigoOpcion_ID || modulo.opcion_ID,
+        nombreOpcion: modulo.nombreOpcion,
+        descripcion: modulo.descripcion,
+        estado: modulo.estado, // ✅ SIN valor por defecto
+        opcionesSubMenu: (
+          modulo.subOpcionesMenu ||
+          modulo.opcionesSubMenu ||
+          []
+        ).map((sub) => ({
+          opcion_ID: sub.codigoOpcion_ID || sub.opcion_ID,
+          nombreOpcion: sub.nombreOpcion,
+          descripcion: sub.descripcion,
+          estado: sub.estado, // ✅ SIN valor por defecto
+        })),
+      }));
+
+      console.log(
+        "🔍 DATOS NORMALIZADOS:",
+        JSON.stringify(normalizedData, null, 2)
+      );
+
+      setMenuStructure(normalizedData);
+
+      // ✅ Extraer permisos ACTIVOS (estado === "ACT")
+      const activePermissionIds = new Set();
+
+      normalizedData.forEach((modulo) => {
+        console.log(
+          `📋 Módulo: ${modulo.nombreOpcion}, Estado: ${modulo.estado}`
+        );
+        if (modulo.estado === "ACT") {
+          activePermissionIds.add(modulo.opcion_ID);
+          console.log(`  ✅ Agregado módulo ID ${modulo.opcion_ID}`);
+        }
+
+        if (modulo.opcionesSubMenu && Array.isArray(modulo.opcionesSubMenu)) {
+          modulo.opcionesSubMenu.forEach((subOpcion) => {
+            console.log(
+              `  📄 Subopción: ${subOpcion.nombreOpcion}, Estado: ${subOpcion.estado}`
+            );
+            if (subOpcion.estado === "ACT") {
+              activePermissionIds.add(subOpcion.opcion_ID);
+              console.log(
+                `    ✅ Agregado subopción ID ${subOpcion.opcion_ID}`
+              );
+            }
+          });
+        }
+      });
+
+      setUserPermissions(activePermissionIds);
+      setHasChanges(false);
+      console.log(
+        `✅ ${
+          activePermissionIds.size
+        } permisos activos cargados (de ${getTotalPermissions(
+          normalizedData
+        )} totales)`
+      );
+      console.log("🔍 IDs ACTIVOS:", Array.from(activePermissionIds));
+    } catch (error) {
+      console.error("❌ Error cargando permisos:", error);
+    } finally {
+      setLoadingMenu(false);
     }
   };
 
-  // Función para alternar permiso individual
+  // Nueva función que solo carga la estructura, no los permisos
+  const loadMenuStructureOnly = async (usuarioId) => {
+    try {
+      setLoadingMenu(true);
+      const menuData = await getMenuEstructura(usuarioId);
+
+      const normalizedData = menuData.map((modulo) => ({
+        opcion_ID: modulo.codigoOpcion_ID || modulo.opcion_ID,
+        nombreOpcion: modulo.nombreOpcion,
+        descripcion: modulo.descripcion,
+        estado: modulo.estado,
+        opcionesSubMenu: (
+          modulo.subOpcionesMenu ||
+          modulo.opcionesSubMenu ||
+          []
+        ).map((sub) => ({
+          opcion_ID: sub.codigoOpcion_ID || sub.opcion_ID,
+          nombreOpcion: sub.nombreOpcion,
+          descripcion: sub.descripcion,
+          estado: sub.estado,
+        })),
+      }));
+
+      setMenuStructure(normalizedData);
+      // ✅ NO tocar userPermissions aquí
+    } catch (error) {
+      console.error("❌ Error cargando estructura:", error);
+    } finally {
+      setLoadingMenu(false);
+    }
+  };
+
+  // ========================================
+  // CALCULAR TOTAL DE PERMISOS
+  // ========================================
+  const getTotalPermissions = (menuData) => {
+    return menuData.reduce((sum, modulo) => {
+      let count = 1; // El módulo principal
+      if (modulo.opcionesSubMenu) {
+        count += modulo.opcionesSubMenu.length;
+      }
+      return sum + count;
+    }, 0);
+  };
+
+  // ========================================
+  // MANEJO DE CAMBIO DE USUARIO
+  // ========================================
+  const handleUserChange = async (event) => {
+    const userId = event.target.value;
+    setSelectedUserId(userId);
+
+    const user = users.find((u) => u.id === parseInt(userId));
+    if (user) {
+      setSelectedSucursalId(user.sucursal_ID || "");
+      setSelectedRolId(user.rol_ID || "");
+
+      if (user.rol) {
+        // 1️⃣ Primero cargar la plantilla de permisos
+        await applyRoleTemplate(user.rol);
+
+        // 2️⃣ Luego cargar la estructura del menú (sin sobrescribir permisos)
+        await loadMenuStructureOnly(userId);
+      }
+    }
+  };
+
+  // ========================================
+  // APLICAR PLANTILLA DE ROL
+  // ========================================
+  // ✅ NUEVA VERSIÓN con Dialog elegante
+  const applyRoleTemplate = async (nombreRol) => {
+    // Abrir dialog de confirmación
+    setPendingRoleName(nombreRol);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmApplyTemplate = async () => {
+    setConfirmDialogOpen(false);
+
+    try {
+      console.log(`🔄 Aplicando plantilla de rol: ${pendingRoleName}`);
+      const templatePermissions = await getRoleTemplatePermissionsReal(
+        pendingRoleName
+      );
+
+      setUserPermissions(new Set(templatePermissions));
+
+      // ✅ ACTUALIZAR el rol_ID cuando se aplica una plantilla
+      const rolSeleccionado = roles.find(
+        (r) => r.nombre_Rol === pendingRoleName
+      );
+      if (rolSeleccionado) {
+        setSelectedRolId(rolSeleccionado.rol_ID);
+        console.log(
+          `✅ Rol actualizado a: ${pendingRoleName} (ID: ${rolSeleccionado.rol_ID})`
+        );
+      }
+
+      setHasChanges(true);
+      console.log(
+        `✅ Plantilla aplicada: ${templatePermissions.length} permisos`
+      );
+    } catch (error) {
+      console.error("❌ Error aplicando plantilla:", error);
+    }
+  };
+
+  const handleCancelApplyTemplate = () => {
+    setConfirmDialogOpen(false);
+    setPendingRoleName("");
+  };
+
+  // ========================================
+  // ALTERNAR PERMISO INDIVIDUAL
+  // ========================================
   const togglePermission = (permissionId) => {
     const newPermissions = new Set(userPermissions);
     if (newPermissions.has(permissionId)) {
@@ -307,55 +316,124 @@ const AssignPermissions = ({ onCancel }) => {
     setHasChanges(true);
   };
 
-  // Función para alternar todos los permisos de un módulo
-  const toggleModulePermissions = (moduleKey) => {
-    const modulePermissions = permissionsConfig[moduleKey].permisos.map(p => p.id);
-    const allSelected = modulePermissions.every(p => userPermissions.has(p));
-    
+  // ========================================
+  // ALTERNAR MÓDULO COMPLETO
+  // ========================================
+  const toggleModulePermissions = (modulo) => {
+    const modulePermissions = [];
+
+    if (modulo.opcion_ID) {
+      modulePermissions.push(modulo.opcion_ID);
+    }
+
+    if (modulo.opcionesSubMenu && Array.isArray(modulo.opcionesSubMenu)) {
+      modulo.opcionesSubMenu.forEach((sub) => {
+        if (sub.opcion_ID) {
+          modulePermissions.push(sub.opcion_ID);
+        }
+      });
+    }
+
+    const allSelected = modulePermissions.every((p) => userPermissions.has(p));
+
     const newPermissions = new Set(userPermissions);
     if (allSelected) {
-      modulePermissions.forEach(p => newPermissions.delete(p));
+      modulePermissions.forEach((p) => newPermissions.delete(p));
     } else {
-      modulePermissions.forEach(p => newPermissions.add(p));
+      modulePermissions.forEach((p) => newPermissions.add(p));
     }
     setUserPermissions(newPermissions);
     setHasChanges(true);
   };
 
-  // Función para alternar panel expandido
-  const togglePanel = (panel) => {
-    setExpandedPanels(prev => 
-      prev.includes(panel) 
-        ? prev.filter(p => p !== panel)
-        : [...prev, panel]
+  // ========================================
+  // ALTERNAR PANEL EXPANDIDO
+  // ========================================
+  const togglePanel = (panelId) => {
+    setExpandedPanels((prev) =>
+      prev.includes(panelId)
+        ? prev.filter((p) => p !== panelId)
+        : [...prev, panelId]
     );
   };
 
-  // Calcular estadísticas de permisos
-  const totalPermissions = Object.values(permissionsConfig)
-    .reduce((sum, module) => sum + module.permisos.length, 0);
+  // ========================================
+  // ESTADÍSTICAS
+  // ========================================
+  const totalPermissions = getTotalPermissions(menuStructure);
   const selectedPermissions = userPermissions.size;
 
-  // Función para guardar permisos
-  const handleSavePermissions = () => {
+  // ========================================
+  // GUARDAR PERMISOS
+  // ========================================
+  const handleSavePermissions = async () => {
     if (!selectedUserId) {
-      alert('Por favor seleccione un usuario');
+      window.alert("Por favor seleccione un usuario");
       return;
     }
 
-    const permissionsArray = Array.from(userPermissions);
-    const success = updateUserPermissions(parseInt(selectedUserId), permissionsArray);
-    
+    if (!selectedSucursalId) {
+      window.alert("Por favor seleccione una sucursal");
+      return;
+    }
+
+    const permisoIDs = Array.from(userPermissions);
+    const usuario_ID = parseInt(selectedUserId);
+    const rol_ID = selectedRolId || currentUser?.rol_ID;
+    const sucursal_ID = parseInt(selectedSucursalId);
+    const codigoEmpleadoAlta = codigoEmpleado || "SYSTEM";
+
+    const success = await saveUserPermissionsReal({
+      usuario_ID,
+      rol_ID,
+      sucursal_ID,
+      permisoIDs,
+      codigoEmpleadoAlta,
+    });
+
     if (success) {
       setHasChanges(false);
+      window.alert(
+        "✅ Permisos guardados correctamente.\n\nLos cambios se aplicarán en el próximo inicio de sesión del usuario."
+      );
     }
   };
 
+  // ========================================
+  // FILTRAR Y ORDENAR ROLES
+  // ========================================
+  const filteredRoles = roles
+    .filter((r) => !EXCLUDED_ROLES.includes(r.nombre_Rol))
+    .sort((a, b) => {
+      const indexA = ROLES_ORDER.indexOf(a.nombre_Rol);
+      const indexB = ROLES_ORDER.indexOf(b.nombre_Rol);
+
+      if (indexA === -1 && indexB === -1) return 0;
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+
+      return indexA - indexB;
+    });
+
+  // ========================================
+  // RENDERIZADO
+  // ========================================
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Encabezado */}
-      <Paper sx={{ p: 3, mb: 3, bgcolor: '#f3e5f5', borderLeft: '4px solid #9c27b0' }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#1A202C', mb: 1 }}>
+      <Paper
+        sx={{
+          p: 3,
+          mb: 3,
+          bgcolor: "#f3e5f5",
+          borderLeft: `4px solid ${farmaColors.secondary}`,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: 600, color: "#1A202C", mb: 1 }}
+        >
           ASIGNAR PERMISOS
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -364,27 +442,46 @@ const AssignPermissions = ({ onCancel }) => {
       </Paper>
 
       <Grid container spacing={3}>
-        {/* Panel izquierdo: Selección de usuario y plantillas */}
+        {/* ========================================
+            PANEL IZQUIERDO
+            ======================================== */}
         <Grid item xs={12} md={4}>
           <Card sx={{ mb: 3 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography
+                variant="h6"
+                sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}
+              >
                 <Person />
                 Seleccionar Usuario
               </Typography>
-              
+
+              {/* Selector de usuario */}
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <InputLabel>Usuario</InputLabel>
                 <Select
                   value={selectedUserId}
-                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  onChange={handleUserChange}
                   label="Usuario"
                 >
                   {users.map((user) => (
                     <MenuItem key={user.id} value={user.id}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem', bgcolor: '#4A5FFF' }}>
-                          {user.nombreCompleto.split(' ').map(n => n[0]).join('')}
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Avatar
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            fontSize: "0.75rem",
+                            bgcolor: farmaColors.primary,
+                          }}
+                        >
+                          {user.avatar ||
+                            user.nombreCompleto
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
                         </Avatar>
                         {user.nombreCompleto}
                         <Chip label={user.rol} size="small" />
@@ -394,11 +491,37 @@ const AssignPermissions = ({ onCancel }) => {
                 </Select>
               </FormControl>
 
+              {/* Selector de sucursal */}
+              <FormControl fullWidth sx={{ mb: 3 }}>
+                <InputLabel>Sucursal</InputLabel>
+                <Select
+                  value={selectedSucursalId}
+                  onChange={(e) => {
+                    setSelectedSucursalId(e.target.value);
+                    setHasChanges(true);
+                  }}
+                  label="Sucursal"
+                  disabled={!selectedUserId}
+                >
+                  {sucursales.map((sucursal) => (
+                    <MenuItem
+                      key={sucursal.sucursal_ID}
+                      value={sucursal.sucursal_ID}
+                    >
+                      {sucursal.nombreSucursal}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Info del usuario */}
               {currentUser && (
                 <Alert severity="info" sx={{ mb: 3 }}>
                   <Typography variant="body2">
-                    <strong>Usuario:</strong> {currentUser.nombreCompleto}<br />
-                    <strong>Rol:</strong> {currentUser.rol}<br />
+                    <strong>Usuario:</strong> {currentUser.nombreCompleto}
+                    <br />
+                    <strong>Rol:</strong> {currentUser.rol}
+                    <br />
                     <strong>Sucursal:</strong> {currentUser.sucursal}
                   </Typography>
                 </Alert>
@@ -410,37 +533,51 @@ const AssignPermissions = ({ onCancel }) => {
                 </Alert>
               )}
 
+              {/* Plantillas de roles */}
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Plantillas de Roles
               </Typography>
-              
-              {Object.entries(roleTemplates).map(([roleKey, template]) => (
-                <Button
-                  key={roleKey}
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => applyRoleTemplate(roleKey)}
-                  sx={{ mb: 1, justifyContent: 'flex-start' }}
-                >
-                  {template.nombre}
-                </Button>
-              ))}
+
+              {filteredRoles.length === 0 ? (
+                <Alert severity="info">No hay roles disponibles</Alert>
+              ) : (
+                filteredRoles.map((role) => (
+                  <Button
+                    key={role.rol_ID}
+                    fullWidth
+                    variant="outlined"
+                    onClick={() => applyRoleTemplate(role.nombre_Rol)}
+                    disabled={!selectedUserId}
+                    sx={{
+                      mb: 1,
+                      justifyContent: "flex-start",
+                      "&:hover": {
+                        bgcolor: farmaColors.alpha.primary10,
+                      },
+                    }}
+                  >
+                    {role.nombre_Rol}
+                  </Button>
+                ))
+              )}
             </CardContent>
           </Card>
 
-          {/* Resumen de permisos */}
+          {/* Resumen */}
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Resumen
               </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Box
+                sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+              >
                 <Typography variant="body2">Permisos seleccionados:</Typography>
                 <Badge badgeContent={selectedPermissions} color="primary">
                   <CheckCircle color="action" />
                 </Badge>
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography variant="body2">Total permisos:</Typography>
                 <Typography variant="body2">{totalPermissions}</Typography>
               </Box>
@@ -448,22 +585,38 @@ const AssignPermissions = ({ onCancel }) => {
           </Card>
         </Grid>
 
-        {/* Panel derecho: Permisos por módulos */}
+        {/* ========================================
+            PANEL DERECHO: PERMISOS
+            ======================================== */}
         <Grid item xs={12} md={8}>
           <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">
-                  Permisos por Módulo
-                </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6">Permisos por Módulo</Typography>
                 <Box>
                   <Button
                     startIcon={<SelectAll />}
                     size="small"
                     onClick={() => {
-                      const allPermissions = Object.values(permissionsConfig)
-                        .flatMap(module => module.permisos.map(p => p.id));
-                      setUserPermissions(new Set(allPermissions));
+                      const allPermissions = new Set();
+                      menuStructure.forEach((modulo) => {
+                        if (modulo.opcion_ID)
+                          allPermissions.add(modulo.opcion_ID);
+                        if (modulo.opcionesSubMenu) {
+                          modulo.opcionesSubMenu.forEach((sub) => {
+                            if (sub.opcion_ID)
+                              allPermissions.add(sub.opcion_ID);
+                          });
+                        }
+                      });
+                      setUserPermissions(allPermissions);
                       setHasChanges(true);
                     }}
                   >
@@ -482,78 +635,169 @@ const AssignPermissions = ({ onCancel }) => {
                 </Box>
               </Box>
 
-              {Object.entries(permissionsConfig).map(([moduleKey, module]) => {
-                const modulePermissions = module.permisos.map(p => p.id);
-                const selectedCount = modulePermissions.filter(p => userPermissions.has(p)).length;
-                const isExpanded = expandedPanels.includes(moduleKey);
+              {loadingMenu ? (
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <>
+                  {menuStructure.map((modulo, index) => {
+                    const modulePermissions = [];
+                    if (modulo.opcion_ID)
+                      modulePermissions.push(modulo.opcion_ID);
+                    if (modulo.opcionesSubMenu) {
+                      modulo.opcionesSubMenu.forEach((sub) => {
+                        if (sub.opcion_ID)
+                          modulePermissions.push(sub.opcion_ID);
+                      });
+                    }
 
-                return (
-                  <Accordion 
-                    key={moduleKey} 
-                    expanded={isExpanded}
-                    onChange={() => togglePanel(moduleKey)}
-                    sx={{ mb: 1 }}
-                  >
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                        <Typography sx={{ mr: 2, fontSize: '1.2rem' }}>
-                          {module.icono}
-                        </Typography>
-                        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                          {module.nombre}
-                        </Typography>
-                        <Chip 
-                          label={`${selectedCount}/${module.permisos.length}`}
-                          size="small"
-                          color={selectedCount > 0 ? 'primary' : 'default'}
-                          sx={{ mr: 1 }}
-                        />
-                        <Switch
-                          checked={selectedCount === module.permisos.length}
-                          indeterminate={selectedCount > 0 && selectedCount < module.permisos.length ? true : undefined}
-                          onChange={() => toggleModulePermissions(moduleKey)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </Box>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Grid container spacing={1}>
-                        {module.permisos.map((permission) => (
-                          <Grid item xs={12} key={permission.id}>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={userPermissions.has(permission.id)}
-                                  onChange={() => togglePermission(permission.id)}
-                                />
-                              }
-                              label={
-                                <Box>
-                                  <Typography variant="body2" fontWeight={500}>
-                                    {permission.nombre}
-                                  </Typography>
-                                  <Typography variant="caption" color="text.secondary">
-                                    {permission.descripcion}
-                                  </Typography>
-                                </Box>
-                              }
+                    const selectedCount = modulePermissions.filter((p) =>
+                      userPermissions.has(p)
+                    ).length;
+                    const isExpanded = expandedPanels.includes(
+                      modulo.opcion_ID
+                    );
+
+                    return (
+                      <Accordion
+                        key={`modulo-${modulo.opcion_ID}-${index}`}
+                        expanded={isExpanded}
+                        onChange={() => togglePanel(modulo.opcion_ID)}
+                        sx={{ mb: 1 }}
+                      >
+                        <AccordionSummary expandIcon={<ExpandMore />}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              width: "100%",
+                            }}
+                          >
+                            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                              {modulo.nombreOpcion}
+                            </Typography>
+                            <Chip
+                              label={`${selectedCount}/${modulePermissions.length}`}
+                              size="small"
+                              color={selectedCount > 0 ? "primary" : "default"}
+                              sx={{ mr: 1 }}
                             />
+                            <Switch
+                              checked={
+                                selectedCount === modulePermissions.length
+                              }
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                toggleModulePermissions(modulo);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Grid container spacing={1}>
+                            {/* Checkbox del módulo principal */}
+                            <Grid item xs={12}>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={userPermissions.has(
+                                      modulo.opcion_ID
+                                    )}
+                                    onChange={() =>
+                                      togglePermission(modulo.opcion_ID)
+                                    }
+                                  />
+                                }
+                                label={
+                                  <Box>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight={600}
+                                    >
+                                      {modulo.nombreOpcion} (Módulo)
+                                    </Typography>
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                    >
+                                      {modulo.descripcion}
+                                    </Typography>
+                                  </Box>
+                                }
+                              />
+                            </Grid>
+
+                            {/* ✅ SUBOPCIONES */}
+                            {modulo.opcionesSubMenu &&
+                              modulo.opcionesSubMenu.length > 0 &&
+                              modulo.opcionesSubMenu.map(
+                                (subOpcion, subIndex) => (
+                                  <Grid
+                                    item
+                                    xs={12}
+                                    key={`subopcion-${subOpcion.opcion_ID}-${subIndex}`}
+                                  >
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                          checked={userPermissions.has(
+                                            subOpcion.opcion_ID
+                                          )}
+                                          onChange={() =>
+                                            togglePermission(
+                                              subOpcion.opcion_ID
+                                            )
+                                          }
+                                        />
+                                      }
+                                      label={
+                                        <Box sx={{ ml: 2 }}>
+                                          <Typography
+                                            variant="body2"
+                                            fontWeight={500}
+                                          >
+                                            {subOpcion.nombreOpcion}
+                                          </Typography>
+                                          <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                          >
+                                            {subOpcion.descripcion}
+                                          </Typography>
+                                        </Box>
+                                      }
+                                    />
+                                  </Grid>
+                                )
+                              )}
                           </Grid>
-                        ))}
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
-                );
-              })}
+                        </AccordionDetails>
+                      </Accordion>
+                    );
+                  })}
+                </>
+              )}
             </CardContent>
           </Card>
 
           {/* Botones de acción */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
+          <Box
+            sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 3 }}
+          >
             <Button
               variant="outlined"
               onClick={onCancel}
               startIcon={<Cancel />}
+              sx={{
+                borderColor: farmaColors.secondary,
+                color: farmaColors.secondary,
+                "&:hover": {
+                  borderColor: farmaColors.secondaryDark,
+                  bgcolor: farmaColors.alpha.secondary10,
+                },
+              }}
             >
               Cancelar
             </Button>
@@ -561,21 +805,76 @@ const AssignPermissions = ({ onCancel }) => {
               variant="contained"
               startIcon={<Save />}
               onClick={handleSavePermissions}
-              disabled={!hasChanges || !selectedUserId}
+              disabled={!hasChanges || !selectedUserId || loading}
               sx={{
-                bgcolor: '#9c27b0',
-                '&:hover': { bgcolor: '#7b1fa2' },
-                '&:disabled': {
-                  bgcolor: '#e0e0e0',
-                  color: '#9e9e9e'
-                }
+                background: farmaColors.gradients.primary,
+                "&:hover": {
+                  background: farmaColors.gradients.primary,
+                  transform: "translateY(-2px)",
+                  boxShadow: `0 6px 25px ${farmaColors.alpha.primary30}`,
+                },
+                "&:disabled": {
+                  background: "rgba(0, 0, 0, 0.12)",
+                  color: "rgba(0, 0, 0, 0.26)",
+                },
               }}
             >
-              Guardar Permisos
+              {loading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Guardar Permisos"
+              )}
             </Button>
           </Box>
         </Grid>
       </Grid>
+
+      {/* Dialog de confirmación */}
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={handleCancelApplyTemplate}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ color: farmaColors.secondary, fontWeight: 600 }}>
+          ⚠️ ADVERTENCIA
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Está a punto de aplicar la plantilla de permisos del rol{" "}
+            <strong>"{pendingRoleName}"</strong>.
+          </DialogContentText>
+          <DialogContentText sx={{ mt: 2, color: "error.main" }}>
+            Esto <strong>REEMPLAZARÁ</strong> todos los permisos actuales del
+            usuario.
+          </DialogContentText>
+          <DialogContentText sx={{ mt: 2 }}>
+            ¿Está seguro de continuar?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={handleCancelApplyTemplate}
+            variant="outlined"
+            sx={{
+              borderColor: farmaColors.secondary,
+              color: farmaColors.secondary,
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmApplyTemplate}
+            variant="contained"
+            sx={{
+              background: farmaColors.gradients.primary,
+            }}
+            autoFocus
+          >
+            Aceptar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

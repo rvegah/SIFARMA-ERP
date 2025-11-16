@@ -68,6 +68,7 @@ const UserList = ({
     handleDeleteUser,
     prepareEditUser,
     loadUsuarios,
+    clearForm, 
   } = useUsers();
 
   // 🔁 Cargar usuarios cada vez que se monta el componente

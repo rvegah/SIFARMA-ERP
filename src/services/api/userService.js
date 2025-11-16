@@ -33,10 +33,12 @@ const userService = {
    * ✅ Obtener lista de roles (Administrador, Farmacéutico, etc)
    * GET /api/farmalink-core/MenuOpciones/ListaRoles1
    */
-  getRoles: async () => {
+  getRoles: async (organizacionId = 1) => {
     try {
-      console.log("📡 Obteniendo roles...");
-      const response = await apiClient.get("/MenuOpciones/ListaRoles1");
+      console.log(`📡 Obteniendo roles de organización ${organizacionId}...`);
+      const response = await apiClient.get(
+        `/MenuOpciones/ListaRoles/${organizacionId}`
+      );
 
       if (response.data && Array.isArray(response.data)) {
         console.log("✅ Roles obtenidos:", response.data.length);
