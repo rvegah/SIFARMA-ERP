@@ -73,8 +73,9 @@ const profileService = {
         if (currentUser) {
           const updatedUser = {
             ...currentUser,
-            nombreCompleto: profileData.nombreCompleto,
+            nombres: profileData.nombreCompleto, // ← Guardar como "nombres"
             apellidos: profileData.apellidos,
+            nombreCompleto: `${profileData.nombreCompleto} ${profileData.apellidos}`, // ← Mantener compatibilidad
             celular: profileData.telefono,
             correo: profileData.email,
           };

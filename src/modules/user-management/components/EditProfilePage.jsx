@@ -64,49 +64,24 @@ const EditProfilePage = () => {
         return;
       }
 
-      // 🔥 Buscar el usuario en todas las sucursales
-      const response = await apiClient.get(
-        "/InicioSesion/BuscarPerfilUsuarios",
-        {
-          params: { Sucursal: "*" }, // buscar en todas porque sucursal viene vacío
-        }
-      );
+      // 🎉 Usar directamente nombres y apellidos del backend
+      setFormData({
+        usuario: currentUser.usuario || "",
+        nombreCompleto: currentUser.nombres || "", // ← Usar "nombres" directamente
+        apellidos: currentUser.apellidos || "", // ← Usar "apellidos" directamente
+        telefono: currentUser.celular || "", // ← Usar "celular" directamente
+        email: currentUser.correo || "",
+        password: "",
+        confirmarPassword: "",
+        sucursal: currentUser.sucursal || "",
+        fotoPerfil: "",
+      });
 
-      if (response.data?.exitoso && response.data?.datos) {
-        const miUsuario = response.data.datos.find(
-          (u) => u.usuario === currentUser.usuario
-        );
-
-        if (!miUsuario) {
-          enqueueSnackbar("No se encontró el usuario", { variant: "error" });
-          navigate("/dashboard");
-          return;
-        }
-
-        // Obtener detalle completo
-        const detalleResponse = await apiClient.get(
-          "/InicioSesion/UsuarioInformacionDetalle",
-          { params: { Usuario_ID: miUsuario.usuario_ID } }
-        );
-
-        if (detalleResponse.data?.exitoso && detalleResponse.data?.datos) {
-          const u = detalleResponse.data.datos;
-
-          setFormData({
-            usuario: u.usuario || "",
-            nombreCompleto: u.nombreCompleto || "",
-            apellidos: u.apellidos || "",
-            telefono: u.celular || "",
-            email: u.correo || "",
-            password: "",
-            confirmarPassword: "",
-            sucursal: u.sucursal || "",
-            fotoPerfil: u.fotoPerfil || "",
-          });
-
-          console.log("✅ Perfil cargado desde API");
-        }
-      }
+      console.log("✅ Perfil cargado desde sessionStorage:", {
+        nombres: currentUser.nombres,
+        apellidos: currentUser.apellidos,
+        celular: currentUser.celular,
+      });
     } catch (error) {
       console.error("❌ Error cargando perfil:", error);
       enqueueSnackbar("Error al cargar los datos del perfil", {
