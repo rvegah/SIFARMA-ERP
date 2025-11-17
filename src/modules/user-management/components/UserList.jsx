@@ -38,7 +38,6 @@ import {
   VpnKey,
 } from "@mui/icons-material";
 import { useUsers } from "../context/UserContext";
-import { roles } from "../constants/userConstants";
 import { farmaColors } from "/src/app/theme"; // Importar colores corporativos
 
 const UserList = ({
@@ -58,6 +57,7 @@ const UserList = ({
     // Configuración
     currentUserSucursal,
     isAdmin,
+    roles,
 
     // Funciones de UI
     handleTabChange,
@@ -68,7 +68,7 @@ const UserList = ({
     handleDeleteUser,
     prepareEditUser,
     loadUsuarios,
-    clearForm, 
+    clearForm,
   } = useUsers();
 
   // 🔁 Cargar usuarios cada vez que se monta el componente
@@ -229,22 +229,26 @@ const UserList = ({
                 }}
               >
                 <MenuItem value="">Todos los roles</MenuItem>
-                {roles.map((role) => (
-                  <MenuItem
-                    key={role}
-                    value={role}
-                    sx={{
-                      "&:hover": {
-                        bgcolor: farmaColors.alpha.primary10,
-                      },
-                      "&.Mui-selected": {
-                        bgcolor: farmaColors.alpha.primary20,
-                      },
-                    }}
-                  >
-                    {role}
-                  </MenuItem>
-                ))}
+                {roles && roles.length > 0 ? (
+                  roles.map((role) => (
+                    <MenuItem
+                      key={role.rol_ID}
+                      value={role.nombre_Rol}
+                      sx={{
+                        "&:hover": {
+                          bgcolor: farmaColors.alpha.primary10,
+                        },
+                        "&.Mui-selected": {
+                          bgcolor: farmaColors.alpha.primary20,
+                        },
+                      }}
+                    >
+                      {role.nombre_Rol}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled>Cargando roles...</MenuItem>
+                )}
               </Select>
             </FormControl>
           </Grid>

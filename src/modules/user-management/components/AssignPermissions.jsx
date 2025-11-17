@@ -393,9 +393,9 @@ const AssignPermissions = ({ onCancel }) => {
 
     if (success) {
       setHasChanges(false);
-      window.alert(
-        "✅ Permisos guardados correctamente.\n\nLos cambios se aplicarán en el próximo inicio de sesión del usuario."
-      );
+      //window.alert(
+      //  "✅ Permisos guardados correctamente.\n\nLos cambios se aplicarán en el próximo inicio de sesión del usuario."
+      //);
     }
   };
 
