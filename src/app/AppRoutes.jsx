@@ -8,8 +8,7 @@ import DashboardLayout from "../shared/components/DashboardLayout";
 import Dashboard from "../shared/components/Dashboard";
 import SalesPage from "../modules/sales/pages/SalesPage";
 
-// Módulo de perfil personal
-import UsersPage from "../modules/access-security/pages/UsersPage";
+
 
 // Módulo de gestión de usuarios (administrativo)
 import UserManagementPage from "../modules/user-management/pages/UserManagementPage";
@@ -58,7 +57,7 @@ function ProtectedRoutes() {
         {/* SEPARACIÓN CLARA DE FUNCIONALIDADES */}
 
         {/* Editar Perfil Personal - acceso desde menú de usuario */}
-        <Route path="/profile" element={<UsersPage />} />
+        {/*/<Route path="/profile" element={<EditProfilePage />} />*/}
 
         {/* Gestión Administrativa de Usuarios - acceso desde sidebar "Usuarios" */}
         <Route path="/users" element={<UserManagementPage key="usersList" />} />

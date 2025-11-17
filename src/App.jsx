@@ -23,7 +23,7 @@ import LoginPage from "./shared/components/LoginPage";
 import DashboardLayout from "./shared/components/DashboardLayout";
 import Dashboard from "./shared/components/Dashboard";
 import UserManagementPage from "./modules/user-management/pages/UserManagementPage";
-import UsersPage from "./modules/access-security/pages/UsersPage";
+import EditProfilePage from "./modules/user-management/components/EditProfilePage";
 import SalesPage from "./modules/sales/pages/SalesPage";
 
 // Componente para redireccionar al dashboard en sesiones restauradas
@@ -77,7 +77,7 @@ function ProtectedRoutes() {
               <Route path="/users/*" element={<UserManagementPage />} />
 
               {/* Perfil personal del usuario actual */}
-              <Route path="/profile" element={<UsersPage />} />
+              <Route path="/profile" element={<EditProfilePage />} />
 
               {/* Ventas */}
               <Route path="/ventas/*" element={<SalesPage />} />
