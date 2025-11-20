@@ -1,4 +1,4 @@
-// src/shared/components/LoginPage.jsx - CON ErrorDialog mejorado
+// src/shared/components/LoginPage.jsx - Diseño mejorado y profesional
 
 import React, { useState } from 'react';
 import {
@@ -167,119 +167,122 @@ function LoginPage() {
       <Box
         sx={{
           minHeight: '100vh',
-          background: '#f8f9fa',
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: 2,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <Container maxWidth="sm">
-          {/* Logo y título */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Box sx={{ display: 'inline-flex', alignItems: 'center', mb: 2 }}>
-              {/* Logo de cruces médicas */}
+        {/* Elementos decorativos de fondo */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: -100,
+            right: -100,
+            width: 400,
+            height: 400,
+            background: `radial-gradient(circle, ${farmaColors.alpha.primary10} 0%, transparent 70%)`,
+            borderRadius: '50%',
+            zIndex: 0,
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -150,
+            left: -150,
+            width: 500,
+            height: 500,
+            background: `radial-gradient(circle, ${farmaColors.alpha.secondary10} 0%, transparent 70%)`,
+            borderRadius: '50%',
+            zIndex: 0,
+          }}
+        />
+
+        <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+          {/* Card principal integrado */}
+          <Card
+            sx={{
+              borderRadius: 4,
+              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+              border: 'none',
+              overflow: 'hidden',
+              background: 'white',
+            }}
+          >
+            {/* Header con logo y gradiente */}
+            <Box
+              sx={{
+                background: `linear-gradient(135deg, ${farmaColors.secondary} 0%, ${farmaColors.primary} 100%)`,
+                padding: 4,
+                textAlign: 'center',
+                position: 'relative',
+              }}
+            >
+              {/* Patrón decorativo */}
               <Box
                 sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: `radial-gradient(circle at 20px 20px, rgba(255,255,255,0.1) 2px, transparent 0)`,
+                  backgroundSize: '40px 40px',
+                  opacity: 0.3,
+                }}
+              />
+
+              {/* Logo */}
+              <Box
+                sx={{
+                  display: 'inline-block',
+                  background: 'white',
+                  padding: '16px 32px',
+                  borderRadius: 3,
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                  mb: 2,
                   position: 'relative',
-                  width: 60,
-                  height: 60,
-                  mr: 2,
                 }}
               >
-                {/* Cruz naranja */}
                 <Box
+                  component="img"
+                  src="/logo_farma_dinamica.jpg"
+                  alt="FARMA DINÁMICA"
                   sx={{
-                    position: 'absolute',
-                    top: 10,
-                    left: 20,
-                    width: 20,
-                    height: 40,
-                    bgcolor: farmaColors.primary,
-                    borderRadius: '10px',
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 20,
-                    left: 10,
-                    width: 40,
-                    height: 20,
-                    bgcolor: farmaColors.primary,
-                    borderRadius: '10px',
-                  }}
-                />
-                {/* Cruz azul entrelazada */}
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 15,
-                    left: 25,
-                    width: 20,
-                    height: 30,
-                    bgcolor: farmaColors.secondary,
-                    borderRadius: '10px',
-                    opacity: 0.9,
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 25,
-                    left: 15,
-                    width: 30,
-                    height: 20,
-                    bgcolor: farmaColors.secondary,
-                    borderRadius: '10px',
-                    opacity: 0.9,
+                    maxWidth: '100%',
+                    height: 'auto',
+                    maxHeight: 60,
+                    objectFit: 'contain',
+                    display: 'block',
                   }}
                 />
               </Box>
 
               <Typography
-                variant="h4"
+                variant="h6"
                 sx={{
-                  fontWeight: 700,
-                  color: farmaColors.secondary,
-                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  color: 'white',
+                  fontWeight: 500,
+                  textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  letterSpacing: '0.5px',
                 }}
               >
-                FARMA{' '}
-                <Box component="span" sx={{ color: farmaColors.primary }}>
-                  DINÁMICA
-                </Box>
+                Sistema Integral de Farmacia
               </Typography>
             </Box>
 
-            <Typography
-              variant="body1"
-              sx={{
-                color: '#6c757d',
-                fontSize: '1.1rem',
-                fontWeight: 400,
-              }}
-            >
-              Sistema Integral de Farmacia
-            </Typography>
-          </Box>
-
-          {/* Card de login */}
-          <Card
-            sx={{
-              borderRadius: 3,
-              boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-              border: '1px solid #e9ecef',
-              overflow: 'hidden',
-            }}
-          >
+            {/* Formulario de login */}
             <CardContent sx={{ p: 5 }}>
               <Typography
                 variant="h5"
                 sx={{
                   textAlign: 'center',
                   mb: 1,
-                  fontWeight: 600,
+                  fontWeight: 700,
                   color: farmaColors.secondary,
                 }}
               >
@@ -399,16 +402,21 @@ function LoginPage() {
                   disabled={loading}
                   sx={{
                     py: 2.5,
-                    background: loading ? '#cccccc' : farmaColors.primary,
+                    background: loading
+                      ? '#cccccc'
+                      : `linear-gradient(135deg, ${farmaColors.primary} 0%, ${farmaColors.primaryDark} 100%)`,
                     fontSize: '1.1rem',
                     fontWeight: 600,
                     borderRadius: 2,
                     textTransform: 'none',
-                    boxShadow: loading ? 'none' : `0 4px 20px ${farmaColors.alpha.primary20}`,
+                    boxShadow: loading ? 'none' : `0 8px 24px ${farmaColors.alpha.primary30}`,
+                    transition: 'all 0.3s ease',
                     '&:hover': {
-                      background: loading ? '#cccccc' : farmaColors.primaryDark,
-                      boxShadow: loading ? 'none' : `0 6px 30px ${farmaColors.alpha.primary30}`,
-                      transform: loading ? 'none' : 'translateY(-1px)',
+                      background: loading
+                        ? '#cccccc'
+                        : `linear-gradient(135deg, ${farmaColors.primaryDark} 0%, ${farmaColors.primary} 100%)`,
+                      boxShadow: loading ? 'none' : `0 12px 32px ${farmaColors.alpha.primary40}`,
+                      transform: loading ? 'none' : 'translateY(-2px)',
                     },
                     '&:disabled': {
                       background: farmaColors.alpha.primary20,
@@ -431,41 +439,34 @@ function LoginPage() {
                 <Typography
                   variant="caption"
                   sx={{
-                    color: farmaColors.secondary,
-                    fontSize: '0.9rem',
+                    color: '#95a5a6',
+                    fontSize: '0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1,
                   }}
                 >
+                  <Box
+                    component="span"
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      bgcolor: '#27ae60',
+                      display: 'inline-block',
+                      animation: 'pulse 2s ease-in-out infinite',
+                      '@keyframes pulse': {
+                        '0%, 100%': { opacity: 1 },
+                        '50%': { opacity: 0.5 },
+                      },
+                    }}
+                  />
                   Farma Dinámica v1.0 • Sistema seguro
                 </Typography>
               </Box>
             </CardContent>
           </Card>
-
-          {/* Elementos decorativos */}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 20,
-              right: 20,
-              width: 100,
-              height: 60,
-              background: `linear-gradient(135deg, ${farmaColors.alpha.primary10} 0%, transparent 70%)`,
-              borderRadius: '20px 0 0 20px',
-              zIndex: -1,
-            }}
-          />
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 20,
-              left: 20,
-              width: 80,
-              height: 80,
-              background: `linear-gradient(135deg, ${farmaColors.alpha.secondary10} 0%, transparent 70%)`,
-              borderRadius: '0 20px 20px 0',
-              zIndex: -1,
-            }}
-          />
         </Container>
       </Box>
 
