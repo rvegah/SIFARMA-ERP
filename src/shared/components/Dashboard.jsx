@@ -140,7 +140,7 @@ function Dashboard() {
           <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
               <Inventory sx={{ color: farmaColors.primary }} />
-              Sistema SIFARMA funcionando correctamente
+              Sistema Farma Dinámica funcionando correctamente
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Todos los módulos están operativos y sincronizados
