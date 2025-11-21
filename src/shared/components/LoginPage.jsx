@@ -23,6 +23,7 @@ import NetworkValidationService from '../../services/networkValidation';
 import ErrorDialog from '../../components/ErrorDialog';
 import { farmaColors } from '../../app/theme';
 import { useAuth } from '../../context/AuthContext';
+import logoFarmaDinamica from '../../assets/logo_farma_dinamica.jpg';
 
 function LoginPage() {
   const [usuario, setUsuario] = useState('');
@@ -250,7 +251,7 @@ function LoginPage() {
               >
                 <Box
                   component="img"
-                  src="/logo_farma_dinamica.jpg"
+                  src={logoFarmaDinamica}
                   alt="FARMA DINÁMICA"
                   sx={{
                     maxWidth: '100%',
