@@ -297,7 +297,7 @@ function LoginPage() {
                   color: '#6c757d',
                 }}
               >
-                Ingresa tus credenciales para acceder al sistema
+                Ingresa tus credenciales para acceder al sistema - RVH
               </Typography>
 
               <Box component="form" onSubmit={handleLogin}>
