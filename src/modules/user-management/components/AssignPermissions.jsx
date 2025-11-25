@@ -303,21 +303,42 @@ const AssignPermissions = ({ onCancel }) => {
   };
 
   // ========================================
-  // ALTERNAR PERMISO INDIVIDUAL
+  // ALTERNAR PERMISO INDIVIDUAL CON SELECCIÓN AUTOMÁTICA DEL PADRE
   // ========================================
-  const togglePermission = (permissionId) => {
+  const togglePermission = (permissionId, parentModuleId = null) => {
     const newPermissions = new Set(userPermissions);
+
     if (newPermissions.has(permissionId)) {
+      // Si se DESMARCA un permiso
       newPermissions.delete(permissionId);
+
+      // ✅ Si se desmarca el PADRE, desmarcar también TODOS los hijos
+      if (parentModuleId === null) {
+        // Estamos desmarcando un módulo padre
+        const modulo = menuStructure.find((m) => m.opcion_ID === permissionId);
+        if (modulo?.opcionesSubMenu) {
+          modulo.opcionesSubMenu.forEach((sub) => {
+            newPermissions.delete(sub.opcion_ID);
+          });
+        }
+      }
     } else {
+      // Si se MARCA un permiso
       newPermissions.add(permissionId);
+
+      // ✅ Si se marca un HIJO, marcar automáticamente el PADRE
+      if (parentModuleId !== null) {
+        newPermissions.add(parentModuleId);
+        console.log(`✅ Auto-seleccionado módulo padre ID: ${parentModuleId}`);
+      }
     }
+
     setUserPermissions(newPermissions);
     setHasChanges(true);
   };
 
   // ========================================
-  // ALTERNAR MÓDULO COMPLETO
+  // ALTERNAR MÓDULO COMPLETO (sin cambios)
   // ========================================
   const toggleModulePermissions = (modulo) => {
     const modulePermissions = [];
@@ -706,7 +727,7 @@ const AssignPermissions = ({ onCancel }) => {
                                       modulo.opcion_ID
                                     )}
                                     onChange={() =>
-                                      togglePermission(modulo.opcion_ID)
+                                      togglePermission(modulo.opcion_ID, null)
                                     }
                                   />
                                 }
@@ -729,7 +750,7 @@ const AssignPermissions = ({ onCancel }) => {
                               />
                             </Grid>
 
-                            {/* ✅ SUBOPCIONES */}
+                            {/* ✅ SUBOPCIONES - Ahora pasan el ID del padre */}
                             {modulo.opcionesSubMenu &&
                               modulo.opcionesSubMenu.length > 0 &&
                               modulo.opcionesSubMenu.map(
@@ -745,10 +766,12 @@ const AssignPermissions = ({ onCancel }) => {
                                           checked={userPermissions.has(
                                             subOpcion.opcion_ID
                                           )}
-                                          onChange={() =>
-                                            togglePermission(
-                                              subOpcion.opcion_ID
-                                            )
+                                          onChange={
+                                            () =>
+                                              togglePermission(
+                                                subOpcion.opcion_ID,
+                                                modulo.opcion_ID
+                                              ) // ✅ Pasa el ID del padre
                                           }
                                         />
                                       }

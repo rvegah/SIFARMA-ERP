@@ -44,23 +44,13 @@ import { getFilteredMenuItems } from "/src/config/menuBuilder";
 const drawerWidth = 280;
 const collapsedDrawerWidth = 60;
 
-// Sucursales disponibles
-const sucursales = [
-  { nombre: "SAN MARTIN", codigo: "SM", porcentaje: "[15.56%]" },
-  { nombre: "BRASIL", codigo: "BR", porcentaje: "[-1.11%]" },
-  { nombre: "URUGUAY", codigo: "UY", porcentaje: "[-37.78%]" },
-  { nombre: "TIQUIPAYA", codigo: "TQ", porcentaje: "[7.78%]" },
-];
-
 function DashboardLayout({ children, onLogout, currentUser }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [openSubMenus, setOpenSubMenus] = useState({});
-  const [currentSucursal, setCurrentSucursal] = useState(sucursales[1]);
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
-  const [sucursalMenuAnchor, setSucursalMenuAnchor] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,6 +69,13 @@ function DashboardLayout({ children, onLogout, currentUser }) {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const getPrimerNombreApellido = (nombreCompleto) => {
+    if (!nombreCompleto) return "U";
+    const palabras = nombreCompleto.trim().split(" ");
+    if (palabras.length === 1) return palabras[0];
+    return `${palabras[0]} ${palabras[palabras.length - 1]}`;
   };
 
   const handleCollapseToggle = () => {
@@ -126,19 +123,6 @@ function DashboardLayout({ children, onLogout, currentUser }) {
     setUserMenuAnchor(null);
   };
 
-  const handleSucursalMenuClick = (event) => {
-    setSucursalMenuAnchor(event.currentTarget);
-  };
-
-  const handleSucursalMenuClose = () => {
-    setSucursalMenuAnchor(null);
-  };
-
-  const handleSucursalChange = (sucursal) => {
-    setCurrentSucursal(sucursal);
-    handleSucursalMenuClose();
-  };
-
   const handleEditProfile = () => {
     navigate("/profile");
     handleUserMenuClose();
@@ -162,7 +146,7 @@ function DashboardLayout({ children, onLogout, currentUser }) {
         transition: "width 0.3s ease",
       }}
     >
-      {/* Profile Section */}
+      {/* Profile Section - SIMPLIFICADO */}
       <Box
         sx={{
           p: collapsed ? 1 : 3,
@@ -171,59 +155,39 @@ function DashboardLayout({ children, onLogout, currentUser }) {
           transition: "all 0.3s ease",
         }}
       >
-        <Button
-          onClick={!collapsed ? handleSucursalMenuClick : undefined}
+        <Avatar
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            color: "white",
-            textTransform: "none",
-            "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
-            width: "100%",
-            p: collapsed ? 0.5 : 2,
+            bgcolor: "#FFFFFF",
+            color: farmaColors.primary,
+            width: collapsed ? 40 : 64,
+            height: collapsed ? 40 : 64,
+            mb: collapsed ? 0 : 2,
+            mx: "auto",
+            boxShadow: "0 4px 20px rgba(255,255,255,0.2)",
+            border: `3px solid ${farmaColors.alpha.primary30}`,
+            transition: "all 0.3s ease",
+            fontWeight: 800,
+            fontSize: collapsed ? "1rem" : "1.5rem",
           }}
         >
-          <Avatar
-            sx={{
-              bgcolor: "#FFFFFF",
-              color: farmaColors.primary,
-              width: collapsed ? 40 : 64,
-              height: collapsed ? 40 : 64,
-              mb: collapsed ? 0 : 2,
-              boxShadow: "0 4px 20px rgba(255,255,255,0.2)",
-              border: `2px solid ${farmaColors.alpha.primary30}`,
-              transition: "all 0.3s ease",
-              fontWeight: "bold",
-            }}
-          >
-            <Typography variant={collapsed ? "body2" : "h6"} fontWeight="bold">
-              {currentSucursal.codigo}
-            </Typography>
-          </Avatar>
+          {currentUser?.nombreCompleto
+            ?.split(" ")
+            .filter((_, i, arr) => i === 0 || i === arr.length - 1) // Primera y última palabra
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase() || "U"}
+        </Avatar>
 
-          {!collapsed && (
-            <>
-              <Typography variant="h6" sx={{ color: "white", fontWeight: 600 }}>
-                {currentUser?.nombreCompleto || "Brasil Admin"}
-              </Typography>
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
-              >
-                <Chip
-                  label={currentSucursal.nombre}
-                  size="small"
-                  sx={{
-                    bgcolor: "rgba(255,255,255,0.15)",
-                    color: "white",
-                    border: "1px solid rgba(255,255,255,0.3)",
-                  }}
-                />
-                <KeyboardArrowDown />
-              </Box>
-            </>
-          )}
-        </Button>
+        {!collapsed && (
+          <>
+            <Typography
+              variant="h6"
+              sx={{ color: "white", fontWeight: 700, mb: 0.5 }}
+            >
+              {getPrimerNombreApellido(currentUser?.nombreCompleto)}
+            </Typography>
+          </>
+        )}
       </Box>
 
       {/* Navigation */}
@@ -439,32 +403,46 @@ function DashboardLayout({ children, onLogout, currentUser }) {
             </Typography>
           </Box>
 
+          {/* Sección derecha del AppBar - VERSIÓN MEJORADA */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Chip de Facturación */}
             <Chip
               label="Facturación electrónica en línea: (Activada)"
               size="small"
               sx={{
                 bgcolor: "rgba(255,255,255,0.2)",
                 color: "white",
-                display: { xs: "none", sm: "flex" },
+                fontWeight: 600,
+                display: { xs: "none", lg: "flex" },
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255,255,255,0.3)",
               }}
             />
 
+            {/* Badge de Notificaciones */}
             <IconButton color="inherit">
               <Badge badgeContent={14} color="error">
                 <Notifications />
               </Badge>
             </IconButton>
 
+            {/* Usuario con Nombre Visible - REDISEÑADO */}
             <Button
               onClick={handleUserMenuClick}
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1,
+                gap: 1.5,
                 color: "white",
                 textTransform: "none",
-                "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
+                px: 2,
+                py: 1,
+                borderRadius: 3,
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.15)",
+                  transform: "translateY(-2px)",
+                },
               }}
             >
               <Avatar
@@ -472,19 +450,45 @@ function DashboardLayout({ children, onLogout, currentUser }) {
                   background: farmaColors.gradients.secondary,
                   width: 40,
                   height: 40,
+                  fontWeight: 800,
+                  border: "2px solid rgba(255,255,255,0.3)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
                 }}
               >
                 {currentUser?.nombreCompleto
                   ?.split(" ")
+                  .filter((_, i, arr) => i === 0 || i === arr.length - 1)
                   .map((n) => n[0])
-                  .join("") || "BA"}
+                  .join("")
+                  .toUpperCase() || "U"}
               </Avatar>
-              <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {currentUser?.nombreCompleto || "Brasil Admin"}
+
+              <Box
+                sx={{ display: { xs: "none", sm: "block" }, textAlign: "left" }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  {getPrimerNombreApellido(currentUser?.nombreCompleto)}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    opacity: 0.85,
+                    fontSize: "0.7rem",
+                    display: "block",
+                  }}
+                >
+                  {currentUser?.rol || "Sin rol"}
                 </Typography>
               </Box>
-              <KeyboardArrowDown />
+
+              <KeyboardArrowDown sx={{ ml: 0.5 }} />
             </Button>
           </Box>
         </Toolbar>
@@ -508,49 +512,6 @@ function DashboardLayout({ children, onLogout, currentUser }) {
           <ExitToApp sx={{ mr: 2, color: farmaColors.secondary }} />
           Salir
         </MenuItem>
-      </Menu>
-
-      <Menu
-        anchorEl={sucursalMenuAnchor}
-        open={Boolean(sucursalMenuAnchor)}
-        onClose={handleSucursalMenuClose}
-        PaperProps={{
-          sx: { mt: 1, minWidth: 200 },
-        }}
-      >
-        {sucursales.map((sucursal, index) => (
-          <MenuItem
-            key={index}
-            onClick={() => handleSucursalChange(sucursal)}
-            selected={currentSucursal.nombre === sucursal.nombre}
-            sx={{
-              "&.Mui-selected": {
-                bgcolor: "rgba(255,255,255,0.08)",
-                "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.12)",
-                },
-              },
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              <Typography>{sucursal.nombre}</Typography>
-              <Typography
-                variant="caption"
-                color={
-                  sucursal.porcentaje.includes("-") ? "error" : "success.main"
-                }
-              >
-                {sucursal.porcentaje}
-              </Typography>
-            </Box>
-          </MenuItem>
-        ))}
       </Menu>
 
       {/* Sidebar */}
