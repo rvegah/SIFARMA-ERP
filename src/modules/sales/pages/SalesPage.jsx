@@ -21,9 +21,16 @@ import SaleItemsTable from "../components/SaleItemsTable";
 import StockModal from "../components/StockModal";
 import MySalesModal from "../components/MySalesModal";
 import PrintInvoiceModal from "../components/PrintInvoiceModal";
-import { enviarFacturaSIAT } from "../services/siatMockService";
+import siatApiService from "../services/siatApiService";
 import CancelInvoiceModal from "../components/CancelInvoiceModal";
 import ProductsModal from "../components/ProductsModal";
+
+const CANCELLATION_REASONS = [
+  { value: 1, label: "Error en la transcripción" },
+  { value: 2, label: "Devolución" },
+  { value: 3, label: "Descuento o bonificación" },
+  { value: 4, label: "Otro" },
+];
 
 const SalesPage = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -49,7 +56,7 @@ const SalesPage = () => {
 
   const totals = React.useMemo(
     () => calculateTotals(),
-    [saleItems, clientForm]
+    [saleItems, clientForm],
   );
 
   const [stockModalOpen, setStockModalOpen] = useState(false);
@@ -63,6 +70,8 @@ const SalesPage = () => {
   const [invoiceToCancel, setInvoiceToCancel] = useState(null);
 
   const [productsModalOpen, setProductsModalOpen] = useState(false);
+
+  const [invoiced, setInvoiced] = useState(false);
 
   // Ver stock en sucursales
   const handleViewStock = () => {
@@ -87,52 +96,23 @@ const SalesPage = () => {
     }
   };
 
-  // Imprimir factura
   const handlePrintInvoice = async () => {
-    // Validar NIT para ventas >= 1000 Bs
-    if (totals.total >= 1000 && clientForm.nit === "4444") {
-      enqueueSnackbar(
-        "Para ventas mayores a 1000 Bs. debe ingresar un NIT/CI válido",
-        {
-          variant: "error",
-        }
-      );
-      return;
-    }
-
-    // Validar que haya items
     if (saleItems.length === 0) {
       enqueueSnackbar("Debe agregar al menos un producto", {
         variant: "warning",
       });
       return;
     }
-
+    enqueueSnackbar("Generando factura...", { variant: "info" });
     try {
-      // Mostrar loading
-      enqueueSnackbar("Generando factura...", { variant: "info" });
-
-      // 1. Preparar datos de la venta
-      const saleData = {
-        cliente: clientForm,
-        items: saleItems,
-        totales: totals,
-        pagado: clientForm.pagado,
-        cambio: clientForm.cambio,
-        metodoPago: "EFECTIVO",
-        userId: 1, // TODO: obtener del contexto de usuario
-        sucursalId: 1,
-        puntoVenta: 2,
-      };
-
-      // 2. Enviar al SIAT (mock) y obtener datos de factura
-      const siatResponse = await enviarFacturaSIAT(saleData);
-
-      if (!siatResponse.success) {
-        throw new Error("Error al generar factura en el SIAT");
+      const result = await invoiceSale();
+      if (!result.success) {
+        enqueueSnackbar(result.message || "Error al generar la factura", {
+          variant: "error",
+        });
+        return;
       }
-
-      // 3. Preparar datos para impresión
+      const invoice = result.invoice;
       const invoiceData = {
         empresa: {
           razonSocial: "FARMADINAMICA S.R.L.",
@@ -143,15 +123,15 @@ const SalesPage = () => {
           ciudad: "Cochabamba",
         },
         factura: {
-          numeroFactura: siatResponse.data.numeroFactura,
-          codigoAutorizacion: siatResponse.data.codigoAutorizacion,
-          cuf: siatResponse.data.cuf,
-          fechaEmision: siatResponse.data.fechaEmision,
-          qrUrl: siatResponse.data.qrUrl,
-          puntoVenta: saleData.puntoVenta,
+          facturaId: invoice.facturaId,
+          numeroFactura: invoice.numeroFactura,
+          codigoAutorizacion: invoice.cuf,
+          cuf: invoice.cuf,
+          fechaEmision: invoice.fechaEmision,
+          qrUrl: invoice.urlVerificacion,
+          estado: invoice.estado,
         },
         cliente: {
-          id: clientForm.id || Date.now(),
           nit: clientForm.nit,
           nombre: clientForm.nombre,
           celular: clientForm.celular,
@@ -173,7 +153,7 @@ const SalesPage = () => {
         },
         pagado: clientForm.pagado,
         cambio: clientForm.cambio,
-        usuario: "Usuario Sistema", // TODO: obtener del contexto
+        usuario: "Usuario Sistema",
         leyendas: {
           principal:
             "ESTA FACTURA CONTRIBUYE AL DESARROLLO DEL PAÍS, EL USO ILÍCITO SERÁ SANCIONADO PENALMENTE DE ACUERDO A LEY",
@@ -183,23 +163,16 @@ const SalesPage = () => {
             "Este documento es la Representación Gráfica de un Documento Fiscal Digital emitido en una modalidad de facturación en línea",
         },
       };
-
-      // 4. Guardar cliente para futuras ventas
-      // TODO: Implementar guardado en BD o localStorage
-      console.log(
-        "💾 Guardando datos del cliente para futuras ventas:",
-        clientForm
-      );
-
-      // 5. Abrir modal de impresión
       setInvoiceDataToPrint(invoiceData);
       setPrintModalOpen(true);
-
-      enqueueSnackbar("Factura generada. Seleccione el formato de impresión.", {
-        variant: "success",
-      });
+      setInvoiced(true);
+      enqueueSnackbar(
+        invoice.estado === "VALIDATED"
+          ? "✅ Factura validada por SIAT"
+          : "⏳ Factura pendiente de validación",
+        { variant: "success" },
+      );
     } catch (error) {
-      console.error("Error al generar factura:", error);
       enqueueSnackbar(error.message || "Error al generar la factura", {
         variant: "error",
       });
@@ -208,6 +181,7 @@ const SalesPage = () => {
 
   // Nueva venta
   const handleNewSale = () => {
+    setInvoiced(false);
     clearForm();
     enqueueSnackbar("Listo para nueva venta", { variant: "info" });
   };
@@ -229,7 +203,7 @@ const SalesPage = () => {
         {
           variant: "info",
           autoHideDuration: 6000,
-        }
+        },
       );
     } else if (saleData.metadata?.status === "GUARDADA") {
       enqueueSnackbar(
@@ -237,7 +211,7 @@ const SalesPage = () => {
         {
           variant: "info",
           autoHideDuration: 4000,
-        }
+        },
       );
     } else {
       enqueueSnackbar("✅ Venta cargada correctamente", { variant: "success" });
@@ -256,70 +230,48 @@ const SalesPage = () => {
 
     // TODO: Aquí deberías verificar si la venta actual tiene una factura asociada
     // Por ahora simulamos con los datos actuales
-    const invoiceData = {
-      numeroFactura: "206279", // Este debería venir de la BD
-      fechaEmision: new Date().toISOString(),
-      cliente: {
-        nombre: clientForm.nombre || "SIN NOMBRE",
-        nit: clientForm.nit || "4444",
-      },
-      totales: {
-        total: totals.total,
-      },
-      items: saleItems.map((item) => ({
-        nombre: item.nombre,
-        cantidad: item.cantidad,
-        subtotal: item.subtotal,
+    const facturaId = invoiceDataToPrint?.factura?.facturaId;
+    if (!facturaId) {
+      enqueueSnackbar(
+        "Cargue la factura desde 'Mis Ventas' para poder anularla",
+        { variant: "warning" },
+      );
+      return;
+    }
+    setInvoiceToCancel({
+      facturaId,
+      numeroFactura: invoiceDataToPrint.factura.numeroFactura,
+      fechaEmision: invoiceDataToPrint.factura.fechaEmision,
+      cliente: { nombre: clientForm.nombre, nit: clientForm.nit },
+      totales: { total: totals.total },
+      items: saleItems.map((i) => ({
+        nombre: i.nombre,
+        cantidad: i.cantidad,
+        subtotal: i.subtotal,
       })),
-    };
-
-    setInvoiceToCancel(invoiceData);
+    });
     setCancelModalOpen(true);
   };
 
   // 4. Función para confirmar anulación:
-  const handleConfirmCancellation = async (motivo) => {
+  const handleConfirmCancellation = async (codigoMotivo) => {
     try {
-      console.log("🚫 Anulando factura:", {
-        factura: invoiceToCancel,
-        motivo: motivo,
-        usuario: "Usuario Actual", // TODO: obtener del contexto
-        timestamp: new Date().toISOString(),
-      });
-
-      // Simulación de llamada al SIAT para anular
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // TODO: Implementar llamada real al SIAT
-      // const siatResponse = await anularFacturaSIAT({
-      //   numeroFactura: invoiceToCancel.numeroFactura,
-      //   motivo: motivo,
-      //   codigoAutorizacion: invoiceToCancel.codigoAutorizacion
-      // });
-
-      // Restaurar stock de los productos
-      saleItems.forEach((item) => {
-        console.log(`📦 Restaurando stock: ${item.nombre} +${item.cantidad}`);
-        // TODO: Implementar restauración de stock en BD
-      });
-
-      // Limpiar formulario
+      await siatApiService.anularFactura(
+        invoiceToCancel.facturaId,
+        codigoMotivo,
+      );
       clearForm();
+      setInvoiceDataToPrint(null);
       setCancelModalOpen(false);
       setInvoiceToCancel(null);
-
-      enqueueSnackbar(
-        `✅ Factura anulada exitosamente. Motivo: ${
-          CANCELLATION_REASONS.find((r) => r.value === motivo)?.label
-        }`,
-        {
-          variant: "success",
-          autoHideDuration: 6000,
-        }
-      );
+      const motivoLabel = CANCELLATION_REASONS.find(
+        (r) => r.value === codigoMotivo,
+      )?.label;
+      enqueueSnackbar(`✅ Factura anulada. Motivo: ${motivoLabel}`, {
+        variant: "success",
+      });
     } catch (error) {
-      console.error("Error al anular factura:", error);
-      enqueueSnackbar("❌ Error al anular la factura. Intente nuevamente.", {
+      enqueueSnackbar(error.message || "Error al anular la factura", {
         variant: "error",
       });
     }
@@ -356,7 +308,7 @@ const SalesPage = () => {
       {
         variant: "success",
         autoHideDuration: 5000,
-      }
+      },
     );
 
     // NO limpiar formulario - vendedora debe verificar entrega
@@ -408,20 +360,27 @@ const SalesPage = () => {
         onSearchProducts={searchProducts}
         searchResults={searchResults}
         isSearching={isSearching}
+        invoiced={invoiced}
       />
 
       {/* SECCIÓN DE BOTONES */}
       <Box sx={{ mt: 3 }}>
         {/* BOTÓN PRINCIPAL: Imprimir Factura */}
-        <Box sx={{ mb: 2 }}>
+        <Box
+          sx={{
+            mb: 2,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <Button
-            fullWidth
             variant="contained"
             size="large"
             startIcon={<Print />}
             onClick={handlePrintInvoice}
-            disabled={loading || saleItems.length === 0}
+            disabled={loading || saleItems.length === 0 || invoiced}
             sx={{
+              width: "300px",
               backgroundColor: farmaColors.primary,
               py: 2,
               fontSize: "1.1rem",
@@ -764,7 +723,6 @@ const SalesPage = () => {
         onClose={() => setProductsModalOpen(false)}
         onSelectProduct={handleSelectProductFromModal}
       />
-      
     </Container>
   );
 };
