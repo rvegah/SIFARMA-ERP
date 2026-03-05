@@ -8,6 +8,7 @@ import {
   Paper,
   MenuItem,
   InputAdornment,
+  CircularProgress,
 } from "@mui/material";
 import {
   Person,
@@ -21,19 +22,55 @@ import {
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 
+// ✅ Fallback hardcodeado: solo se usa si la API falla
+const TIPOS_DOCUMENTO_FALLBACK = [
+  { codigoClasificador: 1, descripcion: "CI - CEDULA DE IDENTIDAD" },
+  {
+    codigoClasificador: 2,
+    descripcion: "CEX - CEDULA DE IDENTIDAD EXTRANJERO",
+  },
+  { codigoClasificador: 3, descripcion: "PAS - PASAPORTE" },
+  { codigoClasificador: 4, descripcion: "OD - OTRO DOCUMENTO DE IDENTIDAD" },
+  {
+    codigoClasificador: 5,
+    descripcion: "NIT - NÚMERO DE IDENTIFICACIÓN TRIBUTARIA",
+  },
+];
+
+// ✅ Fallback para sectores: se muestra si la API de sectores no responde o está vacía
+const SECTORES_FALLBACK = [
+  { codigoClasificador: 1, descripcion: "FACTURA COMPRA-VENTA" },
+  {
+    codigoClasificador: 2,
+    descripcion: "FACTURA DE ALQUILER DE BIENES INMUEBLES",
+  },
+];
+
 const ClientForm = ({
   clientForm,
   setClientForm,
   handleClientSearch,
   totals,
+  // ✅ NUEVOS PROPS: catálogos dinámicos desde SalesPage
+  tiposDocumentoIdentidad = [],
+  loadingCatalogos = false,
+  isAdmin = false,
 }) => {
   const [descuentoInput, setDescuentoInput] = useState(
-    String(clientForm.descuentoAdicional ?? 0)
+    String(clientForm.descuentoAdicional ?? 0),
   );
   const [pagadoInput, setPagadoInput] = useState(
-    String(clientForm.pagado ?? 0)
+    String(clientForm.pagado ?? 0),
   );
   const nitTimerRef = useRef(null);
+
+  // ✅ Resolver qué lista usar: API o fallback
+  // Si la API ya cargó y devolvió datos → usar API
+  // Si aún carga o falló → usar fallback para no bloquear al usuario
+  const tiposDocumento =
+    tiposDocumentoIdentidad.length > 0
+      ? tiposDocumentoIdentidad
+      : TIPOS_DOCUMENTO_FALLBACK;
 
   // Cálculo automático del cambio
   useEffect(() => {
@@ -82,6 +119,7 @@ const ClientForm = ({
         ...prev,
         nit: code,
         nombre: cleanLabel,
+        // ✅ 4444 (SIN NOMBRE) → CI (1), cualquier otro especial → NIT (5)
         tipoDocumento: code === "4444" ? "1" : "5",
       }));
     }
@@ -89,7 +127,7 @@ const ClientForm = ({
 
   return (
     <Box sx={{ mb: 3 }}>
-      {/* HEADER - MANTENIENDO TU DISEÑO ORIGINAL */}
+      {/* HEADER */}
       <Box
         sx={{
           background: farmaColors.secondary,
@@ -114,7 +152,7 @@ const ClientForm = ({
           <Person /> Datos del Cliente
         </Typography>
 
-        {/* TOTAL VENTA - EN EL HEADER */}
+        {/* TOTAL VENTA */}
         <Box
           sx={{
             backgroundColor: "#4CAF50",
@@ -155,9 +193,106 @@ const ClientForm = ({
           border: `2px solid ${farmaColors.secondary}`,
         }}
       >
+        {/* FILA 0: TIPO DE FACTURA — Solo Admin */}
+        {isAdmin && (
+          <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
+            {/* Sector de Documento */}
+            <Grid item xs={12} md={3}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "white",
+                  fontWeight: 600,
+                  display: "block",
+                  mb: 0.5,
+                }}
+              >
+                Sector de Documento:
+              </Typography>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                value={clientForm.codigoDocumentoSector || "1"}
+                onChange={(e) =>
+                  setClientForm((prev) => ({
+                    ...prev,
+                    codigoDocumentoSector: e.target.value,
+                    // Limpiar periodo al cambiar sector
+                    periodoFacturado: "",
+                  }))
+                }
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "white",
+                    fontSize: "0.875rem",
+                  },
+                }}
+              >
+                <MenuItem value="1">
+                  Sector 1 - Compra y Venta de Bienes y Servicios
+                </MenuItem>
+                <MenuItem value="2">
+                  Sector 2 - Alquiler de Bienes Inmuebles
+                </MenuItem>
+              </TextField>
+            </Grid>
+
+            {/* Periodo Facturado — solo si sector 2 */}
+            {clientForm.codigoDocumentoSector === "2" && (
+              <Grid item xs={12} md={4}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "white",
+                    fontWeight: 600,
+                    display: "block",
+                    mb: 0.5,
+                  }}
+                >
+                  Periodo Facturado: <span style={{ color: "#ffcc80" }}>*</span>
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={clientForm.periodoFacturado || ""}
+                  onChange={(e) =>
+                    setClientForm((prev) => ({
+                      ...prev,
+                      periodoFacturado: e.target.value.toUpperCase(),
+                    }))
+                  }
+                  placeholder="Ej: FEBRERO 2026 o 12 DE MARZO AL 11 DE ABRIL DE 2026"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      backgroundColor: "white",
+                      fontSize: "0.875rem",
+                      textTransform: "uppercase",
+                    },
+                  }}
+                />
+                {/* Aviso códigos SIAT para alquiler */}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "#ffcc80",
+                    display: "block",
+                    mt: 0.5,
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  📌 <strong>Sector Alquiler:</strong> Código actividad:{" "}
+                  <strong>6810110</strong> · Producto SIN:{" "}
+                  <strong>1004039</strong>
+                </Typography>
+              </Grid>
+            )}
+          </Grid>
+        )}
+
         {/* FILA 1: DATOS TRIBUTARIOS */}
         <Grid container spacing={1.5} alignItems="flex-start">
-          {/* CÓDIGO RÁPIDO NIT - MÁS CORTO */}
+          {/* CÓDIGO RÁPIDO NIT */}
           <Grid item xs={12} md={1.5}>
             <Typography
               variant="caption"
@@ -183,7 +318,9 @@ const ClientForm = ({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Business sx={{ color: farmaColors.primary, fontSize: 18 }} />
+                    <Business
+                      sx={{ color: farmaColors.primary, fontSize: 18 }}
+                    />
                   </InputAdornment>
                 ),
               }}
@@ -251,7 +388,7 @@ const ClientForm = ({
               onChange={(e) =>
                 setClientForm((prev) => ({
                   ...prev,
-                  complemento: e.target.value,
+                  complemento: e.target.value.toUpperCase(),
                 }))
               }
               placeholder="Comp."
@@ -259,6 +396,7 @@ const ClientForm = ({
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
                   fontSize: "0.875rem",
+                  textTransform: "uppercase",
                 },
               }}
             />
@@ -282,7 +420,7 @@ const ClientForm = ({
               size="small"
               value={clientForm.nombre}
               onChange={(e) =>
-                setClientForm((prev) => ({ ...prev, nombre: e.target.value }))
+                setClientForm((prev) => ({ ...prev, nombre: e.target.value.toUpperCase() }))
               }
               placeholder="Nombre del cliente"
               InputProps={{
@@ -296,12 +434,13 @@ const ClientForm = ({
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
                   fontSize: "0.875rem",
+                  textTransform: "uppercase",
                 },
               }}
             />
           </Grid>
 
-          {/* TIPO DOCUMENTO */}
+          {/* ✅ TIPO DOCUMENTO — Dinámico desde API SIAT */}
           <Grid item xs={12} md={3}>
             <Typography
               variant="caption"
@@ -313,6 +452,13 @@ const ClientForm = ({
               }}
             >
               Tipo Documento Cliente:
+              {/* Indicador sutil de carga */}
+              {loadingCatalogos && (
+                <CircularProgress
+                  size={10}
+                  sx={{ ml: 1, color: "white", verticalAlign: "middle" }}
+                />
+              )}
             </Typography>
             <TextField
               select
@@ -325,7 +471,9 @@ const ClientForm = ({
                   tipoDocumento: e.target.value,
                 }))
               }
-              SelectProps={{ native: true }}
+              // ✅ SelectProps nativo → false para usar MenuItem (consistente con MUI)
+              // Cambiado de native select a MenuItem para soportar array dinámico
+              disabled={loadingCatalogos && tiposDocumento.length === 0}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
@@ -333,11 +481,14 @@ const ClientForm = ({
                 },
               }}
             >
-              <option value="1">1 - CI - CEDULA DE IDENTIDAD</option>
-              <option value="2">2 - CEX - CEDULA DE IDENTIDAD EXTRANJERO</option>
-              <option value="3">3 - PAS - PASAPORTE</option>
-              <option value="4">4 - OD - OTRO DOCUMENTO DE IDENTIDAD</option>
-              <option value="5">5 - NIT - NÚMERO DE IDENTIFICACIÓN TRIBUTARIA</option>
+              {tiposDocumento.map((tipo) => (
+                <MenuItem
+                  key={tipo.codigoClasificador}
+                  value={String(tipo.codigoClasificador)}
+                >
+                  {tipo.codigoClasificador} - {tipo.descripcion}
+                </MenuItem>
+              ))}
             </TextField>
           </Grid>
         </Grid>
@@ -493,7 +644,9 @@ const ClientForm = ({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Discount sx={{ color: farmaColors.primary, fontSize: 18 }} />
+                    <Discount
+                      sx={{ color: farmaColors.primary, fontSize: 18 }}
+                    />
                   </InputAdornment>
                 ),
               }}
@@ -539,7 +692,9 @@ const ClientForm = ({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Payment sx={{ color: farmaColors.primary, fontSize: 18 }} />
+                    <Payment
+                      sx={{ color: farmaColors.primary, fontSize: 18 }}
+                    />
                   </InputAdornment>
                 ),
               }}

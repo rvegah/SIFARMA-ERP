@@ -94,6 +94,7 @@ function buildEmitirFacturaRequest(
     codigoActividad: options.codigoActividad || SIAT_DEFAULTS.codigoActividad,
     codigoDocumentoSector:
       options.codigoDocumentoSector || SIAT_DEFAULTS.codigoDocumentoSector,
+    periodoFacturado: options.periodoFacturado || undefined,  
     tipoFactura: options.tipoFactura || SIAT_DEFAULTS.tipoFactura,
     tipoMetodoPago,
     codigoMoneda: SIAT_DEFAULTS.codigoMoneda,
@@ -310,6 +311,26 @@ function extractErrorMessage(error) {
   return `Error ${s}: ${error.message}`;
 }
 
+async function getTiposDocumentoIdentidad() {
+  try {
+    const response = await siatApiClient.get("/Sincronizacion/tipos-documento-identidad");
+    return response.data?.data || [];
+  } catch (error) {
+    console.error("[SiatAPI] Error al cargar tipos documento:", extractErrorMessage(error));
+    return [];
+  }
+}
+
+async function getActividadesDocumentoSector() {
+  try {
+    const response = await siatApiClient.get("/Sincronizacion/tipos-documento-sector");
+    return response.data?.data || [];
+  } catch (error) {
+    console.error("[SiatAPI] Error al cargar sectores documento:", extractErrorMessage(error));
+    return [];
+  }
+}
+
 // ─── EXPORTS ──────────────────────────────────────────────────────────────────
 
 const siatApiService = {
@@ -326,6 +347,8 @@ const siatApiService = {
   buildSiatQrUrl,
   extractErrorMessage,
   SIAT_DEFAULTS,
+  getTiposDocumentoIdentidad,
+  getActividadesDocumentoSector,
 };
 
 export default siatApiService;
@@ -343,4 +366,6 @@ export {
   buildSiatQrUrl,
   extractErrorMessage,
   SIAT_DEFAULTS,
+  getTiposDocumentoIdentidad,
+  getActividadesDocumentoSector,
 };

@@ -1,5 +1,5 @@
 // src/modules/sales/pages/SalesPage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Box, Button, Grid, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import {
@@ -24,6 +24,7 @@ import PrintInvoiceModal from "../components/PrintInvoiceModal";
 import siatApiService from "../services/siatApiService";
 import CancelInvoiceModal from "../components/CancelInvoiceModal";
 import ProductsModal from "../components/ProductsModal";
+import { useAuth } from "../../../context/AuthContext";
 
 const CANCELLATION_REASONS = [
   { value: 1, label: "Error en la transcripción" },
@@ -59,6 +60,10 @@ const SalesPage = () => {
     [saleItems, clientForm],
   );
 
+  // ✅ NUEVO: Estado para catálogos dinámicos SIAT
+  const [tiposDocumentoIdentidad, setTiposDocumentoIdentidad] = useState([]);
+  const [loadingCatalogos, setLoadingCatalogos] = useState(false);
+
   const [stockModalOpen, setStockModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mySalesModalOpen, setMySalesModalOpen] = useState(false);
@@ -72,6 +77,29 @@ const SalesPage = () => {
   const [productsModalOpen, setProductsModalOpen] = useState(false);
 
   const [invoiced, setInvoiced] = useState(false);
+
+  //Saber si el usuario es admin para mostrar opciones avanzadas
+  const { user } = useAuth();
+  const isAdmin = user?.rol === "Administrador";
+
+  // Cargar catálogos SIAT al montar el componente
+  useEffect(() => {
+    const cargarCatalogos = async () => {
+      setLoadingCatalogos(true);
+      try {
+        const tiposDoc = await siatApiService.getTiposDocumentoIdentidad();
+        setTiposDocumentoIdentidad(tiposDoc);        
+        console.log("✅ Tipos de documento cargados:", tiposDoc.length);
+      } catch (err) {
+        console.error("❌ Error al cargar catálogos SIAT:", err);
+        // Sin fallback hardcodeado — ClientForm tiene su propio fallback
+      } finally {
+        setLoadingCatalogos(false);
+      }
+    };
+
+    cargarCatalogos();
+  }, []);
 
   // Ver stock en sucursales
   const handleViewStock = () => {
@@ -189,29 +217,18 @@ const SalesPage = () => {
   // Cargar venta desde historial
   const handleLoadSale = (saleData) => {
     console.log("🔄 Recuperando venta desde modal:", saleData);
-
-    // Usar la nueva función del hook para cargar TODO
     loadSaleData(saleData);
-
-    // Cerrar modal
     setMySalesModalOpen(false);
 
-    // Mensaje informativo según el estado de la venta
     if (saleData.metadata?.status === "FACTURADA") {
       enqueueSnackbar(
         "✅ Venta facturada cargada. Puede agregar productos y generar nueva factura (se anulará la anterior automáticamente).",
-        {
-          variant: "info",
-          autoHideDuration: 6000,
-        },
+        { variant: "info", autoHideDuration: 6000 },
       );
     } else if (saleData.metadata?.status === "GUARDADA") {
       enqueueSnackbar(
         "✅ Venta guardada cargada. Puede modificar y facturar.",
-        {
-          variant: "info",
-          autoHideDuration: 4000,
-        },
+        { variant: "info", autoHideDuration: 4000 },
       );
     } else {
       enqueueSnackbar("✅ Venta cargada correctamente", { variant: "success" });
@@ -220,7 +237,6 @@ const SalesPage = () => {
 
   // Anular factura
   const handleCancelInvoice = () => {
-    // Verificar que hay una venta cargada para anular
     if (saleItems.length === 0) {
       enqueueSnackbar("No hay ninguna factura cargada para anular", {
         variant: "warning",
@@ -228,8 +244,6 @@ const SalesPage = () => {
       return;
     }
 
-    // TODO: Aquí deberías verificar si la venta actual tiene una factura asociada
-    // Por ahora simulamos con los datos actuales
     const facturaId = invoiceDataToPrint?.factura?.facturaId;
     if (!facturaId) {
       enqueueSnackbar(
@@ -253,7 +267,6 @@ const SalesPage = () => {
     setCancelModalOpen(true);
   };
 
-  // 4. Función para confirmar anulación:
   const handleConfirmCancellation = async (codigoMotivo) => {
     try {
       await siatApiService.anularFactura(
@@ -302,39 +315,28 @@ const SalesPage = () => {
 
   const handlePrintComplete = (printedInvoice) => {
     console.log("✅ Factura impresa:", printedInvoice);
-
     enqueueSnackbar(
       "Factura generada exitosamente. Verifique la entrega de productos al cliente.",
-      {
-        variant: "success",
-        autoHideDuration: 5000,
-      },
+      { variant: "success", autoHideDuration: 5000 },
     );
-
-    // NO limpiar formulario - vendedora debe verificar entrega
-    // El formulario se limpiará solo al hacer clic en "Nueva Venta"
   };
 
   const handleSelectProductFromModal = (product) => {
     console.log("📦 Producto seleccionado desde modal:", product);
-
-    // Convertir a formato compatible con addItem
     const productForSale = {
       id: product.id,
       codigo: product.codigo,
       nombre: product.nombre,
       precio: product.precio,
       stock: product.stock,
-      unidadMedida: "CAJA", // Default, se puede cambiar después
+      unidadMedida: "CAJA",
       presentacion: product.presentacion,
       linea: product.linea,
       laboratorio: product.laboratorio,
-      cantidad: 1, // Cantidad inicial
+      cantidad: 1,
       descuento: 0,
     };
-
     addItem(productForSale);
-
     enqueueSnackbar(`✅ ${product.nombre} agregado a la venta`, {
       variant: "success",
       autoHideDuration: 3000,
@@ -343,12 +345,16 @@ const SalesPage = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* Formulario de cliente */}
+      {/* Formulario de cliente
+          ✅ Se pasan tiposDocumentoIdentidad y loadingCatalogos como props */}
       <ClientForm
         clientForm={clientForm}
         setClientForm={setClientForm}
         handleClientSearch={handleClientSearch}
         totals={totals}
+        tiposDocumentoIdentidad={tiposDocumentoIdentidad}
+        loadingCatalogos={loadingCatalogos}        
+        isAdmin={isAdmin}
       />
 
       {/* Tabla de items CON búsqueda integrada */}
@@ -366,13 +372,7 @@ const SalesPage = () => {
       {/* SECCIÓN DE BOTONES */}
       <Box sx={{ mt: 3 }}>
         {/* BOTÓN PRINCIPAL: Imprimir Factura */}
-        <Box
-          sx={{
-            mb: 2,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
           <Button
             variant="contained"
             size="large"
@@ -398,9 +398,8 @@ const SalesPage = () => {
           </Button>
         </Box>
 
-        {/* Botones secundarios - TODOS EN UNA FILA */}
+        {/* Botones secundarios */}
         <Grid container spacing={1}>
-          {/* Nueva Venta */}
           <Grid item xs={1.5}>
             <Button
               fullWidth
@@ -423,7 +422,6 @@ const SalesPage = () => {
             </Button>
           </Grid>
 
-          {/* Guardar Venta */}
           <Grid item xs={1.5}>
             <Button
               fullWidth
@@ -447,7 +445,6 @@ const SalesPage = () => {
             </Button>
           </Grid>
 
-          {/* Mis Ventas */}
           <Grid item xs={1.5}>
             <Button
               fullWidth
@@ -470,7 +467,6 @@ const SalesPage = () => {
             </Button>
           </Grid>
 
-          {/* Ver Stock */}
           <Grid item xs={1.5}>
             <Button
               fullWidth
@@ -493,7 +489,6 @@ const SalesPage = () => {
             </Button>
           </Grid>
 
-          {/* Productos */}
           <Grid item xs={1.5}>
             <Button
               fullWidth
@@ -516,7 +511,6 @@ const SalesPage = () => {
             </Button>
           </Grid>
 
-          {/* Guardar Cliente */}
           <Grid item xs={1.5}>
             <Button
               fullWidth
@@ -539,7 +533,6 @@ const SalesPage = () => {
             </Button>
           </Grid>
 
-          {/* Imprimir FFDL */}
           <Grid item xs={1.5}>
             <Button
               fullWidth
@@ -563,7 +556,6 @@ const SalesPage = () => {
             </Button>
           </Grid>
 
-          {/* Anular Factura */}
           <Grid item xs={1.5}>
             <Button
               fullWidth
@@ -697,7 +689,6 @@ const SalesPage = () => {
         userId={1}
       />
 
-      {/* Modal de impresión */}
       <PrintInvoiceModal
         open={printModalOpen}
         onClose={() => setPrintModalOpen(false)}
@@ -705,7 +696,6 @@ const SalesPage = () => {
         onPrintComplete={handlePrintComplete}
       />
 
-      {/* Modal de anulación */}
       <CancelInvoiceModal
         open={cancelModalOpen}
         onClose={() => {
@@ -717,7 +707,6 @@ const SalesPage = () => {
         loading={loading}
       />
 
-      {/* Modal de productos */}
       <ProductsModal
         open={productsModalOpen}
         onClose={() => setProductsModalOpen(false)}

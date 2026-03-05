@@ -15,6 +15,8 @@ export const useSales = () => {
     descuentoAdicional: 0,
     pagado: 0,
     cambio: 0,
+    codigoDocumentoSector: "1",
+    periodoFacturado: "",
   });
 
   const [saleItems, setSaleItems] = useState([]);
@@ -26,7 +28,10 @@ export const useSales = () => {
   // ── BÚSQUEDA ──────────────────────────────────────────────────────────────
 
   const searchProducts = useCallback(async (query) => {
-    if (!query || query.length < 2) { setSearchResults([]); return; }
+    if (!query || query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
     setIsSearching(true);
     try {
       const results = await SalesService.searchProducts(query);
@@ -60,13 +65,16 @@ export const useSales = () => {
 
   const addItem = useCallback((product) => {
     setSaleItems((prev) => {
-      const existingIndex = prev.findIndex((item) => item.productId === product.id);
+      const existingIndex = prev.findIndex(
+        (item) => item.productId === product.id,
+      );
 
       if (existingIndex >= 0) {
         const updated = [...prev];
         updated[existingIndex].cantidad += 1;
         updated[existingIndex].subtotal =
-          updated[existingIndex].cantidad * updated[existingIndex].precio - updated[existingIndex].descuento;
+          updated[existingIndex].cantidad * updated[existingIndex].precio -
+          updated[existingIndex].descuento;
         return updated;
       }
 
@@ -82,14 +90,14 @@ export const useSales = () => {
           nombre: product.nombre,
 
           // Info para mostrar en tabla
-          descripcion: product.descripcion || '',
-          categoria: product.categoria || '',
-          linea: product.linea || '',
-          laboratorio: product.laboratorio || '',
+          descripcion: product.descripcion || "",
+          categoria: product.categoria || "",
+          linea: product.linea || "",
+          laboratorio: product.laboratorio || "",
 
           // Lote y vencimiento
-          numeroLote: product.numeroLote || '',
-          fechaVencimiento: product.fechaVencimiento || '',
+          numeroLote: product.numeroLote || "",
+          fechaVencimiento: product.fechaVencimiento || "",
           diasProximoVencimiento: product.diasProximoVencimiento || 0,
           descuentoVencimiento: product.descuentoVencimiento || 0,
 
@@ -119,14 +127,18 @@ export const useSales = () => {
       prev.map((item) => {
         if (item.id === itemId) {
           const updated = { ...item, [field]: value };
-          if (field === "cantidad" || field === "precio" || field === "descuento") {
+          if (
+            field === "cantidad" ||
+            field === "precio" ||
+            field === "descuento"
+          ) {
             const base = updated.cantidad * updated.precio;
             updated.subtotal = base - updated.descuento;
           }
           return updated;
         }
         return item;
-      })
+      }),
     );
   }, []);
 
@@ -159,7 +171,10 @@ export const useSales = () => {
     //   return { valid: false, message: `Stock insuficiente para: ${stockIssues.map((i) => i.nombre).join(", ")}` };
 
     if (total >= FACTURA_SIN_NOMBRE_LIMIT && clientForm.nit === "4444")
-      return { valid: false, message: `Para ventas mayores a ${FACTURA_SIN_NOMBRE_LIMIT} Bs. debe ingresar NIT/CI válido` };
+      return {
+        valid: false,
+        message: `Para ventas mayores a ${FACTURA_SIN_NOMBRE_LIMIT} Bs. debe ingresar NIT/CI válido`,
+      };
 
     if (!clientForm.nombre || clientForm.nombre.trim() === "")
       return { valid: false, message: "Debe ingresar el nombre del cliente" };
@@ -171,16 +186,18 @@ export const useSales = () => {
 
   const saveSale = useCallback(async () => {
     const validation = validateSale();
-    if (!validation.valid) return { success: false, message: validation.message };
+    if (!validation.valid)
+      return { success: false, message: validation.message };
 
     setLoading(true);
     try {
       const result = await SalesService.saveSale({
         cliente: clientForm,
         items: saleItems,
-        totals: calculateTotals(),  // ✅ 'totals' no 'totales'
+        totals: calculateTotals(), // ✅ 'totals' no 'totales'
       });
-      if (result.success) return { success: true, message: "Venta guardada exitosamente" };
+      if (result.success)
+        return { success: true, message: "Venta guardada exitosamente" };
       return { success: false, message: result.message || "Error al guardar" };
     } catch (error) {
       return { success: false, message: "Error al guardar la venta" };
@@ -193,14 +210,15 @@ export const useSales = () => {
 
   const invoiceSale = useCallback(async () => {
     const validation = validateSale();
-    if (!validation.valid) return { success: false, message: validation.message };
+    if (!validation.valid)
+      return { success: false, message: validation.message };
 
     setLoading(true);
     try {
       const result = await SalesService.invoiceSale({
         cliente: clientForm,
         items: saleItems,
-        totals: calculateTotals(),  // ✅ 'totals' no 'totales'
+        totals: calculateTotals(), // ✅ 'totals' no 'totales'
       });
 
       if (result.success) {
@@ -225,28 +243,48 @@ export const useSales = () => {
 
   const clearForm = useCallback(() => {
     setClientForm({
-      nit: "", nombre: "", tipoDocumento: "1", celular: "", email: "",
-      complemento: "", fechaNacimiento: "", descuentoAdicional: 0, pagado: 0, cambio: 0,
+      nit: "",
+      nombre: "",
+      tipoDocumento: "1",
+      celular: "",
+      email: "",
+      complemento: "",
+      fechaNacimiento: "",
+      descuentoAdicional: 0,
+      pagado: 0,
+      cambio: 0,
+      codigoDocumentoSector: "1",
+      periodoFacturado: "",
     });
     setSaleItems([]);
     setSearchQuery("");
     setSearchResults([]);
   }, []);
 
-  const updateDiscount = useCallback((value) => {
-    setClientForm((prev) => {
-      const newDiscount = Math.max(0, value);
-      const totals = calculateTotals();
-      return { ...prev, descuentoAdicional: newDiscount > totals.subtotal ? totals.subtotal : newDiscount };
-    });
-  }, [calculateTotals]);
+  const updateDiscount = useCallback(
+    (value) => {
+      setClientForm((prev) => {
+        const newDiscount = Math.max(0, value);
+        const totals = calculateTotals();
+        return {
+          ...prev,
+          descuentoAdicional:
+            newDiscount > totals.subtotal ? totals.subtotal : newDiscount,
+        };
+      });
+    },
+    [calculateTotals],
+  );
 
-  const updatePayment = useCallback((value) => {
-    const totals = calculateTotals();
-    const pagado = Math.max(0, value);
-    const cambio = Math.max(0, pagado - totals.total);
-    setClientForm((prev) => ({ ...prev, pagado, cambio }));
-  }, [calculateTotals]);
+  const updatePayment = useCallback(
+    (value) => {
+      const totals = calculateTotals();
+      const pagado = Math.max(0, value);
+      const cambio = Math.max(0, pagado - totals.total);
+      setClientForm((prev) => ({ ...prev, pagado, cambio }));
+    },
+    [calculateTotals],
+  );
 
   // ── CARGAR VENTA COMPLETA (para edición) ─────────────────────────────────
 
@@ -262,41 +300,60 @@ export const useSales = () => {
       descuentoAdicional: saleData.clientForm.descuentoAdicional || 0,
       pagado: saleData.clientForm.pagado || 0,
       cambio: saleData.clientForm.cambio || 0,
+      codigoDocumentoSector: saleData.clientForm.codigoDocumentoSector || "1",
+      periodoFacturado: saleData.clientForm.periodoFacturado || "",    
     });
 
-    setSaleItems(saleData.items.map((item, index) => ({
-      id: Date.now() + index,
-      productId: item.productId || item.id,
-      codigo: item.codigo,
-      sku: item.sku,
-      nombre: item.nombre,
-      descripcion: item.descripcion || '',
-      categoria: item.categoria || '',
-      linea: item.linea || '',
-      laboratorio: item.laboratorio || '',
-      numeroLote: item.numeroLote || '',
-      fechaVencimiento: item.fechaVencimiento || '',
-      diasProximoVencimiento: item.diasProximoVencimiento || 0,
-      descuentoVencimiento: item.descuentoVencimiento || 0,
-      codigoSin: item.codigoSin,
-      codigoProductoSin: item.codigoProductoSin,
-      codigoActividad: item.codigoActividad,
-      unidadMedida: item.unidadMedida || 62, // número SIAT
-      stock: item.stock || 0,
-      cantidad: item.cantidad,
-      precio: item.precio,
-      precioUnitario: item.precio,
-      descuento: item.descuento || 0,
-      subtotal: item.subtotal,
-    })));
+    setSaleItems(
+      saleData.items.map((item, index) => ({
+        id: Date.now() + index,
+        productId: item.productId || item.id,
+        codigo: item.codigo,
+        sku: item.sku,
+        nombre: item.nombre,
+        descripcion: item.descripcion || "",
+        categoria: item.categoria || "",
+        linea: item.linea || "",
+        laboratorio: item.laboratorio || "",
+        numeroLote: item.numeroLote || "",
+        fechaVencimiento: item.fechaVencimiento || "",
+        diasProximoVencimiento: item.diasProximoVencimiento || 0,
+        descuentoVencimiento: item.descuentoVencimiento || 0,
+        codigoSin: item.codigoSin,
+        codigoProductoSin: item.codigoProductoSin,
+        codigoActividad: item.codigoActividad,
+        unidadMedida: item.unidadMedida || 62, // número SIAT
+        stock: item.stock || 0,
+        cantidad: item.cantidad,
+        precio: item.precio,
+        precioUnitario: item.precio,
+        descuento: item.descuento || 0,
+        subtotal: item.subtotal,
+      })),
+    );
   }, []);
 
   return {
-    clientForm, saleItems, searchQuery, searchResults, isSearching, loading,
-    setClientForm, searchProducts, handleClientSearch,
-    addItem, updateItem, removeItem,
-    calculateTotals, validateSale,
-    saveSale, invoiceSale, clearForm,
-    setSearchQuery, updateDiscount, updatePayment, loadSaleData,
+    clientForm,
+    saleItems,
+    searchQuery,
+    searchResults,
+    isSearching,
+    loading,
+    setClientForm,
+    searchProducts,
+    handleClientSearch,
+    addItem,
+    updateItem,
+    removeItem,
+    calculateTotals,
+    validateSale,
+    saveSale,
+    invoiceSale,
+    clearForm,
+    setSearchQuery,
+    updateDiscount,
+    updatePayment,
+    loadSaleData,
   };
 };
