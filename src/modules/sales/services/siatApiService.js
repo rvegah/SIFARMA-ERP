@@ -331,6 +331,32 @@ async function getActividadesDocumentoSector() {
   }
 }
 
+async function getEmpresaInfo() {
+  try {
+    const response = await siatApiClient.get('/Configuracion/empresa-info');
+    return response.data?.data || null;
+  } catch (error) {
+    console.error('❌ [SiatAPI] Error al cargar empresa info:', error);
+    return null;
+  }
+}
+
+async function getUnidadesMedida() {
+  try {
+    const response = await siatApiClient.get('/Sincronizacion/unidades-medida');
+    // Convertir array a Map: { 62: "CAJA", 57: "UNIDAD (BIENES)", ... }
+    const data = response.data?.data || [];
+    const mapa = {};
+    data.forEach(u => {
+      mapa[u.codigoClasificador] = u.descripcion;
+    });
+    return mapa;
+  } catch (error) {
+    console.error('❌ [SiatAPI] Error al cargar unidades de medida:', error);
+    return {}; // fallback vacío, InvoiceFullPDF usará el número
+  }
+}
+
 // ─── EXPORTS ──────────────────────────────────────────────────────────────────
 
 const siatApiService = {
@@ -349,6 +375,8 @@ const siatApiService = {
   SIAT_DEFAULTS,
   getTiposDocumentoIdentidad,
   getActividadesDocumentoSector,
+  getEmpresaInfo,
+  getUnidadesMedida,
 };
 
 export default siatApiService;
@@ -368,4 +396,6 @@ export {
   SIAT_DEFAULTS,
   getTiposDocumentoIdentidad,
   getActividadesDocumentoSector,
+  getEmpresaInfo,
+  getUnidadesMedida,
 };

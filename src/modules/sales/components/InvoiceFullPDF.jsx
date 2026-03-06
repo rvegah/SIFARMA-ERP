@@ -1,16 +1,8 @@
 // src/modules/sales/components/InvoiceFullPDF.jsx
-import React from 'react';
-import { Box, Typography, Divider } from '@mui/material';
-// ❌ ANTES:
-// import QRCode from 'qrcode.react';
+import React from "react";
+import { Box, Typography, Divider } from "@mui/material";
+import QRCode from "react-qr-code";
 
-// ✅ AHORA:
-import QRCode from 'react-qr-code';
-
-/**
- * Componente para renderizar factura completa en formato térmico
- * Medidas: 79mm de ancho (aprox 300px a 96 DPI)
- */
 const InvoiceFullPDF = React.forwardRef(({ invoiceData }, ref) => {
   const {
     empresa,
@@ -20,229 +12,326 @@ const InvoiceFullPDF = React.forwardRef(({ invoiceData }, ref) => {
     totales,
     pagado,
     cambio,
-    usuario,
-    leyendas
+    leyendas,
   } = invoiceData;
 
-  // Formatear fecha
+  const esAlquiler = factura?.esAlquiler || false;
+
   const formatFecha = (fecha) => {
     const date = new Date(fecha);
-    return date.toLocaleString('es-BO', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    return date.toLocaleString("es-BO", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     });
   };
 
-  // Número a texto
+  // ENCUENTRA toda la función numeroATexto y REEMPLAZA con esta:
   const numeroATexto = (numero) => {
-    const partes = numero.toFixed(2).split('.');
-    const entero = parseInt(partes[0]);
-    const decimal = partes[1];
-    
-    // Simplificado para el ejemplo
-    const unidades = ['', 'Uno', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis', 'Siete', 'Ocho', 'Nueve'];
-    const decenas = ['', 'Diez', 'Veinte', 'Treinta', 'Cuarenta', 'Cincuenta', 'Sesenta', 'Setenta', 'Ochenta', 'Noventa'];
-    const centenas = ['', 'Ciento', 'Doscientos', 'Trescientos', 'Cuatrocientos', 'Quinientos', 'Seiscientos', 'Setecientos', 'Ochocientos', 'Novecientos'];
-    
-    if (entero === 0) return `Cero ${decimal}/100 Bolivianos`;
-    if (entero < 10) return `${unidades[entero]} ${decimal}/100 Bolivianos`;
-    if (entero < 100) {
-      const dec = Math.floor(entero / 10);
-      const uni = entero % 10;
-      return `${decenas[dec]}${uni > 0 ? ' y ' + unidades[uni] : ''} ${decimal}/100 Bolivianos`;
-    }
-    
-    return `${entero} ${decimal}/100 Bolivianos`;
+    if (numero === 0) return "Cero 00/100 Bolivianos";
+
+    const parteEntera = Math.floor(numero);
+    const parteDecimal = Math.round((numero - parteEntera) * 100);
+
+    const unidades = [
+      "",
+      "uno",
+      "dos",
+      "tres",
+      "cuatro",
+      "cinco",
+      "seis",
+      "siete",
+      "ocho",
+      "nueve",
+    ];
+    const especiales = [
+      "diez",
+      "once",
+      "doce",
+      "trece",
+      "catorce",
+      "quince",
+      "dieciséis",
+      "diecisiete",
+      "dieciocho",
+      "diecinueve",
+    ];
+    const decenas = [
+      "",
+      "diez",
+      "veinte",
+      "treinta",
+      "cuarenta",
+      "cincuenta",
+      "sesenta",
+      "setenta",
+      "ochenta",
+      "noventa",
+    ];
+    const centenas = [
+      "",
+      "ciento",
+      "doscientos",
+      "trescientos",
+      "cuatrocientos",
+      "quinientos",
+      "seiscientos",
+      "setecientos",
+      "ochocientos",
+      "novecientos",
+    ];
+
+    const convertirGrupo = (n) => {
+      if (n === 0) return "";
+      let res = "";
+      const c = Math.floor(n / 100);
+      if (c > 0) {
+        res = n === 100 ? "cien" : centenas[c];
+        n %= 100;
+        if (n > 0) res += " ";
+      }
+      if (n >= 10 && n < 20) return res + especiales[n - 10];
+      const d = Math.floor(n / 10);
+      if (d > 0) {
+        res += decenas[d];
+        n %= 10;
+        if (n > 0) res += d === 2 ? "i" : " y ";
+      }
+      if (n > 0) res += unidades[n];
+      return res.trim();
+    };
+
+    const convertirEntero = (n) => {
+      if (n === 0) return "cero";
+      if (n === 1) return "uno";
+      let res = "";
+      if (n >= 1000000) {
+        const mill = Math.floor(n / 1000000);
+        res += mill === 1 ? "un millón" : convertirGrupo(mill) + " millones";
+        n %= 1000000;
+        if (n > 0) res += " ";
+      }
+      if (n >= 1000) {
+        const miles = Math.floor(n / 1000);
+        res += miles === 1 ? "mil" : convertirGrupo(miles) + " mil";
+        n %= 1000;
+        if (n > 0) res += " ";
+      }
+      if (n > 0) res += convertirGrupo(n);
+      return res.trim();
+    };
+
+    const palabras = convertirEntero(parteEntera);
+    const capitalizada = palabras.charAt(0).toUpperCase() + palabras.slice(1);
+    return `${capitalizada} ${String(parteDecimal).padStart(2, "0")}/100 Bolivianos`;
+  };
+
+  const labelStyle = { fontSize: "10px", fontWeight: "bold" };
+  const valueStyle = { fontSize: "10px" };
+  const centerBold = {
+    fontSize: "11px",
+    fontWeight: "bold",
+    textAlign: "center",
   };
 
   return (
     <Box
       ref={ref}
       sx={{
-        width: '300px',
-        padding: '10px',
-        backgroundColor: 'white',
-        fontFamily: 'monospace',
-        fontSize: '11px',
-        lineHeight: '1.3',
-        color: '#000'
+        width: "300px",
+        padding: "10px",
+        backgroundColor: "white",
+        fontFamily: "Arial, sans-serif",
+        fontSize: "10px",
+        lineHeight: "1.4",
+        color: "#000",
       }}
     >
-      {/* ENCABEZADO */}
-      <Box sx={{ textAlign: 'center', mb: 1 }}>
-        <Typography sx={{ fontSize: '13px', fontWeight: 'bold', mb: 0.5 }}>
-          {empresa.razonSocial}
+      {/* ===================== ENCABEZADO ===================== */}
+      <Box sx={{ textAlign: "center", mb: 1 }}>
+        {/* Título primero — igual que SIAT */}
+        <Typography sx={{ fontSize: "12px", fontWeight: "bold" }}>
+          {esAlquiler ? "FACTURA DE ALQUILER" : "FACTURA"}
         </Typography>
-        <Typography sx={{ fontSize: '10px' }}>
+        <Typography sx={{ fontSize: "9px", mb: 0.5 }}>
+          CON DERECHO A CRÉDITO FISCAL
+        </Typography>
+
+        {/* Empresa */}
+        <Typography sx={centerBold}>{empresa.razonSocial}</Typography>
+        <Typography sx={{ fontSize: "9px" }}>Casa Matriz</Typography>
+        <Typography sx={{ fontSize: "9px" }}>
+          No. Punto de Venta {factura.puntoVenta ?? 0}
+        </Typography>
+        <Typography sx={{ fontSize: "9px" }}>
           {empresa.direccionCasaMatriz}
         </Typography>
-        <Typography sx={{ fontSize: '10px' }}>
-          No. Punto de Venta {factura.puntoVenta}
+        <Typography sx={{ fontSize: "9px" }}>
+          Tel. {empresa.telefono}
         </Typography>
-        <Typography sx={{ fontSize: '10px' }}>
-          Telf: {empresa.telefono}
-        </Typography>
-        <Typography sx={{ fontSize: '10px' }}>
-          {empresa.ciudad}
-        </Typography>
+        <Typography sx={{ fontSize: "9px" }}>{empresa.ciudad}</Typography>
       </Box>
 
-      {/* TIPO DE FACTURA */}
-      <Box sx={{ textAlign: 'center', my: 1 }}>
-        <Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>
-          FACTURA
-        </Typography>
-        <Typography sx={{ fontSize: '9px' }}>
-          (Con Derecho a Crédito Fiscal)
-        </Typography>
-      </Box>
+      <Divider sx={{ borderStyle: "dashed", my: 1 }} />
 
-      <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
+      {/* ===================== NIT / FACTURA / CUF ===================== */}
+      <Box sx={{ textAlign: "center", mb: 1 }}>
+        <Typography sx={centerBold}>NIT</Typography>
+        <Typography sx={{ fontSize: "11px", textAlign: "center" }}>
+          {empresa.nit}
+        </Typography>
 
-      {/* DATOS FISCALES */}
-      <Box sx={{ mb: 1 }}>
-        <Typography sx={{ fontSize: '10px' }}>
-          NIT: {empresa.nit}
+        <Typography sx={{ ...centerBold, mt: 0.5 }}>FACTURA N°</Typography>
+        <Typography sx={{ fontSize: "11px", textAlign: "center" }}>
+          {factura.numeroFactura}
         </Typography>
-        <Typography sx={{ fontSize: '10px', fontWeight: 'bold' }}>
-          FACTURA N° {factura.numeroFactura}
-        </Typography>
-        <Typography sx={{ fontSize: '9px', wordBreak: 'break-all' }}>
+
+        <Typography sx={{ ...centerBold, mt: 0.5 }}>
           CÓD. AUTORIZACIÓN
         </Typography>
-        <Typography sx={{ fontSize: '8px', wordBreak: 'break-all', mb: 0.5 }}>
+        <Typography
+          sx={{ fontSize: "8px", wordBreak: "break-all", textAlign: "center" }}
+        >
           {factura.codigoAutorizacion}
         </Typography>
       </Box>
 
-      <Divider sx={{ borderStyle: 'dashed', my: 1 }} />
+      <Divider sx={{ borderStyle: "dashed", my: 1 }} />
 
-      {/* DATOS DEL CLIENTE */}
+      {/* ===================== DATOS DEL CLIENTE ===================== */}
       <Box sx={{ mb: 1 }}>
-        <Typography sx={{ fontSize: '10px' }}>
-          Nombre/Razón Social: {cliente.nombre}
-        </Typography>
-        <Typography sx={{ fontSize: '10px' }}>
-          NIT/CI/CEX: {cliente.nit}
-        </Typography>
-        <Typography sx={{ fontSize: '10px' }}>
-          Cod. Cliente: COD-{cliente.id}
-        </Typography>
-        <Typography sx={{ fontSize: '10px' }}>
-          Fecha Emision: {formatFecha(factura.fechaEmision)}
-        </Typography>
+        <Box sx={{ display: "flex", gap: 0.5, mb: 0.3 }}>
+          <Typography sx={labelStyle}>NOMBRE/RAZÓN SOCIAL:</Typography>
+          <Typography sx={valueStyle}>
+            {cliente.nombre?.toUpperCase()}
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: 0.5, mb: 0.3 }}>
+          <Typography sx={labelStyle}>NIT/CI/CEX:</Typography>
+          <Typography sx={valueStyle}>{cliente.nit}</Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: 0.5, mb: 0.3 }}>
+          <Typography sx={labelStyle}>COD. CLIENTE:</Typography>
+          <Typography sx={valueStyle}>{cliente.nit}</Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: 0.5, mb: 0.3 }}>
+          <Typography sx={labelStyle}>FECHA DE EMISIÓN:</Typography>
+          <Typography sx={valueStyle}>
+            {formatFecha(factura.fechaEmision)}
+          </Typography>
+        </Box>
+
+        {/* PERIODO FACTURADO — solo alquiler */}
+        {esAlquiler && factura.periodoFacturado && (
+          <Box sx={{ display: "flex", gap: 0.5, mb: 0.3 }}>
+            <Typography sx={labelStyle}>PERIODO FACTURADO:</Typography>
+            <Typography sx={valueStyle}>{factura.periodoFacturado}</Typography>
+          </Box>
+        )}
       </Box>
 
-      <Divider sx={{ borderStyle: 'solid', my: 1 }} />
+      <Divider sx={{ borderStyle: "solid", my: 1 }} />
 
-      {/* ENCABEZADO DE TABLA */}
-      <Box sx={{ display: 'flex', mb: 0.5, fontSize: '9px', fontWeight: 'bold' }}>
-        <Box sx={{ width: '15%' }}>Cant.</Box>
-        <Box sx={{ width: '40%' }}>Precio</Box>
-        <Box sx={{ width: '20%' }}>Desc.</Box>
-        <Box sx={{ width: '25%', textAlign: 'right' }}>Sub Total</Box>
-      </Box>
+      {/* ===================== DETALLE ===================== */}
+      <Typography sx={{ ...centerBold, mb: 0.5 }}>DETALLE</Typography>
 
-      <Divider sx={{ borderStyle: 'solid', my: 0.5 }} />
-
-      {/* ITEMS */}
       {items.map((item, index) => (
         <Box key={index} sx={{ mb: 1 }}>
-          <Typography sx={{ fontSize: '9px', fontWeight: 'bold', mb: 0.3 }}>
-            {item.codigo}-{item.nombre}
+          <Typography sx={{ fontSize: "9px", fontWeight: "bold" }}>
+            {item.codigo} - {item.nombre}
           </Typography>
-          <Typography sx={{ fontSize: '8px', mb: 0.3 }}>
-            Unidad Medida: {item.unidadMedida}
+          <Typography sx={{ fontSize: "8px" }}>
+            Unidad de Medida: {item.unidadMedida}
           </Typography>
-          <Box sx={{ display: 'flex', fontSize: '9px' }}>
-            <Box sx={{ width: '15%' }}>{item.cantidad}</Box>
-            <Box sx={{ width: '40%' }}>{item.precio.toFixed(2)}</Box>
-            <Box sx={{ width: '20%' }}>{item.descuento.toFixed(2)}</Box>
-            <Box sx={{ width: '25%', textAlign: 'right' }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: "9px",
+            }}
+          >
+            <span>
+              {item.cantidad} X {item.precio.toFixed(2)} -{" "}
+              {item.descuento.toFixed(2)}
+            </span>
+            <span style={{ fontWeight: "bold" }}>
               {item.subtotal.toFixed(2)}
-            </Box>
+            </span>
           </Box>
         </Box>
       ))}
 
-      <Divider sx={{ borderStyle: 'solid', my: 1 }} />
+      <Divider sx={{ borderStyle: "dashed", my: 1 }} />
 
-      {/* TOTALES */}
-      <Box sx={{ mb: 1, fontSize: '10px' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-          <span>SUBTOTAL Bs</span>
-          <span style={{ fontWeight: 'bold' }}>{totales.subtotal.toFixed(2)}</span>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-          <span>DESCUENTO Bs</span>
-          <span style={{ fontWeight: 'bold' }}>{totales.descuentoAdicional.toFixed(2)}</span>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-          <span style={{ fontWeight: 'bold' }}>TOTAL Bs</span>
-          <span style={{ fontWeight: 'bold' }}>{totales.total.toFixed(2)}</span>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-          <span>PAGADO Bs</span>
-          <span style={{ fontWeight: 'bold' }}>{pagado.toFixed(2)}</span>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-          <span>CAMBIO Bs</span>
-          <span style={{ fontWeight: 'bold' }}>{cambio.toFixed(2)}</span>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-          <span style={{ fontWeight: 'bold' }}>MONTO A PAGAR Bs</span>
-          <span style={{ fontWeight: 'bold' }}>{totales.total.toFixed(2)}</span>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span>IMPORTE BASE CRÉDITO FISCAL</span>
-          <span>{totales.total.toFixed(2)}</span>
-        </Box>
+      {/* ===================== TOTALES ===================== */}
+      <Box sx={{ mb: 1 }}>
+        {[
+          { label: "SUBTOTAL Bs", value: totales.subtotal },
+          { label: "DESCUENTO Bs", value: totales.descuentoAdicional },
+          { label: "TOTAL Bs", value: totales.total, bold: true },
+          // PAGADO y CAMBIO — solicitado por FARMA DINÁMICA
+          { label: "PAGADO Bs", value: pagado },
+          { label: "CAMBIO Bs", value: cambio },
+          { label: "MONTO A PAGAR Bs", value: totales.total, bold: true },
+          { label: "IMPORTE BASE CRÉDITO FISCAL Bs", value: totales.total },
+        ].map(({ label, value, bold }) => (
+          <Box
+            key={label}
+            sx={{ display: "flex", justifyContent: "space-between", mb: 0.3 }}
+          >
+            <Typography
+              sx={{ fontSize: "9px", fontWeight: bold ? "bold" : "normal" }}
+            >
+              {label}
+            </Typography>
+            <Typography
+              sx={{ fontSize: "9px", fontWeight: bold ? "bold" : "normal" }}
+            >
+              {value.toFixed(2)}
+            </Typography>
+          </Box>
+        ))}
       </Box>
 
-      <Typography sx={{ fontSize: '9px', mb: 1 }}>
-        SON: {numeroATexto(totales.total)}
+      <Typography sx={{ fontSize: "8px", mb: 1 }}>
+        Son: {numeroATexto(totales.total)}
       </Typography>
 
-      <Divider sx={{ borderStyle: 'solid', my: 1 }} />
+      <Divider sx={{ borderStyle: "solid", my: 1 }} />
 
-      {/* LEYENDAS LEGALES */}
-      <Box sx={{ mb: 1, fontSize: '8px', textAlign: 'center' }}>
-        <Typography sx={{ fontSize: '8px', fontWeight: 'bold', mb: 0.5 }}>
+      {/* ===================== LEYENDAS ===================== */}
+      <Box sx={{ mb: 1, textAlign: "center" }}>
+        <Typography sx={{ fontSize: "8px", fontWeight: "bold", mb: 0.5 }}>
           {leyendas.principal}
         </Typography>
-        <Typography sx={{ fontSize: '7px', mb: 0.5 }}>
+        <Typography sx={{ fontSize: "7px", mb: 0.5 }}>
           {leyendas.ley453}
         </Typography>
-        <Typography sx={{ fontSize: '7px', fontStyle: 'italic' }}>
+        <Typography sx={{ fontSize: "7px", fontStyle: "italic" }}>
           "{leyendas.documentoDigital}"
         </Typography>
       </Box>
 
-      {/* QR CODE - ✅ USANDO react-qr-code */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
-        <QRCode 
-          value={factura.qrUrl} 
+      {/* ===================== QR ===================== */}
+      <Box sx={{ display: "flex", justifyContent: "center", my: 1 }}>
+        <QRCode
+          value={factura.qrUrl || "https://siat.impuestos.gob.bo"}
           size={120}
           level="M"
         />
       </Box>
 
-      <Typography sx={{ fontSize: '9px', textAlign: 'center', mb: 0.5 }}>
+      {/*}
+      <Typography sx={{ fontSize: "8px", textAlign: "center" }}>
         Gracias por su compra
-      </Typography>
-
-      {/* PIE */}
-      <Typography sx={{ fontSize: '8px', textAlign: 'center' }}>
-        Usuario: {usuario}
-      </Typography>
+      </Typography>*/}
     </Box>
   );
 });
 
-InvoiceFullPDF.displayName = 'InvoiceFullPDF';
-
+InvoiceFullPDF.displayName = "InvoiceFullPDF";
 export default InvoiceFullPDF;

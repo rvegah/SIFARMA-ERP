@@ -64,6 +64,10 @@ const SalesPage = () => {
   const [tiposDocumentoIdentidad, setTiposDocumentoIdentidad] = useState([]);
   const [loadingCatalogos, setLoadingCatalogos] = useState(false);
 
+  // ✅ NUEVO: Estado para información de la empresa desde SIAT
+  const [empresaInfo, setEmpresaInfo] = useState(null);
+  const [unidadesMedida, setUnidadesMedida] = useState({});
+
   const [stockModalOpen, setStockModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mySalesModalOpen, setMySalesModalOpen] = useState(false);
@@ -87,12 +91,22 @@ const SalesPage = () => {
     const cargarCatalogos = async () => {
       setLoadingCatalogos(true);
       try {
-        const tiposDoc = await siatApiService.getTiposDocumentoIdentidad();
-        setTiposDocumentoIdentidad(tiposDoc);        
+        const [tiposDoc, infoEmpresa, mapaUnidades] = await Promise.all([
+          siatApiService.getTiposDocumentoIdentidad(),
+          siatApiService.getEmpresaInfo(),
+          siatApiService.getUnidadesMedida(),
+        ]);
+        setTiposDocumentoIdentidad(tiposDoc);
+        setEmpresaInfo(infoEmpresa);
+        setUnidadesMedida(mapaUnidades);
+        console.log(
+          "✅ Unidades de medida cargadas:",
+          Object.keys(mapaUnidades).length,
+        );
         console.log("✅ Tipos de documento cargados:", tiposDoc.length);
+        console.log("✅ Empresa info cargada:", infoEmpresa?.razonSocial);
       } catch (err) {
         console.error("❌ Error al cargar catálogos SIAT:", err);
-        // Sin fallback hardcodeado — ClientForm tiene su propio fallback
       } finally {
         setLoadingCatalogos(false);
       }
@@ -143,12 +157,13 @@ const SalesPage = () => {
       const invoice = result.invoice;
       const invoiceData = {
         empresa: {
-          razonSocial: "FARMADINAMICA S.R.L.",
-          nit: "425567025",
+          razonSocial: empresaInfo?.razonSocial ?? "FARMADINAMICA S.R.L.",
+          nit: empresaInfo?.nit ?? "425567025",
           direccionCasaMatriz:
-            "Av. San Martin Nº 808 Esq. Av. Aroma Zona Central",
-          telefono: "4547052",
-          ciudad: "Cochabamba",
+            empresaInfo?.direccion ??
+            "ZONA: SUDESTE, AVENIDA: SAN MARTÍN, TIPO DE ESTABLECIMIENTO: EDIFICIO BRILLANTE, NRO.: 651, BLOQUE: 1, NRO DPTO/LOCAL/OF/PUESTO: 1",
+          telefono: empresaInfo?.telefono ?? "+591 70741024",
+          ciudad: empresaInfo?.ciudad ?? "Cochabamba",
         },
         factura: {
           facturaId: invoice.facturaId,
@@ -158,6 +173,13 @@ const SalesPage = () => {
           fechaEmision: invoice.fechaEmision,
           qrUrl: invoice.urlVerificacion,
           estado: invoice.estado,
+          puntoVenta: invoice.puntoVenta ?? 0,
+          // ✅ Sector dinámico — viene del clientForm, no del invoice
+          esAlquiler: clientForm.codigoDocumentoSector === "2",
+          periodoFacturado:
+            clientForm.codigoDocumentoSector === "2"
+              ? clientForm.periodoFacturado
+              : null,
         },
         cliente: {
           nit: clientForm.nit,
@@ -172,7 +194,10 @@ const SalesPage = () => {
           precio: item.precio,
           descuento: item.descuento,
           subtotal: item.subtotal,
-          unidadMedida: item.unidadMedida,
+          unidadMedida:
+            unidadesMedida[item.unidadMedida] ??
+            item.unidadMedida?.toString() ??
+            "UNIDAD",
         })),
         totales: {
           subtotal: totals.subtotal,
@@ -353,7 +378,7 @@ const SalesPage = () => {
         handleClientSearch={handleClientSearch}
         totals={totals}
         tiposDocumentoIdentidad={tiposDocumentoIdentidad}
-        loadingCatalogos={loadingCatalogos}        
+        loadingCatalogos={loadingCatalogos}
         isAdmin={isAdmin}
       />
 

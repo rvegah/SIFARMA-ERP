@@ -212,6 +212,7 @@ class SalesService {
           estado: siatResponse.estado,
           fechaEmision: siatResponse.fechaEmision,
           montoTotal: siatResponse.montoTotal,
+          puntoVenta: puntoVentaId,
           ...saleData,
           status:
             siatResponse.estado === "VALIDATED"
