@@ -392,6 +392,7 @@ const SalesPage = () => {
         searchResults={searchResults}
         isSearching={isSearching}
         invoiced={invoiced}
+        unidadesMedidaCatalogo={unidadesMedida} 
       />
 
       {/* SECCIÓN DE BOTONES */}
