@@ -62,6 +62,16 @@ const ClientForm = ({
   const [pagadoInput, setPagadoInput] = useState(
     String(clientForm.pagado ?? 0),
   );
+
+  // Sincronizar estado local cuando clientForm se resetea externamente
+  useEffect(() => {
+    setDescuentoInput(String(clientForm.descuentoAdicional ?? 0));
+  }, [clientForm.descuentoAdicional]);
+
+  useEffect(() => {
+    setPagadoInput(String(clientForm.pagado ?? 0));
+  }, [clientForm.pagado]);
+
   const nitTimerRef = useRef(null);
 
   // ✅ Resolver qué lista usar: API o fallback

@@ -94,7 +94,7 @@ function buildEmitirFacturaRequest(
     codigoActividad: options.codigoActividad || SIAT_DEFAULTS.codigoActividad,
     codigoDocumentoSector:
       options.codigoDocumentoSector || SIAT_DEFAULTS.codigoDocumentoSector,
-    periodoFacturado: options.periodoFacturado || undefined,  
+    periodoFacturado: options.periodoFacturado || undefined,
     tipoFactura: options.tipoFactura || SIAT_DEFAULTS.tipoFactura,
     tipoMetodoPago,
     codigoMoneda: SIAT_DEFAULTS.codigoMoneda,
@@ -145,6 +145,7 @@ async function emitirFactura(clientForm, saleItems, totals, options = {}) {
   }
 
   const factura = data.data;
+  const nitEmisor = factura.nitEmisor ?? "425567025";
   return {
     success: true,
     facturaId: factura.facturaId,
@@ -152,12 +153,14 @@ async function emitirFactura(clientForm, saleItems, totals, options = {}) {
     cuf: factura.cuf,
     codigoAutorizacion: factura.cuf,
     estado: factura.estado,
+    tipoEmision: factura.tipoEmision ?? 1,
+    esEnLinea: (factura.tipoEmision ?? 1) === 1,
     fechaEmision: factura.fechaEmision,
     montoTotal: factura.montoTotal,
     mensaje: factura.mensaje,
     urlVerificacion: buildSiatQrUrl(
       factura.cuf,
-      "425567025",
+      nitEmisor,
       factura.numeroFactura,
     ),
   };
@@ -313,46 +316,56 @@ function extractErrorMessage(error) {
 
 async function getTiposDocumentoIdentidad() {
   try {
-    const response = await siatApiClient.get("/Sincronizacion/tipos-documento-identidad");
+    const response = await siatApiClient.get(
+      "/Sincronizacion/tipos-documento-identidad",
+    );
     return response.data?.data || [];
   } catch (error) {
-    console.error("[SiatAPI] Error al cargar tipos documento:", extractErrorMessage(error));
+    console.error(
+      "[SiatAPI] Error al cargar tipos documento:",
+      extractErrorMessage(error),
+    );
     return [];
   }
 }
 
 async function getActividadesDocumentoSector() {
   try {
-    const response = await siatApiClient.get("/Sincronizacion/tipos-documento-sector");
+    const response = await siatApiClient.get(
+      "/Sincronizacion/tipos-documento-sector",
+    );
     return response.data?.data || [];
   } catch (error) {
-    console.error("[SiatAPI] Error al cargar sectores documento:", extractErrorMessage(error));
+    console.error(
+      "[SiatAPI] Error al cargar sectores documento:",
+      extractErrorMessage(error),
+    );
     return [];
   }
 }
 
 async function getEmpresaInfo() {
   try {
-    const response = await siatApiClient.get('/Configuracion/empresa-info');
+    const response = await siatApiClient.get("/Configuracion/empresa-info");
     return response.data?.data || null;
   } catch (error) {
-    console.error('❌ [SiatAPI] Error al cargar empresa info:', error);
+    console.error("❌ [SiatAPI] Error al cargar empresa info:", error);
     return null;
   }
 }
 
 async function getUnidadesMedida() {
   try {
-    const response = await siatApiClient.get('/Sincronizacion/unidades-medida');
+    const response = await siatApiClient.get("/Sincronizacion/unidades-medida");
     // Convertir array a Map: { 62: "CAJA", 57: "UNIDAD (BIENES)", ... }
     const data = response.data?.data || [];
     const mapa = {};
-    data.forEach(u => {
+    data.forEach((u) => {
       mapa[u.codigoClasificador] = u.descripcion;
     });
     return mapa;
   } catch (error) {
-    console.error('❌ [SiatAPI] Error al cargar unidades de medida:', error);
+    console.error("❌ [SiatAPI] Error al cargar unidades de medida:", error);
     return {}; // fallback vacío, InvoiceFullPDF usará el número
   }
 }

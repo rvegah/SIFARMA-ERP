@@ -1,6 +1,21 @@
 // src/modules/sales/pages/SalesPage.jsx
 import React, { useState, useEffect } from "react";
-import { Container, Box, Button, Grid, Typography } from "@mui/material";
+import {
+  Container,
+  Box,
+  Button,
+  Grid,
+  Typography,
+  Alert,
+  AlertTitle,
+  Chip,
+  Collapse,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import { WifiOff, Warning, Wifi } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import {
   Add,
@@ -26,6 +41,9 @@ import CancelInvoiceModal from "../components/CancelInvoiceModal";
 import ProductsModal from "../components/ProductsModal";
 import { useAuth } from "../../../context/AuthContext";
 
+// ✅ NUEVO: Hook de estado SIAT
+import { useSiatStatus } from "../hooks/useSiatStatus";
+
 const CANCELLATION_REASONS = [
   { value: 1, label: "Error en la transcripción" },
   { value: 2, label: "Devolución" },
@@ -33,8 +51,204 @@ const CANCELLATION_REASONS = [
   { value: 4, label: "Otro" },
 ];
 
+// ─── Descripción legible del evento activo ───────────────────────────────────
+// Equivalente a obtenerDescripcionEvento() de SIAT-Facturación
+// Se usa catálogo hardcode mínimo como fallback (igual que el sistema certificado)
+const EVENTOS_DESCRIPCION = {
+  1: "Corte de energía eléctrica",
+  2: "Falla en la red de comunicaciones",
+  3: "Falla en el sistema informático",
+  4: "Intervención de la autoridad competente",
+  5: "Contingencia por otros motivos",
+  6: "Contingencia - Desastres/Siniestros",
+  7: "Contingencia - Otros",
+};
+
+const obtenerDescripcionEvento = (eventoId) => {
+  return EVENTOS_DESCRIPCION[eventoId] || `Evento ${eventoId}`;
+};
+
+// ─── Banner de estado SIAT ────────────────────────────────────────────────────
+// Componente interno que muestra el estado de conexión y evento activo
+// Replica fielmente la alerta de FacturacionPage.tsx de SIAT-Facturación
+const SiatStatusBanner = ({
+  siatOnline,
+  eventoActivo,
+  loading,
+  isContingencia,
+}) => {
+  // No mostrar nada mientras carga la primera vez
+  if (loading && siatOnline === null) return null;
+
+  return (
+    <Box sx={{ mb: 2 }}>
+      {/* ── Indicador de conexión (solo cuando está offline) ── */}
+      <Collapse in={siatOnline === false && !eventoActivo}>
+        <Alert
+          severity="error"
+          icon={<WifiOff fontSize="inherit" />}
+          sx={{
+            mb: 1,
+            borderLeft: "4px solid #d32f2f",
+            "& .MuiAlert-message": { width: "100%" },
+          }}
+        >
+          <AlertTitle sx={{ fontWeight: 700 }}>SIAT Fuera de Línea</AlertTitle>
+          <Typography variant="body2">
+            No hay conexión con el servicio de facturación electrónica. Las
+            facturas se almacenarán localmente hasta restablecer la conexión.
+          </Typography>
+        </Alert>
+      </Collapse>
+
+      {/* ── Alerta de evento/contingencia activa ── */}
+      <Collapse in={!!eventoActivo}>
+        {eventoActivo && (
+          <Alert
+            severity="warning"
+            icon={<Warning fontSize="inherit" />}
+            sx={{
+              borderLeft: "4px solid #f57c00",
+              backgroundColor: "#fff8e1",
+              "& .MuiAlert-message": { width: "100%" },
+            }}
+            action={
+              <Chip
+                label={isContingencia ? "CONTINGENCIA" : "EVENTO"}
+                size="small"
+                sx={{
+                  backgroundColor: isContingencia ? "#e53935" : "#f57c00",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: "0.7rem",
+                }}
+              />
+            }
+          >
+            <AlertTitle sx={{ fontWeight: 700, color: "#e65100" }}>
+              ⚠️ Evento/Contingencia Activa!!!
+            </AlertTitle>
+
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 600, color: "#bf360c" }}
+            >
+              {eventoActivo.eventoId}:{" "}
+              {obtenerDescripcionEvento(eventoActivo.eventoId)}
+            </Typography>
+
+            <Typography
+              variant="caption"
+              sx={{ color: "#e65100", display: "block", mt: 0.5 }}
+            >
+              <strong>Desde:</strong>{" "}
+              {eventoActivo.fechaInicio
+                ? new Date(eventoActivo.fechaInicio).toLocaleString("es-BO", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "—"}
+              {eventoActivo.fechaFin && (
+                <>
+                  {" — "}
+                  <strong>Hasta:</strong>{" "}
+                  {new Date(eventoActivo.fechaFin).toLocaleString("es-BO", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </>
+              )}
+            </Typography>
+
+            <Typography
+              variant="caption"
+              sx={{ color: "#bf360c", display: "block", mt: 0.5 }}
+            >
+              {isContingencia ? (
+                <>
+                  <strong>MODO CONTINGENCIA:</strong> Debe ingresar el número de
+                  factura, fecha y hora del talonario manual. Las facturas se
+                  enviarán a SIAT al cerrar la contingencia.
+                </>
+              ) : (
+                <>
+                  Todas las facturas generadas se almacenarán localmente y no se
+                  enviarán a SIAT hasta cerrar el evento/contingencia.
+                </>
+              )}
+            </Typography>
+          </Alert>
+        )}
+      </Collapse>
+    </Box>
+  );
+};
+
+// ─── Modal de conflicto de actividad ─────────────────────────────────────────
+const ActivityConflictModal = ({ open, onClose, onConfirm, productoNuevo, actividadActual }) => {
+  if (!open || !productoNuevo) return null;
+
+  const ACTIVIDADES = {
+    4772100: "Venta al por menor de productos farmacéuticos",
+    6810110: "Alquiler de bienes inmuebles",
+  };
+
+  const descActual = ACTIVIDADES[actividadActual] || `Actividad ${actividadActual}`;
+  const descNueva = ACTIVIDADES[productoNuevo.codigoActividad] || `Actividad ${productoNuevo.codigoActividad}`;
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ bgcolor: "#f57c00", color: "white", fontWeight: 700 }}>
+        ⚠️ Conflicto de Actividad
+      </DialogTitle>
+      <DialogContent sx={{ mt: 2 }}>
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          No se pueden mezclar productos de diferentes actividades en una misma factura.
+        </Alert>
+        <Typography variant="body2" sx={{ mb: 1 }}>
+          <strong>Actividad actual:</strong> {actividadActual} — {descActual}
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2 }}>
+          <strong>Actividad nueva:</strong> {productoNuevo.codigoActividad} — {descNueva}
+        </Typography>
+        <Typography variant="body2" color="error">
+          Si continúa, se <strong>limpiarán todos los productos</strong> y se agregará el nuevo producto.
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ p: 2 }}>
+        <Button onClick={onClose} variant="outlined">Cancelar</Button>
+        <Button onClick={onConfirm} variant="contained" color="warning">
+          Limpiar y continuar
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+// ─── PÁGINA PRINCIPAL ─────────────────────────────────────────────────────────
+
 const SalesPage = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const { user } = useAuth();
+  const isAdmin = user?.rol === "Administrador";
+
+  // ✅ IDs de sucursal y punto de venta del usuario autenticado
+  const sucursalId = user?.codigoSucursal_SIAT ?? 0;
+  const puntoVentaId = user?.codigoPuntoVenta_SIAT ?? 0;
+
+  // ✅ NUEVO: Estado de SIAT (conexión + evento activo)
+  const {
+    siatOnline,
+    eventoActivo,
+    loading: loadingSiat,
+    isContingencia,
+  } = useSiatStatus(sucursalId, puntoVentaId);
 
   const {
     clientForm,
@@ -60,33 +274,26 @@ const SalesPage = () => {
     [saleItems, clientForm],
   );
 
-  // ✅ NUEVO: Estado para catálogos dinámicos SIAT
+  // Catálogos dinámicos SIAT
   const [tiposDocumentoIdentidad, setTiposDocumentoIdentidad] = useState([]);
   const [loadingCatalogos, setLoadingCatalogos] = useState(false);
-
-  // ✅ NUEVO: Estado para información de la empresa desde SIAT
   const [empresaInfo, setEmpresaInfo] = useState(null);
   const [unidadesMedida, setUnidadesMedida] = useState({});
 
   const [stockModalOpen, setStockModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mySalesModalOpen, setMySalesModalOpen] = useState(false);
-
   const [printModalOpen, setPrintModalOpen] = useState(false);
   const [invoiceDataToPrint, setInvoiceDataToPrint] = useState(null);
-
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [invoiceToCancel, setInvoiceToCancel] = useState(null);
-
   const [productsModalOpen, setProductsModalOpen] = useState(false);
-
   const [invoiced, setInvoiced] = useState(false);
+  // ── Control de actividad mixta ────────────────────────────────────────────
+  const [productoConflicto, setProductoConflicto] = useState(null);
+  const [activityModalOpen, setActivityModalOpen] = useState(false);
 
-  //Saber si el usuario es admin para mostrar opciones avanzadas
-  const { user } = useAuth();
-  const isAdmin = user?.rol === "Administrador";
-
-  // Cargar catálogos SIAT al montar el componente
+  // Cargar catálogos SIAT al montar
   useEffect(() => {
     const cargarCatalogos = async () => {
       setLoadingCatalogos(true);
@@ -116,9 +323,7 @@ const SalesPage = () => {
   }, []);
 
   // Ver stock en sucursales
-  const handleViewStock = () => {
-    setStockModalOpen(true);
-  };
+  const handleViewStock = () => setStockModalOpen(true);
 
   // Guardar venta sin facturar (< 5 Bs)
   const handleSaveSale = async () => {
@@ -128,7 +333,6 @@ const SalesPage = () => {
       });
       return;
     }
-
     const result = await saveSale();
     if (result.success) {
       enqueueSnackbar(result.message, { variant: "success" });
@@ -143,6 +347,22 @@ const SalesPage = () => {
       enqueueSnackbar("Debe agregar al menos un producto", {
         variant: "warning",
       });
+      return;
+    }
+
+    // ── Validación de pago ────────────────────────────────────────────────
+    const pagado = Number(clientForm.pagado) || 0;
+    if (pagado <= 0) {
+      enqueueSnackbar("Debe ingresar el monto pagado por el cliente", {
+        variant: "warning",
+      });
+      return;
+    }
+    if (pagado < totals.total) {
+      enqueueSnackbar(
+        `El monto pagado (Bs. ${pagado.toFixed(2)}) es menor al total de la venta (Bs. ${totals.total.toFixed(2)})`,
+        { variant: "warning", autoHideDuration: 5000 },
+      );
       return;
     }
     enqueueSnackbar("Generando factura...", { variant: "info" });
@@ -174,7 +394,6 @@ const SalesPage = () => {
           qrUrl: invoice.urlVerificacion,
           estado: invoice.estado,
           puntoVenta: invoice.puntoVenta ?? 0,
-          // ✅ Sector dinámico — viene del clientForm, no del invoice
           esAlquiler: clientForm.codigoDocumentoSector === "2",
           periodoFacturado:
             clientForm.codigoDocumentoSector === "2"
@@ -212,8 +431,9 @@ const SalesPage = () => {
             "ESTA FACTURA CONTRIBUYE AL DESARROLLO DEL PAÍS, EL USO ILÍCITO SERÁ SANCIONADO PENALMENTE DE ACUERDO A LEY",
           ley453:
             "Ley N° 453: En caso de incumplimiento a lo ofertado o convenido, el proveedor debe reparar o sustituir el producto.",
-          documentoDigital:
-            "Este documento es la Representación Gráfica de un Documento Fiscal Digital emitido en una modalidad de facturación en línea",
+          documentoDigital: invoice.esEnLinea
+            ? "Este documento es la Representacion Grafica de un Documento Fiscal Digital emitido en una modalidad de facturacion en linea"
+            : "Este documento es la Representacion Grafica de un Documento Fiscal Digital emitido fuera de linea, verifique su envio con su proveedor o en la pagina www.impuestos.gob.bo",
         },
       };
       setInvoiceDataToPrint(invoiceData);
@@ -232,14 +452,12 @@ const SalesPage = () => {
     }
   };
 
-  // Nueva venta
   const handleNewSale = () => {
     setInvoiced(false);
     clearForm();
     enqueueSnackbar("Listo para nueva venta", { variant: "info" });
   };
 
-  // Cargar venta desde historial
   const handleLoadSale = (saleData) => {
     console.log("🔄 Recuperando venta desde modal:", saleData);
     loadSaleData(saleData);
@@ -260,7 +478,6 @@ const SalesPage = () => {
     }
   };
 
-  // Anular factura
   const handleCancelInvoice = () => {
     if (saleItems.length === 0) {
       enqueueSnackbar("No hay ninguna factura cargada para anular", {
@@ -268,7 +485,6 @@ const SalesPage = () => {
       });
       return;
     }
-
     const facturaId = invoiceDataToPrint?.factura?.facturaId;
     if (!facturaId) {
       enqueueSnackbar(
@@ -315,19 +531,14 @@ const SalesPage = () => {
     }
   };
 
-  // Ver productos
-  const handleViewProducts = () => {
-    setProductsModalOpen(true);
-  };
+  const handleViewProducts = () => setProductsModalOpen(true);
 
-  // Imprimir FFDL (Fuera de línea)
   const handlePrintOffline = () => {
     enqueueSnackbar("Impresión fuera de línea en desarrollo", {
       variant: "info",
     });
   };
 
-  // Guardar/Actualizar cliente
   const handleSaveClient = () => {
     if (!clientForm.nit || !clientForm.nombre) {
       enqueueSnackbar("Complete NIT y Nombre para guardar el cliente", {
@@ -346,32 +557,54 @@ const SalesPage = () => {
     );
   };
 
-  const handleSelectProductFromModal = (product) => {
-    console.log("📦 Producto seleccionado desde modal:", product);
-    const productForSale = {
-      id: product.id,
-      codigo: product.codigo,
-      nombre: product.nombre,
-      precio: product.precio,
-      stock: product.stock,
-      unidadMedida: "CAJA",
-      presentacion: product.presentacion,
-      linea: product.linea,
-      laboratorio: product.laboratorio,
-      cantidad: 1,
-      descuento: 0,
-    };
-    addItem(productForSale);
-    enqueueSnackbar(`✅ ${product.nombre} agregado a la venta`, {
+  // ── Agregar producto con validación de actividad ──────────────────────────
+  const handleAddItemConValidacion = (product) => {
+    // Verificar conflicto de actividad
+    if (saleItems.length > 0) {
+      const actividadActual = saleItems[0].codigoActividad;
+      const actividadNueva = product.codigoActividad || 4772100;
+      if (actividadActual !== actividadNueva) {
+        setProductoConflicto(product);
+        setActivityModalOpen(true);
+        return;
+      }
+    }
+    addItem(product);
+    enqueueSnackbar(`✅ ${product.nombre} agregado`, {
       variant: "success",
+      autoHideDuration: 2000,
+    });
+  };
+
+  const handleConfirmActivityChange = () => {
+    if (!productoConflicto) return;
+    // Limpiar carrito y agregar nuevo producto
+    clearForm();
+    addItem(productoConflicto);
+    setActivityModalOpen(false);
+    setProductoConflicto(null);
+    enqueueSnackbar(`✅ Limpiado. ${productoConflicto.nombre} agregado`, {
+      variant: "info",
       autoHideDuration: 3000,
     });
   };
 
+  const handleSelectProductFromModal = (product) => {
+    console.log("📦 Producto seleccionado desde modal:", product);
+    handleAddItemConValidacion(product);
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* Formulario de cliente
-          ✅ Se pasan tiposDocumentoIdentidad y loadingCatalogos como props */}
+      {/* ✅ NUEVO: Banner de estado SIAT — visible para el vendedor */}
+      <SiatStatusBanner
+        siatOnline={siatOnline}
+        eventoActivo={eventoActivo}
+        loading={loadingSiat}
+        isContingencia={isContingencia}
+      />
+
+      {/* Formulario de cliente */}
       <ClientForm
         clientForm={clientForm}
         setClientForm={setClientForm}
@@ -387,12 +620,12 @@ const SalesPage = () => {
         items={saleItems}
         onUpdateItem={updateItem}
         onRemoveItem={removeItem}
-        onAddItem={addItem}
+        onAddItem={handleAddItemConValidacion}
         onSearchProducts={searchProducts}
         searchResults={searchResults}
         isSearching={isSearching}
         invoiced={invoiced}
-        unidadesMedidaCatalogo={unidadesMedida} 
+        unidadesMedidaCatalogo={unidadesMedida}
       />
 
       {/* SECCIÓN DE BOTONES */}
@@ -701,7 +934,7 @@ const SalesPage = () => {
         </Grid>
       </Box>
 
-      {/* Modales */}
+      {/* Modales — sin cambios */}
       <StockModal
         open={stockModalOpen}
         onClose={() => setStockModalOpen(false)}
@@ -737,6 +970,14 @@ const SalesPage = () => {
         open={productsModalOpen}
         onClose={() => setProductsModalOpen(false)}
         onSelectProduct={handleSelectProductFromModal}
+      />
+
+      <ActivityConflictModal
+        open={activityModalOpen}
+        onClose={() => { setActivityModalOpen(false); setProductoConflicto(null); }}
+        onConfirm={handleConfirmActivityChange}
+        productoNuevo={productoConflicto}
+        actividadActual={saleItems[0]?.codigoActividad}
       />
     </Container>
   );
