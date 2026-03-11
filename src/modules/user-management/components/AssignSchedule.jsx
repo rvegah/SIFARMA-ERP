@@ -126,6 +126,9 @@ const AssignSchedule = ({ onCancel }) => {
   const [selectedSucursal_ID, setSelectedSucursal_ID] = useState("");
   const [selectedEquipo_ID, setSelectedEquipo_ID] = useState("");
 
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [fetchingSaved, setFetchingSaved] = useState(false);
+
   // 🆕 Estado del horario semanal (sin descanso)
   const [weeklySchedule, setWeeklySchedule] = useState(() => {
     const initial = {};
@@ -148,44 +151,99 @@ const AssignSchedule = ({ onCancel }) => {
     }
   }, [selectedUserId]);
 
+  // 🆕 Cargar horarios cuando cambian los 4 parámetros
+  useEffect(() => {
+    if (selectedUserId && selectedSucursal_ID && selectedEquipo_ID && selectedTemplateId) {
+      fetchSavedUserSchedule();
+    }
+  }, [selectedUserId, selectedSucursal_ID, selectedEquipo_ID, selectedTemplateId]);
+
+  // 🆕 Cargar registros guardados desde el API
+  const fetchSavedUserSchedule = async () => {
+    try {
+      setFetchingSaved(true);
+      console.log("🔄 Obteniendo configuraciones guardadas...");
+
+      const response = await apiClient.get("/Organizacion/TurnosUsuario", {
+        params: {
+          Usuario_ID: selectedUserId,
+          Sucursal_ID: selectedSucursal_ID,
+          EquipoComputo_ID: selectedEquipo_ID,
+          TurnoLaboral_ID: selectedTemplateId
+        }
+      });
+
+      if (response.data?.exitoso && response.data?.datos) {
+        const savedData = response.data.datos;
+        const turnosUsuario = savedData.turnosUsuario || [];
+
+        // Resetear horario
+        const newSchedule = {};
+        diasSemana.forEach(d => {
+          newSchedule[d.clave] = { activo: false, turno: null };
+        });
+
+        // Mapear turnos guardados
+        turnosUsuario.forEach(t => {
+          const diaSemana = diasSemana.find(d => d.numero === t.numeroDia);
+          if (diaSemana) {
+            const plantilla = plantillasTurnos[selectedTemplateId];
+            newSchedule[diaSemana.clave] = {
+              activo: true,
+              turno: {
+                id: t.usuario_Turno_Horario_ID || Date.now() + Math.random(),
+                turnoLaboral_ID: parseInt(selectedTemplateId),
+                nombre: plantilla.nombre,
+                color: plantilla.color,
+                horaInicio: t.horaInicio,
+                horaFinal: t.horaFinal,
+              }
+            };
+          }
+        });
+
+        setWeeklySchedule(newSchedule);
+        console.log("✅ Horarios cargados:", turnosUsuario.length);
+      } else {
+        // Si no hay datos, deshabilitar todos los días (comportamiento solicitado)
+        const emptySchedule = {};
+        diasSemana.forEach(d => {
+          emptySchedule[d.clave] = { activo: false, turno: null };
+        });
+        setWeeklySchedule(emptySchedule);
+      }
+    } catch (error) {
+      console.error("❌ Error obteniendo horarios guardados:", error);
+      enqueueSnackbar("Error al obtener horarios guardados", { variant: "error" });
+    } finally {
+      setFetchingSaved(false);
+    }
+  };
+
   // 🆕 Cargar sucursales, equipos y horarios del usuario
   const loadUserScheduleData = async () => {
     try {
       setLoading(true);
-      console.log(
-        "🔄 Cargando datos de horarios para usuario:",
-        selectedUserId
-      );
+      setSelectedTemplateId(""); // Resetear plantilla al cambiar usuario
 
       // 1. Cargar sucursales
       const sucursalesData = await userService.getSucursales(1); // organizacion_ID = 1
       setSucursales(sucursalesData);
-      console.log("✅ Sucursales cargadas:", sucursalesData.length);
 
       // 2. Si hay usuario seleccionado, pre-cargar su sucursal
       if (currentUser?.sucursal_ID) {
         setSelectedSucursal_ID(currentUser.sucursal_ID);
 
-        // 3. Cargar equipos de esa sucursal
-        const equiposData = await userService.getEquiposBySucursal(
-          currentUser.sucursal_ID
-        );
+        const equiposData = await userService.getEquiposBySucursal(currentUser.sucursal_ID);
         setEquipos(equiposData);
-        console.log("✅ Equipos cargados:", equiposData.length);
 
-        // 4. Pre-seleccionar equipo si existe
         if (currentUser?.equipoComputo_ID) {
           setSelectedEquipo_ID(currentUser.equipoComputo_ID);
         }
       }
-
-      // TODO: Aquí se cargarían los horarios existentes del usuario
-      // const horariosData = await apiClient.get(`/Horarios/ObtenerHorariosUsuario?Usuario_ID=${selectedUserId}`);
     } catch (error) {
       console.error("❌ Error cargando datos:", error);
-      enqueueSnackbar("Error al cargar datos del usuario", {
-        variant: "error",
-      });
+      enqueueSnackbar("Error al cargar datos del usuario", { variant: "error" });
     } finally {
       setLoading(false);
     }
@@ -195,14 +253,14 @@ const AssignSchedule = ({ onCancel }) => {
   const handleSucursalChange = async (event) => {
     const sucursalId = event.target.value;
     setSelectedSucursal_ID(sucursalId);
-    setSelectedEquipo_ID(""); // Resetear equipo
-    setEquipos([]); // Limpiar equipos
+    setSelectedEquipo_ID("");
+    setSelectedTemplateId(""); // Resetear plantilla
+    setEquipos([]);
 
     if (sucursalId) {
       try {
         const equiposData = await userService.getEquiposBySucursal(sucursalId);
         setEquipos(equiposData);
-        console.log("✅ Equipos cargados para sucursal:", sucursalId);
       } catch (error) {
         console.error("❌ Error cargando equipos:", error);
         enqueueSnackbar("Error al cargar equipos", { variant: "error" });
@@ -210,50 +268,25 @@ const AssignSchedule = ({ onCancel }) => {
     }
   };
 
-  // 🆕 Agregar turno a un día (solo uno permitido)
-  const addShiftToDay = (claveDia, turnoId) => {
-    // 🔒 Validación: solo un turno por día
-    if (weeklySchedule[claveDia].turno !== null) {
-      enqueueSnackbar("❌ Solo se puede asignar un turno por día", {
-        variant: "warning",
-        anchorOrigin: { vertical: "top", horizontal: "center" },
-      });
-      return;
-    }
-
-    const plantilla = plantillasTurnos[turnoId];
-
-    setWeeklySchedule((prev) => ({
-      ...prev,
-      [claveDia]: {
-        activo: true,
-        turno: {
-          id: Date.now(),
-          turnoLaboral_ID: plantilla.id,
-          nombre: plantilla.nombre,
-          color: plantilla.color,
-          horaInicio: plantilla.horaInicio,
-          horaFinal: plantilla.horaFinal,
-        },
-      },
-    }));
-
-    console.log(`✅ Turno "${plantilla.nombre}" asignado a ${claveDia}`);
+  // 🆕 Manejar cambio de plantilla
+  const handleTemplateSelect = (plantillaId) => {
+    setSelectedTemplateId(plantillaId);
+    console.log(`✅ Plantilla seleccionada: ${plantillaId}`);
   };
 
   // 🆕 Aplicar plantilla de turno a TODOS los días de la semana
-  const applyTemplateToAllDays = (turnoId) => {
-    const plantilla = plantillasTurnos[turnoId];
+  const applyTemplateToAllDays = () => {
+    if (!selectedTemplateId) return;
 
+    const plantilla = plantillasTurnos[selectedTemplateId];
     console.log(`🔄 Aplicando turno "${plantilla.nombre}" a todos los días...`);
 
     const nuevoSchedule = {};
-
     diasSemana.forEach((dia) => {
       nuevoSchedule[dia.clave] = {
         activo: true,
         turno: {
-          id: Date.now() + Math.random(), // ID único
+          id: Date.now() + Math.random(),
           turnoLaboral_ID: plantilla.id,
           nombre: plantilla.nombre,
           color: plantilla.color,
@@ -264,11 +297,7 @@ const AssignSchedule = ({ onCancel }) => {
     });
 
     setWeeklySchedule(nuevoSchedule);
-
-    enqueueSnackbar(
-      `✅ Turno "${plantilla.nombre}" aplicado a toda la semana`,
-      { variant: "success" }
-    );
+    enqueueSnackbar(`✅ Plantilla "${plantilla.nombre}" aplicada a toda la semana`, { variant: "success" });
   };
 
   // 🆕 Eliminar turno de un día
@@ -315,16 +344,32 @@ const AssignSchedule = ({ onCancel }) => {
     });
   };
 
-  // 🆕 Alternar día activo/inactivo
+  // 🆕 Alternar día activo/inactivo (Aplica plantilla seleccionada automáticamente)
   const toggleDay = (claveDia) => {
-    setWeeklySchedule((prev) => ({
-      ...prev,
-      [claveDia]: {
-        ...prev[claveDia],
-        activo: !prev[claveDia].activo,
-        turno: !prev[claveDia].activo ? prev[claveDia].turno : null,
-      },
-    }));
+    if (!selectedTemplateId) {
+      enqueueSnackbar("⚠️ Debe seleccionar una plantilla de turno primero", { variant: "warning" });
+      return;
+    }
+
+    const plantilla = plantillasTurnos[selectedTemplateId];
+
+    setWeeklySchedule((prev) => {
+      const isCurrentlyActive = prev[claveDia].activo;
+      return {
+        ...prev,
+        [claveDia]: {
+          activo: !isCurrentlyActive,
+          turno: !isCurrentlyActive ? {
+            id: Date.now(),
+            turnoLaboral_ID: plantilla.id,
+            nombre: plantilla.nombre,
+            color: plantilla.color,
+            horaInicio: plantilla.horaInicio,
+            horaFinal: plantilla.horaFinal,
+          } : null,
+        },
+      };
+    });
   };
 
   // 🆕 Calcular horas totales semanales (sin descanso)
@@ -422,15 +467,8 @@ const AssignSchedule = ({ onCancel }) => {
       );
 
       if (response.data?.exitoso) {
-        console.log("✅ Horarios guardados exitosamente:", response.data);
-        enqueueSnackbar("✅ Horarios asignados correctamente", {
-          variant: "success",
-        });
-
-        // Volver a la lista después de guardar
-        if (onCancel) {
-          onCancel();
-        }
+        enqueueSnackbar("✅ Horarios asignados correctamente", { variant: "success" });
+        if (onCancel) onCancel();
       } else {
         throw new Error(response.data?.mensaje || "Error al guardar horarios");
       }
@@ -578,37 +616,52 @@ const AssignSchedule = ({ onCancel }) => {
               {/* Plantillas de Turno */}
               <Typography
                 variant="h6"
-                sx={{ mb: 2, color: farmaColors.secondary }}
+                sx={{ mb: 2, color: farmaColors.secondary, opacity: (!selectedUserId || !selectedSucursal_ID || !selectedEquipo_ID) ? 0.5 : 1 }}
               >
                 Plantillas de Turno
               </Typography>
 
-              {Object.values(plantillasTurnos).map((plantilla) => (
-                <Tooltip
-                  key={plantilla.id}
-                  title={`${plantilla.horaInicio} - ${plantilla.horaFinal}`}
-                  placement="right"
-                >
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={plantilla.icono}
-                    onClick={() => applyTemplateToAllDays(plantilla.id)} // 🆕 CAMBIO AQUÍ
-                    sx={{
-                      mb: 1,
-                      justifyContent: "flex-start",
-                      borderColor: plantilla.color,
-                      color: plantilla.color,
-                      "&:hover": {
-                        bgcolor: `${plantilla.color}20`,
-                        borderColor: plantilla.color,
-                      },
-                    }}
+              {Object.values(plantillasTurnos).map((plantilla) => {
+                const isSelected = selectedTemplateId === plantilla.id;
+                return (
+                  <Tooltip
+                    key={plantilla.id}
+                    title={`${plantilla.horaInicio} - ${plantilla.horaFinal}`}
+                    placement="right"
                   >
-                    {plantilla.nombre}
-                  </Button>
-                </Tooltip>
-              ))}
+                    <span>
+                      <Button
+                        fullWidth
+                        variant={isSelected ? "contained" : "outlined"}
+                        startIcon={plantilla.icono}
+                        disabled={!selectedUserId || !selectedSucursal_ID || !selectedEquipo_ID || loading}
+                        onClick={() => handleTemplateSelect(plantilla.id)}
+                        sx={{
+                          mb: 1,
+                          justifyContent: "flex-start",
+                          borderColor: plantilla.color,
+                          color: isSelected ? "white" : plantilla.color,
+                          bgcolor: isSelected ? plantilla.color : "transparent",
+                          fontWeight: isSelected ? 700 : 500,
+                          boxShadow: isSelected ? `0 4px 12px ${plantilla.color}40` : "none",
+                          "&:hover": {
+                            bgcolor: isSelected ? plantilla.color : `${plantilla.color}15`,
+                            borderColor: plantilla.color,
+                            transform: "translateX(4px)"
+                          },
+                          transition: "all 0.2s ease",
+                          "&:disabled": {
+                            borderColor: "#e0e0e0",
+                            color: "#9e9e9e"
+                          }
+                        }}
+                      >
+                        {plantilla.nombre}
+                      </Button>
+                    </span>
+                  </Tooltip>
+                );
+              })}
             </CardContent>
           </Card>
 
@@ -667,16 +720,58 @@ const AssignSchedule = ({ onCancel }) => {
 
         {/* Panel principal: Calendario semanal */}
         <Grid item xs={12} lg={9}>
-          <Card sx={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-            <CardContent>
-              <Typography
-                variant="h6"
-                sx={{ mb: 3, color: farmaColors.secondary }}
+          <Card sx={{
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            opacity: (!selectedUserId || !selectedSucursal_ID || !selectedEquipo_ID) ? 0.6 : 1,
+            pointerEvents: (!selectedUserId || !selectedSucursal_ID || !selectedEquipo_ID) ? "none" : "auto",
+            position: "relative"
+          }}>
+            {(!selectedUserId || !selectedSucursal_ID || !selectedEquipo_ID || !selectedTemplateId) && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: "rgba(255,255,255,0.7)",
+                  backdropFilter: "blur(2px)",
+                  textAlign: "center",
+                  p: 3
+                }}
               >
-                Configuración Semanal
-              </Typography>
+                <Typography variant="h6" sx={{ color: farmaColors.secondary, fontWeight: 600 }}>
+                  Seleccione Usuario, Sucursal, Equipo y <br /> Plantilla de Turno para configurar
+                </Typography>
+              </Box>
+            )}
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6" sx={{ color: farmaColors.secondary }}>
+                  Configuración Semanal
+                </Typography>
+                {selectedTemplateId && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={applyTemplateToAllDays}
+                    sx={{ color: farmaColors.primary, borderColor: farmaColors.primary }}
+                  >
+                    Asignar plantilla a toda la semana
+                  </Button>
+                )}
+              </Box>
 
-              {diasSemana.map((dia) => (
+              {fetchingSaved ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 10 }}>
+                  <CircularProgress color="secondary" />
+                  <Typography sx={{ mt: 2, color: 'text.secondary' }}>Cargando registros existentes...</Typography>
+                </Box>
+              ) : diasSemana.map((dia) => (
                 <Paper
                   key={dia.clave}
                   sx={{
@@ -718,9 +813,9 @@ const AssignSchedule = ({ onCancel }) => {
                             color: farmaColors.primary,
                           },
                           "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                            {
-                              backgroundColor: farmaColors.primary,
-                            },
+                          {
+                            backgroundColor: farmaColors.primary,
+                          },
                         }}
                       />
                       {weeklySchedule[dia.clave].turno && (
@@ -756,116 +851,58 @@ const AssignSchedule = ({ onCancel }) => {
                   </Box>
 
                   {weeklySchedule[dia.clave].activo && (
-                    <>
-                      {weeklySchedule[dia.clave].turno ? (
-                        <Paper
+                    <Paper
+                      sx={{
+                        p: 2,
+                        bgcolor: "white",
+                        border: `2px solid ${weeklySchedule[dia.clave].turno.color}30`,
+                        borderLeft: `4px solid ${weeklySchedule[dia.clave].turno.color}`,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mb: 2,
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle1"
                           sx={{
-                            p: 2,
-                            bgcolor: "white",
-                            border: `2px solid ${
-                              weeklySchedule[dia.clave].turno.color
-                            }30`,
-                            borderLeft: `4px solid ${
-                              weeklySchedule[dia.clave].turno.color
-                            }`,
+                            color: weeklySchedule[dia.clave].turno.color,
+                            fontWeight: 600,
                           }}
                         >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              mb: 2,
-                            }}
-                          >
-                            <Typography
-                              variant="subtitle1"
-                              sx={{
-                                color: weeklySchedule[dia.clave].turno.color,
-                                fontWeight: 600,
-                              }}
-                            >
-                              {weeklySchedule[dia.clave].turno.nombre}
-                            </Typography>
-                            <IconButton
-                              size="small"
-                              onClick={() => removeShiftFromDay(dia.clave)}
-                              color="error"
-                            >
-                              <Delete />
-                            </IconButton>
-                          </Box>
+                          {weeklySchedule[dia.clave].turno.nombre}
+                        </Typography>
+                      </Box>
 
-                          <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                              <TextField
-                                label="Hora Inicio"
-                                type="time"
-                                value={
-                                  weeklySchedule[dia.clave].turno.horaInicio
-                                }
-                                InputLabelProps={{ shrink: true }}
-                                InputProps={{ readOnly: true }}
-                                fullWidth
-                                size="small"
-                              />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <TextField
-                                label="Hora Final"
-                                type="time"
-                                value={
-                                  weeklySchedule[dia.clave].turno.horaFinal
-                                }
-                                InputLabelProps={{ shrink: true }}
-                                InputProps={{ readOnly: true }}
-                                fullWidth
-                                size="small"
-                              />
-                            </Grid>
-                          </Grid>
-                        </Paper>
-                      ) : (
-                        <Box sx={{ textAlign: "center", py: 2 }}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ mb: 2 }}
-                          >
-                            No hay turno asignado para este día
-                          </Typography>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              gap: 1,
-                              justifyContent: "center",
-                              flexWrap: "wrap",
-                            }}
-                          >
-                            {Object.values(plantillasTurnos).map(
-                              (plantilla) => (
-                                <Button
-                                  key={plantilla.id}
-                                  size="small"
-                                  variant="outlined"
-                                  startIcon={plantilla.icono}
-                                  onClick={() =>
-                                    addShiftToDay(dia.clave, plantilla.id)
-                                  }
-                                  sx={{
-                                    borderColor: plantilla.color,
-                                    color: plantilla.color,
-                                    fontSize: "0.75rem",
-                                  }}
-                                >
-                                  {plantilla.nombre}
-                                </Button>
-                              )
-                            )}
-                          </Box>
-                        </Box>
-                      )}
-                    </>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            label="Hora Inicio"
+                            type="time"
+                            value={weeklySchedule[dia.clave].turno.horaInicio}
+                            InputLabelProps={{ shrink: true }}
+                            InputProps={{ readOnly: true }}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField
+                            label="Hora Final"
+                            type="time"
+                            value={weeklySchedule[dia.clave].turno.horaFinal}
+                            InputLabelProps={{ shrink: true }}
+                            InputProps={{ readOnly: true }}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                    </Paper>
                   )}
 
                   {!weeklySchedule[dia.clave].activo && (
