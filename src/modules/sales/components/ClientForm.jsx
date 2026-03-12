@@ -8,6 +8,7 @@ import {
   Paper,
   MenuItem,
   InputAdornment,
+  CircularProgress,
 } from "@mui/material";
 import {
   Person,
@@ -21,19 +22,56 @@ import {
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 
+// ✅ Fallback hardcodeado: solo se usa si la API falla
+const TIPOS_DOCUMENTO_FALLBACK = [
+  { codigoClasificador: 1, descripcion: "CI - CEDULA DE IDENTIDAD" },
+  {
+    codigoClasificador: 2,
+    descripcion: "CEX - CEDULA DE IDENTIDAD EXTRANJERO",
+  },
+  { codigoClasificador: 3, descripcion: "PAS - PASAPORTE" },
+  { codigoClasificador: 4, descripcion: "OD - OTRO DOCUMENTO DE IDENTIDAD" },
+  {
+    codigoClasificador: 5,
+    descripcion: "NIT - NÚMERO DE IDENTIFICACIÓN TRIBUTARIA",
+  },
+];
+
 const ClientForm = ({
   clientForm,
   setClientForm,
   handleClientSearch,
   totals,
+  tiposDocumentoIdentidad = [],
+  loadingCatalogos = false,
+  isAdmin = false,
+  // ✅ NUEVO: callback para buscar cliente en FARMADINAMICA
+  onBuscarCliente,
 }) => {
   const [descuentoInput, setDescuentoInput] = useState(
-    String(clientForm.descuentoAdicional ?? 0)
+    String(clientForm.descuentoAdicional ?? 0),
   );
   const [pagadoInput, setPagadoInput] = useState(
-    String(clientForm.pagado ?? 0)
+    String(clientForm.pagado ?? 0),
   );
+  // ✅ NUEVO: indica que se está buscando el cliente en FARMADINAMICA
+  const [buscandoCliente, setBuscandoCliente] = useState(false);
+
+  // Sincronizar estado local cuando clientForm se resetea externamente
+  useEffect(() => {
+    setDescuentoInput(String(clientForm.descuentoAdicional ?? 0));
+  }, [clientForm.descuentoAdicional]);
+
+  useEffect(() => {
+    setPagadoInput(String(clientForm.pagado ?? 0));
+  }, [clientForm.pagado]);
+
   const nitTimerRef = useRef(null);
+
+  const tiposDocumento =
+    tiposDocumentoIdentidad.length > 0
+      ? tiposDocumentoIdentidad
+      : TIPOS_DOCUMENTO_FALLBACK;
 
   // Cálculo automático del cambio
   useEffect(() => {
@@ -55,7 +93,7 @@ const ClientForm = ({
     { code: "4444", label: "4444 - SIN NOMBRE" },
   ];
 
-  // Manejo de búsqueda con debounce
+  // Manejo de búsqueda SIAT con debounce (igual que antes)
   const handleNitChange = (value) => {
     setClientForm((prev) => ({ ...prev, nit: value }));
 
@@ -65,6 +103,38 @@ const ClientForm = ({
       nitTimerRef.current = setTimeout(() => {
         handleClientSearch(value);
       }, 400);
+    }
+  };
+
+  // ✅ NUEVO: onBlur del campo NIT → buscar cliente en FARMADINAMICA
+  const handleNitBlur = async () => {
+    const nit = clientForm.nit?.trim();
+    // No buscar para NITs especiales (4444, 99001, 99002, 99003)
+    const nitEspeciales = ["4444", "99001", "99002", "99003"];
+    if (!nit || nit.length < 4 || nitEspeciales.includes(nit)) return;
+    if (!onBuscarCliente) return;
+
+    setBuscandoCliente(true);
+    try {
+      await onBuscarCliente({ numeroDocumento: nit });
+    } finally {
+      setBuscandoCliente(false);
+    }
+  };
+
+  // ✅ NUEVO: onBlur del campo Nombre → buscar cliente en FARMADINAMICA
+  const handleNombreBlur = async () => {
+    const nombre = clientForm.nombre?.trim();
+    // Solo buscar por nombre si el NIT está vacío o muy corto
+    if (!nombre || nombre.length < 3) return;
+    if (clientForm.nit && clientForm.nit.length >= 4) return; // ya tiene NIT, no repetir
+    if (!onBuscarCliente) return;
+
+    setBuscandoCliente(true);
+    try {
+      await onBuscarCliente({ razonSocial: nombre });
+    } finally {
+      setBuscandoCliente(false);
     }
   };
 
@@ -89,7 +159,7 @@ const ClientForm = ({
 
   return (
     <Box sx={{ mb: 3 }}>
-      {/* HEADER - MANTENIENDO TU DISEÑO ORIGINAL */}
+      {/* HEADER */}
       <Box
         sx={{
           background: farmaColors.secondary,
@@ -112,9 +182,13 @@ const ClientForm = ({
           }}
         >
           <Person /> Datos del Cliente
+          {/* ✅ Indicador de búsqueda en FARMADINAMICA */}
+          {buscandoCliente && (
+            <CircularProgress size={14} sx={{ color: "white", ml: 1 }} />
+          )}
         </Typography>
 
-        {/* TOTAL VENTA - EN EL HEADER */}
+        {/* TOTAL VENTA */}
         <Box
           sx={{
             backgroundColor: "#4CAF50",
@@ -155,9 +229,104 @@ const ClientForm = ({
           border: `2px solid ${farmaColors.secondary}`,
         }}
       >
+        {/* FILA 0: TIPO DE FACTURA — Solo Admin */}
+        {isAdmin && (
+          <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
+            {/* Sector de Documento */}
+            <Grid item xs={12} md={3}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "white",
+                  fontWeight: 600,
+                  display: "block",
+                  mb: 0.5,
+                }}
+              >
+                Sector de Documento:
+              </Typography>
+              <TextField
+                select
+                fullWidth
+                size="small"
+                value={clientForm.codigoDocumentoSector || "1"}
+                onChange={(e) =>
+                  setClientForm((prev) => ({
+                    ...prev,
+                    codigoDocumentoSector: e.target.value,
+                    periodoFacturado: "",
+                  }))
+                }
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "white",
+                    fontSize: "0.875rem",
+                  },
+                }}
+              >
+                <MenuItem value="1">
+                  Sector 1 - Compra y Venta de Bienes y Servicios
+                </MenuItem>
+                <MenuItem value="2">
+                  Sector 2 - Alquiler de Bienes Inmuebles
+                </MenuItem>
+              </TextField>
+            </Grid>
+
+            {/* Periodo Facturado — solo si sector 2 */}
+            {clientForm.codigoDocumentoSector === "2" && (
+              <Grid item xs={12} md={4}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "white",
+                    fontWeight: 600,
+                    display: "block",
+                    mb: 0.5,
+                  }}
+                >
+                  Periodo Facturado: <span style={{ color: "#ffcc80" }}>*</span>
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={clientForm.periodoFacturado || ""}
+                  onChange={(e) =>
+                    setClientForm((prev) => ({
+                      ...prev,
+                      periodoFacturado: e.target.value.toUpperCase(),
+                    }))
+                  }
+                  placeholder="Ej: FEBRERO 2026 o 12 DE MARZO AL 11 DE ABRIL DE 2026"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      backgroundColor: "white",
+                      fontSize: "0.875rem",
+                      textTransform: "uppercase",
+                    },
+                  }}
+                />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "#ffcc80",
+                    display: "block",
+                    mt: 0.5,
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  📌 <strong>Sector Alquiler:</strong> Código actividad:{" "}
+                  <strong>6810110</strong> · Producto SIN:{" "}
+                  <strong>1004039</strong>
+                </Typography>
+              </Grid>
+            )}
+          </Grid>
+        )}
+
         {/* FILA 1: DATOS TRIBUTARIOS */}
         <Grid container spacing={1.5} alignItems="flex-start">
-          {/* CÓDIGO RÁPIDO NIT - MÁS CORTO */}
+          {/* CÓDIGO RÁPIDO NIT */}
           <Grid item xs={12} md={1.5}>
             <Typography
               variant="caption"
@@ -183,7 +352,9 @@ const ClientForm = ({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Business sx={{ color: farmaColors.primary, fontSize: 18 }} />
+                    <Business
+                      sx={{ color: farmaColors.primary, fontSize: 18 }}
+                    />
                   </InputAdornment>
                 ),
               }}
@@ -203,7 +374,7 @@ const ClientForm = ({
             </TextField>
           </Grid>
 
-          {/* NIT/CI MANUAL */}
+          {/* NIT/CI MANUAL — ✅ onBlur busca en FARMADINAMICA */}
           <Grid item xs={12} md={2.5}>
             <Typography
               variant="caption"
@@ -221,7 +392,18 @@ const ClientForm = ({
               size="small"
               value={clientForm.nit}
               onChange={(e) => handleNitChange(e.target.value)}
+              onBlur={handleNitBlur}
               placeholder="Ingrese NIT/CI"
+              InputProps={{
+                endAdornment: buscandoCliente ? (
+                  <InputAdornment position="end">
+                    <CircularProgress
+                      size={14}
+                      sx={{ color: farmaColors.primary }}
+                    />
+                  </InputAdornment>
+                ) : null,
+              }}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
@@ -247,24 +429,28 @@ const ClientForm = ({
             <TextField
               fullWidth
               size="small"
-              value={clientForm.complemento}
+              value={
+                clientForm.tipoDocumento === "1" ? clientForm.complemento : ""
+              }
               onChange={(e) =>
                 setClientForm((prev) => ({
                   ...prev,
-                  complemento: e.target.value,
+                  complemento: e.target.value.toUpperCase(),
                 }))
               }
+              disabled={clientForm.tipoDocumento !== "1"}
               placeholder="Comp."
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
                   fontSize: "0.875rem",
+                  textTransform: "uppercase",
                 },
               }}
             />
           </Grid>
 
-          {/* NOMBRE */}
+          {/* NOMBRE — ✅ onBlur busca en FARMADINAMICA (solo si no hay NIT) */}
           <Grid item xs={12} md={3.5}>
             <Typography
               variant="caption"
@@ -282,8 +468,12 @@ const ClientForm = ({
               size="small"
               value={clientForm.nombre}
               onChange={(e) =>
-                setClientForm((prev) => ({ ...prev, nombre: e.target.value }))
+                setClientForm((prev) => ({
+                  ...prev,
+                  nombre: e.target.value.toUpperCase(),
+                }))
               }
+              onBlur={handleNombreBlur}
               placeholder="Nombre del cliente"
               InputProps={{
                 startAdornment: (
@@ -296,12 +486,13 @@ const ClientForm = ({
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
                   fontSize: "0.875rem",
+                  textTransform: "uppercase",
                 },
               }}
             />
           </Grid>
 
-          {/* TIPO DOCUMENTO */}
+          {/* TIPO DOCUMENTO — Dinámico desde API SIAT */}
           <Grid item xs={12} md={3}>
             <Typography
               variant="caption"
@@ -313,6 +504,12 @@ const ClientForm = ({
               }}
             >
               Tipo Documento Cliente:
+              {loadingCatalogos && (
+                <CircularProgress
+                  size={10}
+                  sx={{ ml: 1, color: "white", verticalAlign: "middle" }}
+                />
+              )}
             </Typography>
             <TextField
               select
@@ -323,9 +520,10 @@ const ClientForm = ({
                 setClientForm((prev) => ({
                   ...prev,
                   tipoDocumento: e.target.value,
+                  complemento: e.target.value !== "1" ? "" : prev.complemento,
                 }))
               }
-              SelectProps={{ native: true }}
+              disabled={loadingCatalogos && tiposDocumento.length === 0}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
@@ -333,11 +531,14 @@ const ClientForm = ({
                 },
               }}
             >
-              <option value="1">1 - CI - CEDULA DE IDENTIDAD</option>
-              <option value="2">2 - CEX - CEDULA DE IDENTIDAD EXTRANJERO</option>
-              <option value="3">3 - PAS - PASAPORTE</option>
-              <option value="4">4 - OD - OTRO DOCUMENTO DE IDENTIDAD</option>
-              <option value="5">5 - NIT - NÚMERO DE IDENTIFICACIÓN TRIBUTARIA</option>
+              {tiposDocumento.map((tipo) => (
+                <MenuItem
+                  key={tipo.codigoClasificador}
+                  value={String(tipo.codigoClasificador)}
+                >
+                  {tipo.codigoClasificador} - {tipo.descripcion}
+                </MenuItem>
+              ))}
             </TextField>
           </Grid>
         </Grid>
@@ -433,7 +634,8 @@ const ClientForm = ({
               fullWidth
               size="small"
               type="date"
-              value={clientForm.fechaNacimiento}
+              key={clientForm.fechaNacimiento || "empty-date"}
+              value={clientForm.fechaNacimiento || ""}
               onChange={(e) =>
                 setClientForm((prev) => ({
                   ...prev,
@@ -493,7 +695,9 @@ const ClientForm = ({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Discount sx={{ color: farmaColors.primary, fontSize: 18 }} />
+                    <Discount
+                      sx={{ color: farmaColors.primary, fontSize: 18 }}
+                    />
                   </InputAdornment>
                 ),
               }}
@@ -539,7 +743,9 @@ const ClientForm = ({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Payment sx={{ color: farmaColors.primary, fontSize: 18 }} />
+                    <Payment
+                      sx={{ color: farmaColors.primary, fontSize: 18 }}
+                    />
                   </InputAdornment>
                 ),
               }}
