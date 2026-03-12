@@ -80,6 +80,28 @@ const userService = {
   },
 
   /**
+   * ✅ Obtener lista de empleados/usuarios de la organización
+   * GET /api/farmalink-core/Organizacion/ListaEmpleadosUsuarios
+   */
+  getEmpleadosUsuarios: async () => {
+    try {
+      console.log("📡 Obteniendo empleados/usuarios...");
+      const response = await apiClient.get("/Organizacion/ListaEmpleadosUsuarios");
+
+      if (response.data.exitoso && response.data.datos) {
+        console.log("✅ Empleados obtenidos:", response.data.datos.length);
+        return response.data.datos;
+      }
+
+      console.warn("⚠️ No se obtuvieron empleados");
+      return [];
+    } catch (error) {
+      console.error("❌ Error obteniendo empleados:", error);
+      throw error;
+    }
+  },
+
+  /**
    * ✅ Obtener equipos de cómputo de una sucursal
    * GET /api/farmalink-core/Organizacion/EquipoComputoSucursal/{sucursalId}
    */

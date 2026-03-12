@@ -72,7 +72,7 @@ function Dashboard() {
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {tarjetasEstadisticas.map((card, index) => (
           <Grid item xs={12} sm={6} lg={3} key={index}>
-            <Card 
+            <Card
               sx={{
                 background: `linear-gradient(135deg, ${card.color} 0%, ${card.color}CC 100%)`,
                 color: 'white',
@@ -95,31 +95,31 @@ function Dashboard() {
                       {card.titulo}
                     </Typography>
                   </Box>
-                  <Box sx={{ 
-                    bgcolor: 'rgba(255,255,255,0.2)', 
-                    borderRadius: 2, 
+                  <Box sx={{
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    borderRadius: 2,
                     p: 1.5,
                     backdropFilter: 'blur(10px)'
                   }}>
                     {card.icono}
                   </Box>
                 </Box>
-                
+
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Chip
                     label={card.cambio}
                     size="small"
                     sx={{
                       bgcolor: card.tipoCambio === 'positive' ? 'rgba(255,255,255,0.2)' :
-                              card.tipoCambio === 'negative' ? 'rgba(0,0,0,0.2)' : 'rgba(255,193,7,0.2)',
+                        card.tipoCambio === 'negative' ? 'rgba(0,0,0,0.2)' : 'rgba(255,193,7,0.2)',
                       color: 'white',
                       fontWeight: 600
                     }}
                   />
-                  <Button 
-                    size="small" 
-                    sx={{ 
-                      color: 'white', 
+                  <Button
+                    size="small"
+                    sx={{
+                      color: 'white',
                       fontWeight: 600,
                       '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
                     }}
@@ -145,18 +145,18 @@ function Dashboard() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Todos los módulos están operativos y sincronizados
             </Typography>
-            <LinearProgress 
-              variant="determinate" 
-              value={95} 
-              sx={{ 
-                height: 8, 
+            <LinearProgress
+              variant="determinate"
+              value={95}
+              sx={{
+                height: 8,
                 borderRadius: 4,
                 bgcolor: farmaColors.alpha.primary10,
                 '& .MuiLinearProgress-bar': {
                   borderRadius: 4,
                   background: farmaColors.gradients.primary
                 }
-              }} 
+              }}
             />
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
               Sistema optimizado al 95%
@@ -171,10 +171,10 @@ function Dashboard() {
               Próximos pasos
             </Typography>
             <Box sx={{ mb: 2 }}>
-              <Chip 
-                label="En desarrollo" 
-                size="small" 
-                sx={{ 
+              <Chip
+                label="En desarrollo"
+                size="small"
+                sx={{
                   mb: 1,
                   bgcolor: farmaColors.alpha.primary20,
                   color: farmaColors.primaryDark
@@ -184,10 +184,10 @@ function Dashboard() {
                 Módulo de Gestión de Acceso y Seguridad
               </Typography>
             </Box>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               size="small"
-              sx={{ 
+              sx={{
                 background: farmaColors.gradients.corporate,
                 boxShadow: `0 4px 15px ${farmaColors.alpha.primary30}`,
                 '&:hover': {

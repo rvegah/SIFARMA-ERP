@@ -1,24 +1,29 @@
 // src/app/AppRoutes.jsx - MODIFICADO con AuthProvider y protección de rutas
 
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import LoginPage from "../shared/components/LoginPage";
 import DashboardLayout from "../shared/components/DashboardLayout";
 import Dashboard from "../shared/components/Dashboard";
 import SalesPage from "../modules/sales/pages/SalesPage";
-
-
-
+import PurchasesPage from "../modules/purchases/pages/PurchasesPage";
+import TransfersPage from "../modules/transfers/pages/TransfersPage";
 // Módulo de gestión de usuarios (administrativo)
 import UserManagementPage from "../modules/user-management/pages/UserManagementPage";
+// Módulo de gestión de productos
+import ProductManagementPage from "../modules/products/pages/ProductManagementPage";
+
+// Módulo de reportes y pedidos
+import ReportManagementPage from "../modules/reports/pages/ReportManagementPage";
 
 /**
  * Componente de rutas protegidas
  * Solo se renderiza si el usuario está autenticado
  */
 function ProtectedRoutes() {
-  const { isAuthenticated, isLoading, logout, user, permissions } = useAuth();
+  const { isAuthenticated, isLoading, logout, user, apiPermissions } = useAuth();
+  const location = useLocation();
 
   // Mostrar loading mientras se verifica la autenticación
   if (isLoading) {
@@ -43,16 +48,48 @@ function ProtectedRoutes() {
     return <LoginPage />;
   }
 
+  // Depuración de permisos
+  React.useEffect(() => {
+    if (user?.apiPermissions) {
+      console.log("🔑 [AppRoutes] API Permissions:", user.apiPermissions.map(p => ({
+        opcion: p.nombreOpcion,
+        ruta: p.ruta,
+        subopciones: p.subOpcionesMenu?.map(s => s.nombreOpcion)
+      })));
+    }
+  }, [user]);
+
   // Si está autenticado, mostrar dashboard con rutas
+  console.log("📍 [ProtectedRoutes] Matching for path:", location.pathname);
+  console.log("📍 [ProtectedRoutes] Available Permissions:", apiPermissions?.length);
+
   return (
     <DashboardLayout
       onLogout={logout}
       currentUser={user}
-      userPermissions={permissions}
+      userPermissions={apiPermissions}
     >
       <Routes>
+        {/* PRIORIDAD: REPORTES (Movido al inicio) */}
+        <Route path="/reportes/*" element={<ReportManagementPage />} />
+        <Route path="/Reportes/*" element={<ReportManagementPage />} />
+        <Route path="/reporte/*" element={<ReportManagementPage />} />
+        <Route path="/Reporte/*" element={<ReportManagementPage />} />
+        <Route path="/gestion-reportes/*" element={<ReportManagementPage />} />
+        <Route path="/reportes-sucursales/*" element={<ReportManagementPage />} />
+
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* Módulo de Compras - Prioridad elevada */}
+        <Route path="/compras/*" element={<PurchasesPage />} />
+        <Route path="/Compras/*" element={<PurchasesPage />} />
+
+        {/* Módulo de Traspasos */}
+        <Route path="/traspasos/*" element={<TransfersPage />} />
+        <Route path="/Traspasos/*" element={<TransfersPage />} />
+        <Route path="/traspaso/*" element={<TransfersPage />} />
+        <Route path="/Traspaso/*" element={<TransfersPage />} />
 
         {/* SEPARACIÓN CLARA DE FUNCIONALIDADES */}
 
@@ -74,28 +111,27 @@ function ProtectedRoutes() {
           element={<UserManagementPage key="usersAny" />}
         />
 
-        {/* Rutas futuras de otros módulos */}
-        <Route
-          path="/productos/*"
-          element={<div>Módulo de Productos (próximamente)</div>}
-        />
-        <Route
-          path="/compras/*"
-          element={<div>Módulo de Compras (próximamente)</div>}
-        />
+        {/* Módulo de productos: lista, agregar, editar */}
+        <Route path="/productos" element={<ProductManagementPage />} />
+        <Route path="/productos/ver" element={<ProductManagementPage />} />
+        <Route path="/productos/agregar" element={<ProductManagementPage />} />
+        <Route path="/productos/*" element={<ProductManagementPage />} />
         <Route
           path="/proveedor/*"
           element={<div>Módulo de Proveedores (próximamente)</div>}
         />
         <Route path="/ventas/*" element={<SalesPage />} />
-        <Route
-          path="/traspasos/*"
-          element={<div>Módulo de Traspasos (próximamente)</div>}
-        />
-        <Route
-          path="/reportes/*"
-          element={<div>Módulo de Reportes (próximamente)</div>}
-        />
+
+        {/* REPORTES: RUTAS ULTRA-PERMISIVAS PARA EVITAR FALLOS DE MATCHING */}
+        <Route path="/reportes" element={<ReportManagementPage />} />
+        <Route path="/reportes/*" element={<ReportManagementPage />} />
+        <Route path="/reporte/*" element={<ReportManagementPage />} />
+        <Route path="/Reportes/*" element={<ReportManagementPage />} />
+        <Route path="/Reporte/*" element={<ReportManagementPage />} />
+        <Route path="/gestion-reportes/*" element={<ReportManagementPage />} />
+        <Route path="/reportes-sucursales/*" element={<ReportManagementPage />} />
+        <Route path="/sucursales/reporte/*" element={<ReportManagementPage />} />
+        <Route path="/reportes-y-pedidos/*" element={<ReportManagementPage />} />
         <Route
           path="/configuracion/*"
           element={<div>Módulo de Configuración (próximamente)</div>}
@@ -105,7 +141,13 @@ function ProtectedRoutes() {
           path="/access-security/*"
           element={<div>Módulo de Seguridad (próximamente)</div>}
         />
-        <Route path="*" element={<div>Página no encontrada</div>} />
+        <Route path="*" element={
+          <div style={{ p: 4, textAlign: 'center' }}>
+            <h2>Página no encontrada</h2>
+            <p>Ruta actual: <strong>{location.pathname}</strong></p>
+            <button onClick={() => window.location.href = '/dashboard'}>Volver al Inicio</button>
+          </div>
+        } />
       </Routes>
     </DashboardLayout>
   );

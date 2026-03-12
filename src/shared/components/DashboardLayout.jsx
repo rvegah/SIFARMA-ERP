@@ -38,34 +38,39 @@ import {
   Edit,
   KeyboardArrowDown,
 } from "@mui/icons-material";
-import { farmaColors } from "/src/app/theme";
-import { getFilteredMenuItems } from "/src/config/menuBuilder";
+import { farmaColors } from "../../app/theme";
+import { getFilteredMenuItems } from "../../config/menuBuilder";
+import NotificationPanel from "./NotificationPanel";
 
 const drawerWidth = 280;
 const collapsedDrawerWidth = 60;
 
-function DashboardLayout({ children, onLogout, currentUser }) {
+function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [openSubMenus, setOpenSubMenus] = useState({});
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
 
   // Obtener menú filtrado según permisos del usuario
   const elementosMenu = useMemo(() => {
-    if (!currentUser || !currentUser.apiPermissions) {
-      console.warn("No hay usuario o permisos disponibles");
+    // Usar userPermissions (prop) o currentUser.apiPermissions (fallback)
+    const perms = userPermissions || currentUser?.apiPermissions;
+
+    if (!perms) {
+      console.warn("No hay permisos disponibles para construir el menú");
       return [];
     }
-    console.log("Permisos del usuario (API):", currentUser.apiPermissions);
-    const filtered = getFilteredMenuItems(currentUser.apiPermissions);
-    console.log("Menús filtrados:", filtered);
+    
+    console.log("Generando menú con permisos:", perms.length);
+    const filtered = getFilteredMenuItems(perms);
     return filtered;
-  }, [currentUser]);
+  }, [currentUser, userPermissions]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -135,6 +140,16 @@ function DashboardLayout({ children, onLogout, currentUser }) {
       );
     }
     return location.pathname.startsWith(itemPath);
+  };
+
+  const toggleNotifications = (event) => {
+    event.stopPropagation();
+    setShowNotifications(!showNotifications);
+  };
+
+  // Cierra notificaciones al hacer clic en cualquier parte del layout
+  const handleLayoutClick = () => {
+    if (showNotifications) setShowNotifications(false);
   };
 
   const drawer = (
@@ -362,15 +377,14 @@ function DashboardLayout({ children, onLogout, currentUser }) {
   );
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex" }} onClick={handleLayoutClick}>
       {/* App Bar */}
       <AppBar
         position="fixed"
         sx={{
           width: {
-            md: `calc(100% - ${
-              collapsed ? collapsedDrawerWidth : drawerWidth
-            }px)`,
+            md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth
+              }px)`,
           },
           ml: { md: `${collapsed ? collapsedDrawerWidth : drawerWidth}px` },
           background: farmaColors.gradients.primary,
@@ -420,11 +434,17 @@ function DashboardLayout({ children, onLogout, currentUser }) {
             />
 
             {/* Badge de Notificaciones */}
-            <IconButton color="inherit">
-              <Badge badgeContent={14} color="error">
-                <Notifications />
-              </Badge>
-            </IconButton>
+            <Box sx={{ position: 'relative' }}>
+              <IconButton color="inherit" onClick={toggleNotifications}>
+                <Badge badgeContent={5} color="error">
+                  <Notifications />
+                </Badge>
+              </IconButton>
+              <NotificationPanel 
+                open={showNotifications} 
+                onClose={() => setShowNotifications(false)} 
+              />
+            </Box>
 
             {/* Usuario con Nombre Visible - REDISEÑADO */}
             <Button
@@ -563,9 +583,8 @@ function DashboardLayout({ children, onLogout, currentUser }) {
           flexGrow: 1,
           p: { xs: 2, sm: 3 },
           width: {
-            md: `calc(100% - ${
-              collapsed ? collapsedDrawerWidth : drawerWidth
-            }px)`,
+            md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth
+              }px)`,
           },
           minHeight: "100vh",
           bgcolor: "#F8FAFC",
