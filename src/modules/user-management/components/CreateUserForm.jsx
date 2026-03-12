@@ -133,7 +133,7 @@ const CreateUserForm = ({ onCancel }) => {
         sx={{ p: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}
       >
         <Grid container spacing={3}>
-                    {/* 1. Nombre completo */}
+          {/* 1. Nombre completo */}
           <Grid item xs={12} md={4}>
             <Typography
               variant="body2"
@@ -229,6 +229,7 @@ const CreateUserForm = ({ onCancel }) => {
               value={userForm.usuario || ""}
               onChange={handleFormChange("usuario")}
               disabled={loading}
+              autoComplete="off"
               sx={{
                 bgcolor: "white",
                 "& .MuiOutlinedInput-root": {
@@ -257,6 +258,7 @@ const CreateUserForm = ({ onCancel }) => {
               value={userForm.password || ""}
               onChange={handleFormChange("password")}
               disabled={loading}
+              autoComplete="new-password"
               sx={{
                 bgcolor: "white",
                 "& .MuiOutlinedInput-root": {

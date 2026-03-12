@@ -41,20 +41,29 @@ export const buildMenuFromApi = (apiPermissions) => {
   const menu = apiPermissions
     .filter(module => {
       // Solo mostrar módulos que tengan al menos 1 subopción
-      const hasSubOptions = module.subOpcionesMenu && module.subOpcionesMenu.length > 0;
-      if (!hasSubOptions) {
+      // O si es Traspasos (porque inyectaremos la opción)
+      const isTraspaso = module.nombreOpcion?.toLowerCase().includes('traspaso');
+      const hasSubOptions = (module.subOpcionesMenu && module.subOpcionesMenu.length > 0) || isTraspaso;
+      
+      if (!hasSubOptions && !isTraspaso) {
         console.log(`⚠️ Módulo "${module.nombreOpcion}" sin subopciones, se omite`);
       }
       return hasSubOptions;
     })
     .map(module => {
       console.log(`📦 Procesando módulo: ${module.nombreOpcion}`);
-      
+
+      const cleanParentName = module.nombreOpcion
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Quitar acentos
+        .replace(/\s+/g, '-'); // Espacios por guiones
+
       // Construir elemento principal del menú
       const menuItem = {
         texto: module.nombreOpcion,
         icono: getIconComponent(module.icono),
-        ruta: module.ruta || `/${module.nombreOpcion.toLowerCase()}`, // 🔥 Usar descripcion directamente
+        ruta: module.ruta || `/${cleanParentName}`,
         color: module.color,
         subElementos: [],
       };
@@ -64,16 +73,83 @@ export const buildMenuFromApi = (apiPermissions) => {
         menuItem.subElementos = module.subOpcionesMenu
           .sort((a, b) => (a.orden || 0) - (b.orden || 0))
           .map(subOption => {
-            // 🔥 Usar descripcion directamente como ruta
-            const subRoute = subOption.ruta || `${menuItem.ruta}/${subOption.nombreOpcion.toLowerCase()}`;
-            
+            // 🔥 Usar ruta del API o construir una limpia (sin espacios)
+            let subRoute = subOption.ruta;
+
+            if (!subRoute) {
+              const cleanName = subOption.nombreOpcion
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "") // Quitar acentos
+                .replace(/\s+/g, '-'); // Espacios por guiones
+
+              subRoute = `${menuItem.ruta}/${cleanName}`;
+            }
+
             console.log(`  └─ Subopción: ${subOption.nombreOpcion} → ${subRoute}`);
-            
+
             return {
               texto: subOption.nombreOpcion,
-              ruta: subRoute, // 🔥 Ruta desde el API
+              ruta: subRoute,
             };
           });
+
+        // 🚀 INYECCIÓN DINÁMICA: Si es el módulo de Ventas, añadir opciones de Pedidos si no existen
+        if (module.nombreOpcion === 'Ventas' || module.nombreOpcion === 'VENTAS') {
+          const hasRealizarPedido = menuItem.subElementos.some(sub => sub.texto.includes('Pedido'));
+          if (!hasRealizarPedido) {
+            menuItem.subElementos.push(
+              { texto: 'Realizar pedidos', ruta: '/ventas/pedidos/crear' },
+              { texto: 'Mis pedidos', ruta: '/ventas/mis-pedidos' }
+            );
+          }
+        }
+
+        // 🚀 INYECCIÓN DINÁMICA: Si es el módulo de Compras, añadir opciones de Compras si no existen
+        if (module.nombreOpcion === 'Compras' || module.nombreOpcion === 'COMPRAS') {
+          const hasNuevaCompra = menuItem.subElementos.some(sub => sub.texto.includes('Compra'));
+          if (!hasNuevaCompra) {
+            menuItem.subElementos.push(
+              { texto: 'Nueva Compra', ruta: '/compras/nueva' }
+            );
+          }
+          // Añadir Compras al crédito si no existe
+          const hasComprasCredito = menuItem.subElementos.some(sub => sub.texto.includes('crédito'));
+          if (!hasComprasCredito) {
+            menuItem.subElementos.push(
+              { texto: 'Compras al crédito', ruta: '/compras/credito' }
+            );
+          }
+          // Añadir Nueva salida si no existe
+          const hasNuevaSalida = menuItem.subElementos.some(sub => sub.texto.includes('salida'));
+          if (!hasNuevaSalida) {
+            menuItem.subElementos.push(
+              { texto: 'Nueva salida', ruta: '/compras/nueva-salida' }
+            );
+          }
+        }
+      }
+
+      // 🚀 INYECCIÓN DINÁMICA: Traspasos (Fuera del if de subOpcionesMenu para asegurar que corra)
+      if (module.nombreOpcion && module.nombreOpcion.toLowerCase().includes('traspaso')) {
+        // Asegurar que subElementos existe
+        if (!menuItem.subElementos) menuItem.subElementos = [];
+
+        // Si el API ya trae opciones, nos aseguramos que "nuevo" apunte a nuestra ruta
+        menuItem.subElementos.forEach(sub => {
+          if (sub.texto.toLowerCase().includes('nuevo') || sub.texto.toLowerCase().includes('nueva')) {
+            sub.ruta = '/traspasos/nuevo-traspaso';
+          }
+        });
+
+        const hasNuevoTraspaso = menuItem.subElementos.some(sub => 
+          sub.texto.toLowerCase().includes('nuevo') || sub.texto.toLowerCase().includes('nueva')
+        );
+        if (!hasNuevoTraspaso) {
+          menuItem.subElementos.push(
+            { texto: 'Nuevo Traspaso', ruta: '/traspasos/nuevo-traspaso' }
+          );
+        }
       }
 
       console.log(`✅ Módulo "${module.nombreOpcion}" procesado:`, {
