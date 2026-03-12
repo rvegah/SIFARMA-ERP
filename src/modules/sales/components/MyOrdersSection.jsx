@@ -1,4 +1,4 @@
-// src/modules/sales/pages/MyOrdersPage.jsx
+// src/modules/sales/components/MyOrdersSection.jsx
 import React, { useState, useEffect } from "react";
 import {
     Container,
@@ -25,10 +25,7 @@ import {
     Search as SearchIcon,
     Edit as EditIcon,
     History,
-    FilterList,
-    Store,
-    CalendarToday,
-    ConfirmationNumber
+    FilterList
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import userService from "../../../services/api/userService";
@@ -43,7 +40,7 @@ const STATUS_OPTIONS = [
     { value: "CER", label: "Cerrado" }
 ];
 
-const MyOrdersPage = () => {
+const MyOrdersSection = () => {
     const navigate = useNavigate();
     const [filters, setFilters] = useState({
         codigoSucursal: "",
@@ -300,4 +297,4 @@ const MyOrdersPage = () => {
     );
 };
 
-export default MyOrdersPage;
+export default MyOrdersSection;

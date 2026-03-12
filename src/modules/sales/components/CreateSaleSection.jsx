@@ -1,4 +1,4 @@
-// src/modules/sales/components/CounterSaleSection.jsx
+// src/modules/sales/components/CreateSaleSection.jsx
 import React, { useState } from "react";
 import { Container, Box, Button, Grid, Typography, IconButton, Chip } from "@mui/material";
 import { useSnackbar } from "notistack";
@@ -25,7 +25,7 @@ import { enviarFacturaSIAT } from "../services/siatMockService";
 import CancelInvoiceModal from "./CancelInvoiceModal";
 import ProductsModal from "./ProductsModal";
 
-const CounterSaleSection = () => {
+const CreateSaleSection = () => {
     const { enqueueSnackbar } = useSnackbar();
 
     const {
@@ -331,4 +331,4 @@ const CounterSaleSection = () => {
     );
 };
 
-export default CounterSaleSection;
+export default CreateSaleSection;
