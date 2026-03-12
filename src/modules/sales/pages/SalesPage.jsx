@@ -40,6 +40,7 @@ import siatApiService from "../services/siatApiService";
 import CancelInvoiceModal from "../components/CancelInvoiceModal";
 import ProductsModal from "../components/ProductsModal";
 import { useAuth } from "../../../context/AuthContext";
+import SalesService from "../services/salesService";
 
 // ✅ NUEVO: Hook de estado SIAT
 import { useSiatStatus } from "../hooks/useSiatStatus";
@@ -191,7 +192,13 @@ const SiatStatusBanner = ({
 };
 
 // ─── Modal de conflicto de actividad ─────────────────────────────────────────
-const ActivityConflictModal = ({ open, onClose, onConfirm, productoNuevo, actividadActual }) => {
+const ActivityConflictModal = ({
+  open,
+  onClose,
+  onConfirm,
+  productoNuevo,
+  actividadActual,
+}) => {
   if (!open || !productoNuevo) return null;
 
   const ACTIVIDADES = {
@@ -199,8 +206,11 @@ const ActivityConflictModal = ({ open, onClose, onConfirm, productoNuevo, activi
     6810110: "Alquiler de bienes inmuebles",
   };
 
-  const descActual = ACTIVIDADES[actividadActual] || `Actividad ${actividadActual}`;
-  const descNueva = ACTIVIDADES[productoNuevo.codigoActividad] || `Actividad ${productoNuevo.codigoActividad}`;
+  const descActual =
+    ACTIVIDADES[actividadActual] || `Actividad ${actividadActual}`;
+  const descNueva =
+    ACTIVIDADES[productoNuevo.codigoActividad] ||
+    `Actividad ${productoNuevo.codigoActividad}`;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -209,20 +219,25 @@ const ActivityConflictModal = ({ open, onClose, onConfirm, productoNuevo, activi
       </DialogTitle>
       <DialogContent sx={{ mt: 2 }}>
         <Alert severity="warning" sx={{ mb: 2 }}>
-          No se pueden mezclar productos de diferentes actividades en una misma factura.
+          No se pueden mezclar productos de diferentes actividades en una misma
+          factura.
         </Alert>
         <Typography variant="body2" sx={{ mb: 1 }}>
           <strong>Actividad actual:</strong> {actividadActual} — {descActual}
         </Typography>
         <Typography variant="body2" sx={{ mb: 2 }}>
-          <strong>Actividad nueva:</strong> {productoNuevo.codigoActividad} — {descNueva}
+          <strong>Actividad nueva:</strong> {productoNuevo.codigoActividad} —{" "}
+          {descNueva}
         </Typography>
         <Typography variant="body2" color="error">
-          Si continúa, se <strong>limpiarán todos los productos</strong> y se agregará el nuevo producto.
+          Si continúa, se <strong>limpiarán todos los productos</strong> y se
+          agregará el nuevo producto.
         </Typography>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} variant="outlined">Cancelar</Button>
+        <Button onClick={onClose} variant="outlined">
+          Cancelar
+        </Button>
         <Button onClick={onConfirm} variant="contained" color="warning">
           Limpiar y continuar
         </Button>
@@ -539,14 +554,43 @@ const SalesPage = () => {
     });
   };
 
-  const handleSaveClient = () => {
+  const handleBuscarCliente = async ({ numeroDocumento, razonSocial } = {}) => {
+    const datos = await SalesService.getClienteByDocumento({
+      numeroDocumento,
+      razonSocial,
+    });
+    if (datos) {
+      setClientForm((prev) => ({
+        ...prev,
+        nit: datos.nit || prev.nit,
+        complemento: datos.complemento || prev.complemento,
+        nombre: datos.nombre || prev.nombre,
+        celular: datos.celular || prev.celular,
+        email: datos.email || prev.email,
+        fechaNacimiento: datos.fechaNacimiento || "",
+        tipoDocumento: datos.tipoDocumento || prev.tipoDocumento,
+        codigoCliente: datos.codigoCliente || prev.codigoCliente,
+        nombresCliente: datos.nombresCliente || prev.nombresCliente,
+        apellidosCliente: datos.apellidosCliente || prev.apellidosCliente,
+      }));
+      enqueueSnackbar("✅ Cliente encontrado", {
+        variant: "success",
+        autoHideDuration: 2500,
+      });
+    }
+  };
+
+  const handleSaveClient = async () => {
     if (!clientForm.nit || !clientForm.nombre) {
       enqueueSnackbar("Complete NIT y Nombre para guardar el cliente", {
         variant: "warning",
       });
       return;
     }
-    enqueueSnackbar("Cliente guardado correctamente", { variant: "success" });
+    const result = await SalesService.guardarCliente(clientForm);
+    enqueueSnackbar(result.message, {
+      variant: result.success ? "success" : "error",
+    });
   };
 
   const handlePrintComplete = (printedInvoice) => {
@@ -613,6 +657,7 @@ const SalesPage = () => {
         tiposDocumentoIdentidad={tiposDocumentoIdentidad}
         loadingCatalogos={loadingCatalogos}
         isAdmin={isAdmin}
+        onBuscarCliente={handleBuscarCliente} 
       />
 
       {/* Tabla de items CON búsqueda integrada */}
@@ -974,7 +1019,10 @@ const SalesPage = () => {
 
       <ActivityConflictModal
         open={activityModalOpen}
-        onClose={() => { setActivityModalOpen(false); setProductoConflicto(null); }}
+        onClose={() => {
+          setActivityModalOpen(false);
+          setProductoConflicto(null);
+        }}
         onConfirm={handleConfirmActivityChange}
         productoNuevo={productoConflicto}
         actividadActual={saleItems[0]?.codigoActividad}

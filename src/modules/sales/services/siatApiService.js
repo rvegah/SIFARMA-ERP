@@ -47,6 +47,10 @@ function mapSaleItemsToDetalles(saleItems) {
     montoDescuento: parseFloat(item.descuento || 0),
     numeroSerie: item.numeroSerie || null,
     numeroImei: item.numeroImei || null,
+    // Trazabilidad FARMADINAMICA
+    sku: item.sku ?? null,
+    numeroLote: item.numeroLote ?? null,
+    fechaVencimiento: item.fechaVencimiento || null,
   }));
 }
 

@@ -15,10 +15,6 @@ const farmaciaApiClient = axios.create({
 });
 
 // ─── HELPER: leer ubicación del usuario logueado ─────────────────────────────
-// El Core API devuelve en el login:
-//   codigoSucursal_ID     → sucursal interna (para búsqueda de productos)
-//   codigoSucursal_SIAT   → sucursalId para SiatAPI
-//   codigoPuntoVenta_SIAT → puntoVentaId para SiatAPI
 function getLocationFromSession() {
   const user = authService.getCurrentUser();
   return {
@@ -30,12 +26,6 @@ function getLocationFromSession() {
 
 class SalesService {
   // ── PRODUCTOS — endpoint Ventas/BuscarProductos ───────────────────────────
-  // Estructura del API (nueva):
-  //   id, codigo, nombre, descripcion, precio, codigoBarra, stock, categoria,
-  //   codigoSin, codigoActividad, unidadMedida (número SIAT directo),
-  //   linea, laboratorio, sku, numeroLote, fechaVencimiento,
-  //   diasProximoVencimiento, descuentoVencimiento
-
   static async searchProducts(query) {
     try {
       const { codigoSucursalInterno } = getLocationFromSession();
@@ -51,34 +41,25 @@ class SalesService {
       }
 
       return (response.data.datos || []).map((p) => ({
-        // Identificación
         id: p.id,
         codigo: p.codigo,
         sku: p.sku,
         nombre: p.nombre,
-
-        // Info para mostrar en tabla
         descripcion: p.descripcion,
         categoria: p.categoria,
         linea: p.linea,
         laboratorio: p.laboratorio,
-
-        // Lote y vencimiento (fila 2 en tabla)
         numeroLote: p.numeroLote,
         fechaVencimiento: p.fechaVencimiento?.split("T")[0] || "",
         diasProximoVencimiento: p.diasProximoVencimiento,
         descuentoVencimiento: p.descuentoVencimiento,
-
-        // Precio y stock
         precio: p.precio,
         precioUnitario: p.precio,
         stock: p.stock,
-
-        // Campos SIAT — ya vienen correctos del API
         codigoSin: p.codigoSin,
         codigoProductoSin: p.codigoSin,
         codigoActividad: parseInt(p.codigoActividad) || 4772100,
-        unidadMedida: p.unidadMedida || 62, // número SIAT directo
+        unidadMedida: p.unidadMedida || 62,
       }));
     } catch (error) {
       console.error("❌ Error al buscar productos:", error.message);
@@ -86,8 +67,7 @@ class SalesService {
     }
   }
 
-  // ── SUCURSALES — endpoint real de api-core ────────────────────────────────
-
+  // ── SUCURSALES ────────────────────────────────────────────────────────────
   static async getStockBySucursal(productId) {
     try {
       const response = await apiClient.get(
@@ -117,8 +97,115 @@ class SalesService {
     }
   }
 
-  // ── CLIENTE ───────────────────────────────────────────────────────────────
+  // ── BUSCAR CLIENTE POR DOCUMENTO O RAZÓN SOCIAL ───────────────────────────
+  // GET /Ventas/DatosCliente?NumeroDocumento=&RazonSocialCliente=
+  // Se llama en onBlur del campo NIT/CI o Nombre Completo
+  static async getClienteByDocumento({ numeroDocumento, razonSocial } = {}) {
+    try {
+      const params = {};
+      if (numeroDocumento) params.NumeroDocumento = numeroDocumento;
+      if (razonSocial) params.RazonSocialCliente = razonSocial;
 
+      if (!params.NumeroDocumento && !params.RazonSocialCliente) return null;
+
+      console.log("🔍 Buscando cliente en FARMADINAMICA:", params);
+
+      const response = await farmaciaApiClient.get("/Ventas/DatosCliente", {
+        params,
+      });
+
+      if (!response.data?.exitoso) {
+        console.log("ℹ️ Cliente no encontrado en FARMADINAMICA");
+        return null;
+      }
+
+      const lista = response.data.datos;
+      const d = Array.isArray(lista) ? lista[0] : lista;
+      if (!d) return null;
+
+      // Mapear respuesta al formato de clientForm
+      return {
+        nit: d.numeroDocumento || "",
+        complemento: d.complemento || "",
+        nombre: d.razonSocialCliente || "",
+        celular: d.celular || "",
+        email: d.correoElectronico || "",
+        // Convertir fecha ISO → "yyyy-MM-dd" para input type="date"
+        fechaNacimiento: d.fechaNacimiento
+          ? d.fechaNacimiento.split("T")[0]
+          : "",
+        tipoDocumento: d.tipoDocumento ? String(d.tipoDocumento) : "1",
+        // Datos extra para guardarCliente (no se muestran en form)
+        codigoCliente: d.codigoCliente || null,
+        nombresCliente: d.nombresCliente || "",
+        apellidosCliente: d.apellidosCliente || "",
+      };
+    } catch (error) {
+      // No propagar: si el cliente no existe en BD es normal
+      console.warn("⚠️ getClienteByDocumento:", error.message);
+      return null;
+    }
+  }
+
+  // ── GUARDAR CLIENTE EN FARMADINAMICA ──────────────────────────────────────
+  // POST /Ventas/GuardarCliente
+  // Se llama al presionar el botón "Guardar Cliente" (◇) en ClientForm
+  static async guardarCliente(clientForm) {
+    try {
+      const user = authService.getCurrentUser();
+
+      // Construir fecha de nacimiento en ISO con zona horaria Bolivia (UTC-4)
+      let fechaNacimientoISO = null;
+      if (clientForm.fechaNacimiento) {
+        // clientForm.fechaNacimiento viene como "yyyy-MM-dd"
+        fechaNacimientoISO = new Date(
+          clientForm.fechaNacimiento + "T00:00:00",
+        ).toISOString();
+      }
+
+      const payload = {
+        tipoDocumento: parseInt(clientForm.tipoDocumento || "1"),
+        numeroDocumento: clientForm.nit || "",
+        complemento: clientForm.complemento || "",
+        razonSocialCliente: clientForm.nombre || "",
+        // nombresCliente y apellidosCliente: si el nombre tiene espacio lo separamos,
+        // de lo contrario todo va a razonSocial y estos quedan vacíos
+        nombresCliente: clientForm.nombresCliente || "",
+        apellidosCliente: clientForm.apellidosCliente || "",
+        celular: clientForm.celular || "",
+        correoElectronico: clientForm.email || "",
+        fechaNacimiento: fechaNacimientoISO,
+        codigoEmpleadoAlta: user?.usuario || "SYSTEMAS",
+      };
+
+      console.log("💾 Guardando cliente en FARMADINAMICA:", payload);
+
+      const response = await farmaciaApiClient.post(
+        "/Ventas/GuardarCliente",
+        payload,
+      );
+
+      if (!response.data?.exitoso) {
+        throw new Error(response.data?.mensaje || "Error al guardar cliente");
+      }
+
+      console.log("✅ Cliente guardado:", response.data.datos);
+
+      return {
+        success: true,
+        message: response.data.mensaje || "Cliente guardado correctamente",
+        datos: response.data.datos,
+      };
+    } catch (error) {
+      console.error("❌ guardarCliente:", error.message);
+      return {
+        success: false,
+        message: error.message || "Error al guardar el cliente",
+      };
+    }
+  }
+
+  // ── CLIENTE (búsqueda SIAT/local) ─────────────────────────────────────────
   static async searchOrCreateClient(nit) {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -140,13 +227,12 @@ class SalesService {
   static detectDocumentType(nit) {
     if (!nit) return "1";
     if (nit.startsWith("E")) return "2";
-    if (nit.length <= 10) return "1";
-    if (nit.length > 10) return "5";
+    if (nit.length <= 8) return "1";
+    if (nit.length > 8) return "5";
     return "4";
   }
 
   // ── GUARDAR VENTA SIN FACTURAR ────────────────────────────────────────────
-
   static async saveSale(saleData) {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -161,7 +247,6 @@ class SalesService {
   }
 
   // ── FACTURAR ──────────────────────────────────────────────────────────────
-
   static async invoiceSale(saleData) {
     try {
       console.log("📤 Iniciando facturación con SiatAPI...", saleData);
@@ -193,8 +278,8 @@ class SalesService {
           numeroTarjeta,
           codigoDocumentoSector: parseInt(
             saleData.cliente.codigoDocumentoSector || "1",
-          ), // ✅
-          periodoFacturado: saleData.cliente.periodoFacturado || undefined, // ✅
+          ),
+          periodoFacturado: saleData.cliente.periodoFacturado || undefined,
         },
       );
 
@@ -234,7 +319,6 @@ class SalesService {
   }
 
   // ── ANULAR ────────────────────────────────────────────────────────────────
-
   static async cancelInvoice(invoiceId, motivo) {
     try {
       const siatResponse = await siatApiService.anularFactura(
@@ -257,7 +341,6 @@ class SalesService {
   }
 
   // ── HISTORIAL ─────────────────────────────────────────────────────────────
-
   static async getUserSales(userId, filters = {}) {
     try {
       const result = await siatApiService.listarFacturas({

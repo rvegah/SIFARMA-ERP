@@ -37,24 +37,16 @@ const TIPOS_DOCUMENTO_FALLBACK = [
   },
 ];
 
-// ✅ Fallback para sectores: se muestra si la API de sectores no responde o está vacía
-const SECTORES_FALLBACK = [
-  { codigoClasificador: 1, descripcion: "FACTURA COMPRA-VENTA" },
-  {
-    codigoClasificador: 2,
-    descripcion: "FACTURA DE ALQUILER DE BIENES INMUEBLES",
-  },
-];
-
 const ClientForm = ({
   clientForm,
   setClientForm,
   handleClientSearch,
   totals,
-  // ✅ NUEVOS PROPS: catálogos dinámicos desde SalesPage
   tiposDocumentoIdentidad = [],
   loadingCatalogos = false,
   isAdmin = false,
+  // ✅ NUEVO: callback para buscar cliente en FARMADINAMICA
+  onBuscarCliente,
 }) => {
   const [descuentoInput, setDescuentoInput] = useState(
     String(clientForm.descuentoAdicional ?? 0),
@@ -62,6 +54,8 @@ const ClientForm = ({
   const [pagadoInput, setPagadoInput] = useState(
     String(clientForm.pagado ?? 0),
   );
+  // ✅ NUEVO: indica que se está buscando el cliente en FARMADINAMICA
+  const [buscandoCliente, setBuscandoCliente] = useState(false);
 
   // Sincronizar estado local cuando clientForm se resetea externamente
   useEffect(() => {
@@ -74,9 +68,6 @@ const ClientForm = ({
 
   const nitTimerRef = useRef(null);
 
-  // ✅ Resolver qué lista usar: API o fallback
-  // Si la API ya cargó y devolvió datos → usar API
-  // Si aún carga o falló → usar fallback para no bloquear al usuario
   const tiposDocumento =
     tiposDocumentoIdentidad.length > 0
       ? tiposDocumentoIdentidad
@@ -102,7 +93,7 @@ const ClientForm = ({
     { code: "4444", label: "4444 - SIN NOMBRE" },
   ];
 
-  // Manejo de búsqueda con debounce
+  // Manejo de búsqueda SIAT con debounce (igual que antes)
   const handleNitChange = (value) => {
     setClientForm((prev) => ({ ...prev, nit: value }));
 
@@ -112,6 +103,38 @@ const ClientForm = ({
       nitTimerRef.current = setTimeout(() => {
         handleClientSearch(value);
       }, 400);
+    }
+  };
+
+  // ✅ NUEVO: onBlur del campo NIT → buscar cliente en FARMADINAMICA
+  const handleNitBlur = async () => {
+    const nit = clientForm.nit?.trim();
+    // No buscar para NITs especiales (4444, 99001, 99002, 99003)
+    const nitEspeciales = ["4444", "99001", "99002", "99003"];
+    if (!nit || nit.length < 4 || nitEspeciales.includes(nit)) return;
+    if (!onBuscarCliente) return;
+
+    setBuscandoCliente(true);
+    try {
+      await onBuscarCliente({ numeroDocumento: nit });
+    } finally {
+      setBuscandoCliente(false);
+    }
+  };
+
+  // ✅ NUEVO: onBlur del campo Nombre → buscar cliente en FARMADINAMICA
+  const handleNombreBlur = async () => {
+    const nombre = clientForm.nombre?.trim();
+    // Solo buscar por nombre si el NIT está vacío o muy corto
+    if (!nombre || nombre.length < 3) return;
+    if (clientForm.nit && clientForm.nit.length >= 4) return; // ya tiene NIT, no repetir
+    if (!onBuscarCliente) return;
+
+    setBuscandoCliente(true);
+    try {
+      await onBuscarCliente({ razonSocial: nombre });
+    } finally {
+      setBuscandoCliente(false);
     }
   };
 
@@ -129,7 +152,6 @@ const ClientForm = ({
         ...prev,
         nit: code,
         nombre: cleanLabel,
-        // ✅ 4444 (SIN NOMBRE) → CI (1), cualquier otro especial → NIT (5)
         tipoDocumento: code === "4444" ? "1" : "5",
       }));
     }
@@ -160,6 +182,10 @@ const ClientForm = ({
           }}
         >
           <Person /> Datos del Cliente
+          {/* ✅ Indicador de búsqueda en FARMADINAMICA */}
+          {buscandoCliente && (
+            <CircularProgress size={14} sx={{ color: "white", ml: 1 }} />
+          )}
         </Typography>
 
         {/* TOTAL VENTA */}
@@ -228,7 +254,6 @@ const ClientForm = ({
                   setClientForm((prev) => ({
                     ...prev,
                     codigoDocumentoSector: e.target.value,
-                    // Limpiar periodo al cambiar sector
                     periodoFacturado: "",
                   }))
                 }
@@ -281,7 +306,6 @@ const ClientForm = ({
                     },
                   }}
                 />
-                {/* Aviso códigos SIAT para alquiler */}
                 <Typography
                   variant="caption"
                   sx={{
@@ -350,7 +374,7 @@ const ClientForm = ({
             </TextField>
           </Grid>
 
-          {/* NIT/CI MANUAL */}
+          {/* NIT/CI MANUAL — ✅ onBlur busca en FARMADINAMICA */}
           <Grid item xs={12} md={2.5}>
             <Typography
               variant="caption"
@@ -368,7 +392,18 @@ const ClientForm = ({
               size="small"
               value={clientForm.nit}
               onChange={(e) => handleNitChange(e.target.value)}
+              onBlur={handleNitBlur}
               placeholder="Ingrese NIT/CI"
+              InputProps={{
+                endAdornment: buscandoCliente ? (
+                  <InputAdornment position="end">
+                    <CircularProgress
+                      size={14}
+                      sx={{ color: farmaColors.primary }}
+                    />
+                  </InputAdornment>
+                ) : null,
+              }}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
@@ -394,13 +429,16 @@ const ClientForm = ({
             <TextField
               fullWidth
               size="small"
-              value={clientForm.complemento}
+              value={
+                clientForm.tipoDocumento === "1" ? clientForm.complemento : ""
+              }
               onChange={(e) =>
                 setClientForm((prev) => ({
                   ...prev,
                   complemento: e.target.value.toUpperCase(),
                 }))
               }
+              disabled={clientForm.tipoDocumento !== "1"}
               placeholder="Comp."
               sx={{
                 "& .MuiOutlinedInput-root": {
@@ -412,7 +450,7 @@ const ClientForm = ({
             />
           </Grid>
 
-          {/* NOMBRE */}
+          {/* NOMBRE — ✅ onBlur busca en FARMADINAMICA (solo si no hay NIT) */}
           <Grid item xs={12} md={3.5}>
             <Typography
               variant="caption"
@@ -430,8 +468,12 @@ const ClientForm = ({
               size="small"
               value={clientForm.nombre}
               onChange={(e) =>
-                setClientForm((prev) => ({ ...prev, nombre: e.target.value.toUpperCase() }))
+                setClientForm((prev) => ({
+                  ...prev,
+                  nombre: e.target.value.toUpperCase(),
+                }))
               }
+              onBlur={handleNombreBlur}
               placeholder="Nombre del cliente"
               InputProps={{
                 startAdornment: (
@@ -450,7 +492,7 @@ const ClientForm = ({
             />
           </Grid>
 
-          {/* ✅ TIPO DOCUMENTO — Dinámico desde API SIAT */}
+          {/* TIPO DOCUMENTO — Dinámico desde API SIAT */}
           <Grid item xs={12} md={3}>
             <Typography
               variant="caption"
@@ -462,7 +504,6 @@ const ClientForm = ({
               }}
             >
               Tipo Documento Cliente:
-              {/* Indicador sutil de carga */}
               {loadingCatalogos && (
                 <CircularProgress
                   size={10}
@@ -479,10 +520,9 @@ const ClientForm = ({
                 setClientForm((prev) => ({
                   ...prev,
                   tipoDocumento: e.target.value,
+                  complemento: e.target.value !== "1" ? "" : prev.complemento,
                 }))
               }
-              // ✅ SelectProps nativo → false para usar MenuItem (consistente con MUI)
-              // Cambiado de native select a MenuItem para soportar array dinámico
               disabled={loadingCatalogos && tiposDocumento.length === 0}
               sx={{
                 "& .MuiOutlinedInput-root": {
@@ -594,7 +634,8 @@ const ClientForm = ({
               fullWidth
               size="small"
               type="date"
-              value={clientForm.fechaNacimiento}
+              key={clientForm.fechaNacimiento || "empty-date"}
+              value={clientForm.fechaNacimiento || ""}
               onChange={(e) =>
                 setClientForm((prev) => ({
                   ...prev,
