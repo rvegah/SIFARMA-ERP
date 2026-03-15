@@ -208,37 +208,44 @@ export const useSales = () => {
 
   // ── FACTURAR ──────────────────────────────────────────────────────────────
 
-  const invoiceSale = useCallback(async () => {
-    const validation = validateSale();
-    if (!validation.valid)
-      return { success: false, message: validation.message };
+  const invoiceSale = useCallback(
+    async (contingenciaData = {}) => {
+      const validation = validateSale();
+      if (!validation.valid)
+        return { success: false, message: validation.message };
 
-    setLoading(true);
-    try {
-      const result = await SalesService.invoiceSale({
-        cliente: clientForm,
-        items: saleItems,
-        totals: calculateTotals(), // ✅ 'totals' no 'totales'
-      });
+      setLoading(true);
+      try {
+        const result = await SalesService.invoiceSale({
+          cliente: clientForm,
+          items: saleItems,
+          totals: calculateTotals(),
+          ...contingenciaData,
+        });
 
-      if (result.success) {
+        if (result.success) {
+          return {
+            success: true,
+            message: result.message || "Factura generada exitosamente",
+            invoice: result.invoice,
+            siatData: result.siatData,
+          };
+        }
+
         return {
-          success: true,
-          message: result.message || "Factura generada exitosamente",
-          invoice: result.invoice,
-          siatData: result.siatData,
+          success: false,
+          message: result.message || "Error al facturar",
         };
+      } catch (error) {
+        console.error("Error facturando:", error);
+        if (error.code === "INVALID_NIT") throw error; // ← agregar esta línea
+        return { success: false, message: "Error al generar la factura" };
+      } finally {
+        setLoading(false);
       }
-
-      return { success: false, message: result.message || "Error al facturar" };
-    } catch (error) {
-      console.error("Error facturando:", error);
-      if (error.code === "INVALID_NIT") throw error; // ← agregar esta línea
-      return { success: false, message: "Error al generar la factura" };
-    } finally {
-      setLoading(false);
-    }
-  }, [clientForm, saleItems, validateSale, calculateTotals]);
+    },
+    [clientForm, saleItems, validateSale, calculateTotals],
+  );
 
   // ── LIMPIAR ───────────────────────────────────────────────────────────────
 

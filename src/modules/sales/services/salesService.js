@@ -281,6 +281,8 @@ class SalesService {
           ),
           periodoFacturado: saleData.cliente.periodoFacturado || undefined,
           codigoExcepcion: saleData.codigoExcepcion ?? undefined,
+          numeroFacturaTalonario: saleData.numeroFacturaTalonario ?? undefined,
+          fechaContingencia: saleData.fechaContingencia ?? undefined,
         },
       );
 
