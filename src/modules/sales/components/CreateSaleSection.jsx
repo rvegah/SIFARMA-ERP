@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
 } from "@mui/material";
 import { WifiOff, Warning, Wifi } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
@@ -308,7 +309,11 @@ const CreateSaleSection = () => {
   const [productoConflicto, setProductoConflicto] = useState(null);
   const [activityModalOpen, setActivityModalOpen] = useState(false);
 
-  const [showNitModal, setShowNitModal] = useState(false); 
+  const [showNitModal, setShowNitModal] = useState(false);
+
+  const [nroFacturaTalonario, setNroFacturaTalonario] = useState("");
+  const [fechaContingencia, setFechaContingencia] = useState("");
+  const [horaContingencia, setHoraContingencia] = useState("");
 
   // Cargar catálogos SIAT al montar
   useEffect(() => {
@@ -367,6 +372,28 @@ const CreateSaleSection = () => {
       return;
     }
 
+    // ── Validación de contingencia ────────────────────────────────────────────
+    if (isContingencia) {
+      if (!nroFacturaTalonario) {
+        enqueueSnackbar("Debe ingresar el número de factura del talonario", {
+          variant: "warning",
+        });
+        return;
+      }
+      if (!fechaContingencia) {
+        enqueueSnackbar("Debe ingresar la fecha del talonario", {
+          variant: "warning",
+        });
+        return;
+      }
+      if (!horaContingencia) {
+        enqueueSnackbar("Debe ingresar la hora del talonario", {
+          variant: "warning",
+        });
+        return;
+      }
+    }
+
     // ── Validación de pago ────────────────────────────────────────────────
     const pagado = Number(clientForm.pagado) || 0;
     if (pagado <= 0) {
@@ -384,7 +411,16 @@ const CreateSaleSection = () => {
     }
     enqueueSnackbar("Generando factura...", { variant: "info" });
     try {
-      const result = await invoiceSale();
+      const result = await invoiceSale({
+        numeroFacturaTalonario:
+          isContingencia && nroFacturaTalonario
+            ? parseInt(nroFacturaTalonario)
+            : undefined,
+        fechaContingencia:
+          isContingencia && fechaContingencia
+            ? `${fechaContingencia} ${horaContingencia}`
+            : undefined,
+      });
       if (!result.success) {
         enqueueSnackbar(result.message || "Error al generar la factura", {
           variant: "error",
@@ -476,6 +512,9 @@ const CreateSaleSection = () => {
   const handleNewSale = () => {
     setInvoiced(false);
     clearForm();
+    setNroFacturaTalonario("");
+    setFechaContingencia("");
+    setHoraContingencia("");
     enqueueSnackbar("Listo para nueva venta", { variant: "info" });
   };
 
@@ -741,6 +780,99 @@ const CreateSaleSection = () => {
         loading={loadingSiat}
         isContingencia={isContingencia}
       />
+
+      {/* FORMULARIO DE CONTINGENCIA (solo eventos 5-7) */}
+      {eventoActivo && isContingencia && (
+        <Box
+          sx={{
+            mb: 2,
+            p: 2.5,
+            backgroundColor: "#fff8e1",
+            border: "2px solid #f57c00",
+            borderRadius: 2,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 700,
+              color: "#e65100",
+              mb: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Warning sx={{ fontSize: 20 }} />
+            Datos del Talonario (Contingencia)
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#bf360c", mb: 2 }}>
+            Ingrese los datos de la factura física del talonario de
+            contingencia.
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={4}>
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+              >
+                Nro. Factura (talonario) <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <TextField
+                fullWidth
+                size="small"
+                value={nroFacturaTalonario}
+                onChange={(e) => setNroFacturaTalonario(e.target.value)}
+                placeholder="Ej: 001234"
+                sx={{ backgroundColor: "white", borderRadius: 1 }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+              >
+                Fecha <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <TextField
+                fullWidth
+                size="small"
+                type="date"
+                value={fechaContingencia}
+                onChange={(e) => setFechaContingencia(e.target.value)}
+                sx={{ backgroundColor: "white", borderRadius: 1 }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+              >
+                Hora <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <TextField
+                fullWidth
+                size="small"
+                type="time"
+                value={horaContingencia}
+                onChange={(e) => setHoraContingencia(e.target.value)}
+                sx={{ backgroundColor: "white", borderRadius: 1 }}
+              />
+            </Grid>
+          </Grid>
+          <Button
+            size="small"
+            sx={{ mt: 1, color: "#e65100", textDecoration: "underline" }}
+            onClick={() => {
+              const now = new Date();
+              setFechaContingencia(now.toISOString().split("T")[0]);
+              setHoraContingencia(now.toTimeString().slice(0, 5));
+            }}
+          >
+            Usar fecha y hora actual
+          </Button>
+        </Box>
+      )}
 
       {/* Formulario de cliente */}
       <ClientForm
