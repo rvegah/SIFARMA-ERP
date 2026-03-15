@@ -18,8 +18,8 @@ const SIAT_DEFAULTS = {
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 function getCodigoExcepcion(nitCliente) {
-  const map = { 99001: 1, 99002: 2, 99003: 3, 4444: 4 };
-  return map[String(nitCliente)] ?? 0;
+  const especiales = ["99001", "99002", "99003", "4444", "0"];
+  return especiales.includes(String(nitCliente)) ? 1 : 0;
 }
 
 function getTipoDocumentoIdentidad(nitCliente, tipoDocumento) {
@@ -68,6 +68,8 @@ function buildEmitirFacturaRequest(
     montoPagadoTarjeta = 0,
     numeroTarjeta = null,
     montoGiftCard = 0,
+    numeroFacturaTalonario = undefined,
+    fechaContingencia = undefined,  
   } = options;
 
   const nitCliente = String(clientForm.nit || clientForm.nitCliente || "4444");
@@ -114,6 +116,8 @@ function buildEmitirFacturaRequest(
 
     // Excepción NITs especiales
     codigoExcepcion: options.codigoExcepcion ?? getCodigoExcepcion(nitCliente),
+    numeroFacturaTalonario,
+    fechaContingencia,
 
     // Detalles
     detalles: mapSaleItemsToDetalles(saleItems),
