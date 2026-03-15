@@ -113,7 +113,7 @@ function buildEmitirFacturaRequest(
     numeroTarjeta: numeroTarjeta || null,
 
     // Excepción NITs especiales
-    codigoExcepcion: getCodigoExcepcion(nitCliente),
+    codigoExcepcion: options.codigoExcepcion ?? getCodigoExcepcion(nitCliente),
 
     // Detalles
     detalles: mapSaleItemsToDetalles(saleItems),
@@ -137,37 +137,70 @@ async function emitirFactura(clientForm, saleItems, totals, options = {}) {
     puntoVentaId: requestDto.puntoVentaId,
     total: requestDto.montoAPagar,
     items: requestDto.detalles.length,
+    codigoExcepcion: requestDto.codigoExcepcion,
   });
 
-  const response = await siatApiClient.post("/Facturacion/emitir", requestDto);
-  const { data } = response;
-
-  if (!data.success) {
-    throw new Error(
-      data.message || data.errors?.join("\n") || "Error al emitir factura",
+  try {
+    const response = await siatApiClient.post(
+      "/Facturacion/emitir",
+      requestDto,
     );
-  }
+    const { data } = response;
 
-  const factura = data.data;
-  const nitEmisor = factura.nitEmisor ?? "425567025";
-  return {
-    success: true,
-    facturaId: factura.facturaId,
-    numeroFactura: factura.numeroFactura,
-    cuf: factura.cuf,
-    codigoAutorizacion: factura.cuf,
-    estado: factura.estado,
-    tipoEmision: factura.tipoEmision ?? 1,
-    esEnLinea: (factura.tipoEmision ?? 1) === 1,
-    fechaEmision: factura.fechaEmision,
-    montoTotal: factura.montoTotal,
-    mensaje: factura.mensaje,
-    urlVerificacion: buildSiatQrUrl(
-      factura.cuf,
-      nitEmisor,
-      factura.numeroFactura,
-    ),
-  };
+    if (!data.success) {
+      const msg =
+        data.message || data.errors?.join("\n") || "Error al emitir factura";
+      if (
+        msg.includes("1037") ||
+        msg.toUpperCase().includes("NIT NO ES VALIDO")
+      ) {
+        const err = new Error(msg);
+        err.code = "INVALID_NIT";
+        throw err;
+      }
+      throw new Error(msg);
+    }
+
+    const factura = data.data;
+    const nitEmisor = factura.nitEmisor ?? "425567025";
+    return {
+      success: true,
+      facturaId: factura.facturaId,
+      numeroFactura: factura.numeroFactura,
+      cuf: factura.cuf,
+      codigoAutorizacion: factura.cuf,
+      estado: factura.estado,
+      tipoEmision: factura.tipoEmision ?? 1,
+      esEnLinea: (factura.tipoEmision ?? 1) === 1,
+      fechaEmision: factura.fechaEmision,
+      montoTotal: factura.montoTotal,
+      mensaje: factura.mensaje,
+      urlVerificacion: buildSiatQrUrl(
+        factura.cuf,
+        nitEmisor,
+        factura.numeroFactura,
+      ),
+    };
+  } catch (error) {
+    if (error.code === "INVALID_NIT") throw error;
+
+    const data = error.response?.data;
+    if (data) {
+      const msg =
+        data.message || data.errors?.join("\n") || "Error al emitir factura";
+      if (
+        msg.includes("1037") ||
+        msg.toUpperCase().includes("NIT NO ES VALIDO")
+      ) {
+        const err = new Error(msg);
+        err.code = "INVALID_NIT";
+        throw err;
+      }
+      throw new Error(msg);
+    }
+
+    throw error;
+  }
 }
 
 async function anularFactura(facturaId, codigoMotivo) {
