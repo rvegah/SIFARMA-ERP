@@ -280,6 +280,7 @@ class SalesService {
             saleData.cliente.codigoDocumentoSector || "1",
           ),
           periodoFacturado: saleData.cliente.periodoFacturado || undefined,
+          codigoExcepcion: saleData.codigoExcepcion ?? undefined,
         },
       );
 
@@ -310,6 +311,7 @@ class SalesService {
       };
     } catch (error) {
       console.error("❌ Error al facturar:", error);
+      if (error.code === "INVALID_NIT") throw error;
       return {
         success: false,
         message: error.message || "Error al generar la factura",
