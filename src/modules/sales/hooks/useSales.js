@@ -233,6 +233,7 @@ export const useSales = () => {
       return { success: false, message: result.message || "Error al facturar" };
     } catch (error) {
       console.error("Error facturando:", error);
+      if (error.code === "INVALID_NIT") throw error; // ← agregar esta línea
       return { success: false, message: "Error al generar la factura" };
     } finally {
       setLoading(false);
@@ -301,7 +302,7 @@ export const useSales = () => {
       pagado: saleData.clientForm.pagado || 0,
       cambio: saleData.clientForm.cambio || 0,
       codigoDocumentoSector: saleData.clientForm.codigoDocumentoSector || "1",
-      periodoFacturado: saleData.clientForm.periodoFacturado || "",    
+      periodoFacturado: saleData.clientForm.periodoFacturado || "",
     });
 
     setSaleItems(

@@ -308,6 +308,8 @@ const CreateSaleSection = () => {
   const [productoConflicto, setProductoConflicto] = useState(null);
   const [activityModalOpen, setActivityModalOpen] = useState(false);
 
+  const [showNitModal, setShowNitModal] = useState(false); 
+
   // Cargar catálogos SIAT al montar
   useEffect(() => {
     const cargarCatalogos = async () => {
@@ -461,6 +463,10 @@ const CreateSaleSection = () => {
         { variant: "success" },
       );
     } catch (error) {
+      if (error.code === "INVALID_NIT") {
+        setShowNitModal(true);
+        return;
+      }
       enqueueSnackbar(error.message || "Error al generar la factura", {
         variant: "error",
       });
@@ -638,6 +644,94 @@ const CreateSaleSection = () => {
     handleAddItemConValidacion(product);
   };
 
+  const handleConfirmNitException = async () => {
+    setShowNitModal(false);
+    enqueueSnackbar("Generando factura...", { variant: "info" });
+    try {
+      const result = await SalesService.invoiceSale({
+        cliente: clientForm,
+        items: saleItems,
+        totals: calculateTotals(),
+        codigoExcepcion: 1,
+      });
+      if (!result.success) {
+        enqueueSnackbar(result.message || "Error al generar la factura", {
+          variant: "error",
+        });
+        return;
+      }
+      const invoice = result.invoice;
+      setInvoiceDataToPrint({
+        empresa: {
+          razonSocial: empresaInfo?.razonSocial ?? "FARMADINAMICA S.R.L.",
+          nit: empresaInfo?.nit ?? "425567025",
+          direccionCasaMatriz: empresaInfo?.direccion ?? "",
+          telefono: empresaInfo?.telefono ?? "+591 70741024",
+          ciudad: empresaInfo?.ciudad ?? "Cochabamba",
+        },
+        factura: {
+          facturaId: invoice.facturaId,
+          numeroFactura: invoice.numeroFactura,
+          codigoAutorizacion: invoice.cuf,
+          cuf: invoice.cuf,
+          fechaEmision: invoice.fechaEmision,
+          qrUrl: invoice.urlVerificacion,
+          estado: invoice.estado,
+          puntoVenta: invoice.puntoVenta ?? 0,
+          esAlquiler: clientForm.codigoDocumentoSector === "2",
+          periodoFacturado:
+            clientForm.codigoDocumentoSector === "2"
+              ? clientForm.periodoFacturado
+              : null,
+        },
+        cliente: {
+          nit: clientForm.nit,
+          nombre: clientForm.nombre,
+          celular: clientForm.celular,
+          email: clientForm.email,
+        },
+        items: saleItems.map((item) => ({
+          codigo: item.codigo,
+          nombre: item.nombre,
+          cantidad: item.cantidad,
+          precio: item.precio,
+          descuento: item.descuento,
+          subtotal: item.subtotal,
+          unidadMedida:
+            unidadesMedida[item.unidadMedida] ??
+            item.unidadMedida?.toString() ??
+            "UNIDAD",
+        })),
+        totales: {
+          subtotal: totals.subtotal,
+          descuentoAdicional: totals.descuentoAdicional,
+          total: totals.total,
+        },
+        pagado: clientForm.pagado,
+        cambio: clientForm.cambio,
+        usuario: "Usuario Sistema",
+        leyendas: {
+          principal:
+            "ESTA FACTURA CONTRIBUYE AL DESARROLLO DEL PAÍS, EL USO ILÍCITO SERÁ SANCIONADO PENALMENTE DE ACUERDO A LEY",
+          ley453:
+            "Ley N° 453: En caso de incumplimiento a lo ofertado o convenido, el proveedor debe reparar o sustituir el producto.",
+          documentoDigital: invoice.esEnLinea
+            ? "Este documento es la Representacion Grafica de un Documento Fiscal Digital emitido en una modalidad de facturacion en linea"
+            : "Este documento es la Representacion Grafica de un Documento Fiscal Digital emitido fuera de linea",
+        },
+      });
+      setPrintModalOpen(true);
+      setInvoiced(true);
+      enqueueSnackbar("✅ Factura generada con excepción de NIT", {
+        variant: "success",
+      });
+    } catch (error) {
+      enqueueSnackbar(error.message || "Error al generar la factura", {
+        variant: "error",
+      });
+    }
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* ✅ NUEVO: Banner de estado SIAT — visible para el vendedor */}
@@ -657,7 +751,7 @@ const CreateSaleSection = () => {
         tiposDocumentoIdentidad={tiposDocumentoIdentidad}
         loadingCatalogos={loadingCatalogos}
         isAdmin={isAdmin}
-        onBuscarCliente={handleBuscarCliente} 
+        onBuscarCliente={handleBuscarCliente}
       />
 
       {/* Tabla de items CON búsqueda integrada */}
@@ -1027,6 +1121,46 @@ const CreateSaleSection = () => {
         productoNuevo={productoConflicto}
         actividadActual={saleItems[0]?.codigoActividad}
       />
+
+      <Dialog
+        open={showNitModal}
+        onClose={() => setShowNitModal(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{ bgcolor: "#f57c00", color: "white", fontWeight: 700 }}
+        >
+          Verificación de NIT
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <Box
+            sx={{ display: "flex", alignItems: "flex-start", gap: 2, pt: 1 }}
+          >
+            <Warning sx={{ color: "#f57c00", fontSize: 40 }} />
+            <Box>
+              <Typography variant="body1" fontWeight={600} sx={{ mb: 1 }}>
+                El NIT del cliente no es válido
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                ¿Desea generar la factura de todas formas?
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button onClick={() => setShowNitModal(false)} variant="outlined">
+            Cerrar
+          </Button>
+          <Button
+            onClick={handleConfirmNitException}
+            variant="contained"
+            sx={{ bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}
+          >
+            Generar Factura
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
