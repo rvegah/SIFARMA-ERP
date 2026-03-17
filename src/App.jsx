@@ -28,6 +28,8 @@ import ProductManagementPage from "./modules/products/pages/ProductManagementPag
 import ReportManagementPage from "./modules/reports/pages/ReportManagementPage";
 import PurchasesPage from "./modules/purchases/pages/PurchasesPage";
 import TransfersPage from "./modules/transfers/pages/TransfersPage";
+import NotificationsPage from "./shared/pages/NotificationsPage";
+import NotificationDetailPage from "./shared/pages/NotificationDetailPage";
 
 // Redirección después de login
 function DashboardRedirect({ children }) {
@@ -81,6 +83,8 @@ function ProtectedRoutes() {
             <Route path="/traspaso/*" element={<TransfersPage />} />
             <Route path="/Traspasos/*" element={<TransfersPage />} />
             <Route path="/Traspaso/*" element={<TransfersPage />} />
+            <Route path="/notificaciones" element={<NotificationsPage />} />
+            <Route path="/notificaciones/:numeroTraspaso" element={<NotificationDetailPage />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </DashboardLayout>
