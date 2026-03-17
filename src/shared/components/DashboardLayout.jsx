@@ -53,6 +53,7 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
   const [openSubMenus, setOpenSubMenus] = useState({});
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -436,13 +437,17 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
             {/* Badge de Notificaciones */}
             <Box sx={{ position: 'relative' }}>
               <IconButton color="inherit" onClick={toggleNotifications}>
-                <Badge badgeContent={5} color="error">
+                <Badge 
+                  badgeContent={unreadNotificationsCount > 0 ? unreadNotificationsCount : null} 
+                  color="error"
+                >
                   <Notifications />
                 </Badge>
               </IconButton>
               <NotificationPanel 
                 open={showNotifications} 
                 onClose={() => setShowNotifications(false)} 
+                onUnreadCountChange={setUnreadNotificationsCount}
               />
             </Box>
 
