@@ -6,7 +6,7 @@ const API_FARMACIA_URL = 'https://api-farmacia.farmadinamica.com.bo/api/farmalin
 // Crear instancia de Axios para Farmacia
 const pharmacyApiClient = axios.create({
     baseURL: API_FARMACIA_URL,
-    timeout: 15000,
+    timeout: 45000,
     // Asumimos que comparte cookies de sesión o auth
     withCredentials: true,
 });

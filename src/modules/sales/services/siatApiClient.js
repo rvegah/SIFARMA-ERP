@@ -9,7 +9,7 @@ const SIAT_API_BASE_URL = import.meta.env.VITE_SIAT_API_URL || import.meta.env.V
 
 const siatApiClient = axios.create({
   baseURL: SIAT_API_BASE_URL,
-  timeout: 60000,
+  timeout: 45000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
