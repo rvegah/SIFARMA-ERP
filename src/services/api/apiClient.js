@@ -8,7 +8,7 @@ const API_BASE_URL = 'https://api-core.farmadinamica.com.bo/api/farmalink-core';
 // Crear instancia de Axios
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000, // 15 segundos
+  timeout: 45000, // 15 segundos
   headers: {
     'Content-Type': 'application/json',
   },
