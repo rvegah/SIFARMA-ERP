@@ -43,9 +43,13 @@ import {
     LocalShipping,
     Storefront,
     ContentCopy,
-    Visibility
+    Visibility,
+    Assessment,
+    RestartAlt
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
+import transferService from "../services/transferService";
+
 
 const AddProductsToTransferSection = ({
     createdTransfer,
@@ -81,9 +85,93 @@ const AddProductsToTransferSection = ({
     const [purchasePage, setPurchasePage] = useState(0);
     const rowsPerPage = 10;
 
+    // Report State
+    const [reportLabInput, setReportLabInput] = useState("");
+    const [reportData, setReportData] = useState([]);
+    const [reportLoading, setReportLoading] = useState(false);
+    const [reportPage, setReportPage] = useState(0);
+
     const handleSearch = () => {
         setSearchPage(0);
         searchProducts();
+    };
+
+    const handleFetchReport = async () => {
+        if (!reportLabInput.trim()) {
+            enqueueSnackbar("Ingrese un laboratorio para reportar", { variant: "warning" });
+            return;
+        }
+        try {
+            setReportLoading(true);
+            const res = await transferService.getProductosSucursalReporte(reportLabInput);
+            if (res.exitoso) {
+                setReportData(res.datos || []);
+                setReportPage(0);
+                if (res.datos?.length === 0) enqueueSnackbar("No se encontraron resultados", { variant: "info" });
+            } else {
+                enqueueSnackbar(res.mensaje || "Error al obtener reporte", { variant: "error" });
+                setReportData([]);
+            }
+        } catch (error) {
+            console.error("Error fetching report:", error);
+            enqueueSnackbar("Error de red al obtener reporte", { variant: "error" });
+            setReportData([]);
+        } finally {
+            setReportLoading(false);
+        }
+    };
+
+    const handleResetReport = () => {
+        setReportLabInput("");
+        setReportData([]);
+        setReportPage(0);
+    };
+
+    const formatDate = (isoString) => {
+        if (!isoString) return "-";
+        const date = new Date(isoString);
+        if (isNaN(date.getTime())) return "-";
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
+
+    const renderBranchCells = (branchArr, isLast = false) => {
+        const branchData = branchArr && branchArr.length > 0 ? branchArr[0] : null;
+        if (!branchData) {
+            return (
+                <React.Fragment>
+                    <TableCell align="center">-</TableCell>
+                    <TableCell align="center">-</TableCell>
+                    <TableCell align="center">-</TableCell>
+                    <TableCell align="center" sx={{ borderRight: isLast ? 'none' : '1px solid rgba(224, 224, 224, 1)' }}>-</TableCell>
+                </React.Fragment>
+            );
+        }
+
+        const { stockProducto, precioUnitario, numeroLote, fechaVencimiento, diasVencimiento, stockMinimo } = branchData;
+        const stockColor = stockProducto === 0 ? '#ffcdd2' : '#fff9c4';
+
+        return (
+            <React.Fragment>
+                <Tooltip title={
+                    <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Días Vto: {diasVencimiento}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Stock Mín: {stockMinimo}</Typography>
+                    </Box>
+                }>
+                    <TableCell align="center" sx={{ bgcolor: stockColor, fontWeight: 700, cursor: 'help' }}>
+                        {stockProducto}
+                    </TableCell>
+                </Tooltip>
+                <TableCell align="center">{precioUnitario}</TableCell>
+                <TableCell align="center">{numeroLote || "-"}</TableCell>
+                <TableCell align="center" sx={{ borderRight: isLast ? 'none' : '1px solid rgba(224, 224, 224, 1)' }}>
+                    {formatDate(fechaVencimiento)}
+                </TableCell>
+            </React.Fragment>
+        );
     };
 
     const getBranchName = (id) => {
@@ -154,6 +242,69 @@ const AddProductsToTransferSection = ({
                             </Box>
                         </Grid>
                     </Grid>
+                </CardContent>
+            </Card>
+
+            {/* 5. Productos por Sucursal Report */}
+            <Card sx={{ borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
+                <CardContent sx={{ p: 0 }}>
+                    <Box sx={{ p: 2, borderBottom: `1px solid ${farmaColors.alpha.secondary10}` }}>
+                        <Typography variant="h6" sx={{ color: farmaColors.secondary, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Assessment sx={{ color: farmaColors.primary }} /> Productos del Laboratorio
+                        </Typography>
+                    </Box>
+                    <Box sx={{ p: 3 }}>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item xs={12} sm={6} md={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Laboratorio"
+                                    placeholder="Ej: INTI"
+                                    size="small"
+                                    value={reportLabInput}
+                                    onChange={(e) => setReportLabInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleFetchReport()}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4} md={3}>
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                    <Button
+                                        variant="contained"
+                                        fullWidth
+                                        startIcon={reportLoading ? <CircularProgress size={20} color="inherit" /> : <Assessment />}
+                                        onClick={handleFetchReport}
+                                        disabled={reportLoading}
+                                        sx={{ background: farmaColors.gradients.primary }}
+                                    >
+                                        Buscar Productos
+                                    </Button>
+                                    <Tooltip title="Reestablecer">
+                                        <IconButton
+                                            onClick={handleResetReport}
+                                            sx={{
+                                                bgcolor: farmaColors.alpha.secondary10,
+                                                '&:hover': { bgcolor: farmaColors.alpha.secondary20 },
+                                                color: 'text.secondary'
+                                            }}
+                                        >
+                                            <RestartAlt />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </Box>
+
+                    {reportData.length > 10 && (
+                        <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', gap: 1, borderTop: `1px solid ${farmaColors.alpha.secondary10}` }}>
+                            <Button disabled={reportPage === 0} onClick={() => setReportPage(prev => prev - 1)}>Anterior</Button>
+                            <Typography sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+                                Página {reportPage + 1} de {Math.ceil(reportData.length / 10)}
+                            </Typography>
+                            <Button disabled={reportPage >= Math.ceil(reportData.length / 10) - 1} onClick={() => setReportPage(prev => prev + 1)}>Siguiente</Button>
+                        </Box>
+                    )}
+
                 </CardContent>
             </Card>
 
@@ -300,13 +451,13 @@ const AddProductsToTransferSection = ({
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             {!isReadOnly && (
                                 <Tooltip title="Copiar Productos de Compra">
-                                    <IconButton 
+                                    <IconButton
                                         onClick={() => {
                                             setCopyDialogOpen(true);
                                             fetchPurchases();
-                                        }} 
-                                        sx={{ 
-                                            color: farmaColors.primary, 
+                                        }}
+                                        sx={{
+                                            color: farmaColors.primary,
                                             bgcolor: farmaColors.alpha.primary10,
                                             '&:hover': { bgcolor: farmaColors.alpha.primary20 }
                                         }}
@@ -430,11 +581,142 @@ const AddProductsToTransferSection = ({
                 </CardContent>
             </Card>
 
+            {/* 5. Productos por Sucursal Report */}
+            <Card sx={{ borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
+                <CardContent sx={{ p: 0 }}>
+                    <Box sx={{ p: 2, borderBottom: `1px solid ${farmaColors.alpha.secondary10}` }}>
+                        <Typography variant="h6" sx={{ color: farmaColors.secondary, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Assessment sx={{ color: farmaColors.primary }} /> Lista de productos del Laboratorio
+                        </Typography>
+                    </Box>
+                    {/* <Box sx={{ p: 3 }}>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item xs={12} sm={6} md={4}>
+                                <TextField
+                                    fullWidth
+                                    label="Laboratorio"
+                                    placeholder="Ej: INTI"
+                                    size="small"
+                                    value={reportLabInput}
+                                    onChange={(e) => setReportLabInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleFetchReport()}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={4} md={3}>
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                    <Button
+                                        variant="contained"
+                                        fullWidth
+                                        startIcon={reportLoading ? <CircularProgress size={20} color="inherit" /> : <Assessment />}
+                                        onClick={handleFetchReport}
+                                        disabled={reportLoading}
+                                        sx={{ background: farmaColors.gradients.primary }}
+                                    >
+                                        Buscar Productos
+                                    </Button>
+                                    <Tooltip title="Reestablecer">
+                                        <IconButton
+                                            onClick={handleResetReport}
+                                            sx={{
+                                                bgcolor: farmaColors.alpha.secondary10,
+                                                '&:hover': { bgcolor: farmaColors.alpha.secondary20 },
+                                                color: 'text.secondary'
+                                            }}
+                                        >
+                                            <RestartAlt />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                    </Box> */}
+
+                    {reportData.length > 0 && (
+                        <TableContainer sx={{ maxHeight: 600 }}>
+                            <Table size="small" stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell colSpan={2} align="center" sx={{ fontWeight: 800, bgcolor: farmaColors.alpha.secondary10, borderRight: '1px solid rgba(224, 224, 224, 1)' }}>SUCURSALES</TableCell>
+                                        <TableCell colSpan={4} align="center" sx={{ fontWeight: 800, bgcolor: farmaColors.alpha.secondary10, borderRight: '1px solid rgba(224, 224, 224, 1)' }}>SAN MARTIN</TableCell>
+                                        <TableCell colSpan={4} align="center" sx={{ fontWeight: 800, bgcolor: farmaColors.alpha.secondary10, borderRight: '1px solid rgba(224, 224, 224, 1)' }}>URUGUAY</TableCell>
+                                        <TableCell colSpan={4} align="center" sx={{ fontWeight: 800, bgcolor: farmaColors.alpha.secondary10, borderRight: '1px solid rgba(224, 224, 224, 1)' }}>BRASIL</TableCell>
+                                        <TableCell colSpan={4} align="center" sx={{ fontWeight: 800, bgcolor: farmaColors.alpha.secondary10, borderRight: '1px solid rgba(224, 224, 224, 1)' }}>TIQUIPAYA</TableCell>
+                                        <TableCell colSpan={4} align="center" sx={{ fontWeight: 800, bgcolor: farmaColors.alpha.secondary10 }}>PACATA</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell sx={{ fontWeight: 700, bgcolor: "grey.50" }}>Código</TableCell>
+                                        <TableCell sx={{ fontWeight: 700, bgcolor: "grey.50", borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Producto</TableCell>
+
+                                        {/* San Martin */}
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>Stock</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>P/U</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>N° Lote</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50", borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Vencimiento</TableCell>
+
+                                        {/* Uruguay */}
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>Stock</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>P/U</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>N° Lote</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50", borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Vencimiento</TableCell>
+
+                                        {/* Brasil */}
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>Stock</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>P/U</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>N° Lote</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50", borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Vencimiento</TableCell>
+
+                                        {/* Tiquipaya */}
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>Stock</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>P/U</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>N° Lote</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50", borderRight: '1px solid rgba(224, 224, 224, 1)' }}>Vencimiento</TableCell>
+
+                                        {/* Pacata */}
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>Stock</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>P/U</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>N° Lote</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 700, bgcolor: "grey.50" }}>Vencimiento</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {reportData.slice(reportPage * 10, (reportPage + 1) * 10).map((row, idx) => (
+                                        <TableRow key={idx} hover>
+                                            <TableCell sx={{ whiteSpace: 'nowrap' }}><Typography variant="body2" fontWeight="700" color="primary">{row.codigoProducto}</Typography></TableCell>
+                                            <TableCell sx={{ minWidth: 200, borderRight: '1px solid rgba(224, 224, 224, 1)' }}>
+                                                <Typography variant="body2" fontWeight="600">{row.nombreProducto}</Typography>
+                                            </TableCell>
+
+                                            {renderBranchCells(row.sucursal_SanMaterin)}
+                                            {renderBranchCells(row.sucursal_Uruguay)}
+                                            {renderBranchCells(row.sucursal_Brasil)}
+                                            {renderBranchCells(row.sucursal_Tiquipaya)}
+                                            {renderBranchCells(row.sucursal_Pacata, true)}
+
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+
+                    {reportData.length > 10 && (
+                        <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', gap: 1, borderTop: `1px solid ${farmaColors.alpha.secondary10}` }}>
+                            <Button disabled={reportPage === 0} onClick={() => setReportPage(prev => prev - 1)}>Anterior</Button>
+                            <Typography sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+                                Página {reportPage + 1} de {Math.ceil(reportData.length / 10)}
+                            </Typography>
+                            <Button disabled={reportPage >= Math.ceil(reportData.length / 10) - 1} onClick={() => setReportPage(prev => prev + 1)}>Siguiente</Button>
+                        </Box>
+                    )}
+
+                </CardContent>
+            </Card>
+
             {/* Copy Products from Purchase Dialog */}
-            <Dialog 
-                open={copyDialogOpen} 
-                onClose={() => setCopyDialogOpen(false)} 
-                maxWidth="lg" 
+            <Dialog
+                open={copyDialogOpen}
+                onClose={() => setCopyDialogOpen(false)}
+                maxWidth="lg"
                 fullWidth
                 PaperProps={{ sx: { borderRadius: 3 } }}
             >
@@ -472,14 +754,14 @@ const AddProductsToTransferSection = ({
                                             </TableRow>
                                         ) : (
                                             [...purchaseList]
-                                                .sort((a,b) => new Date(b.fecha) - new Date(a.fecha))
+                                                .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
                                                 .slice(purchasePage * 10, (purchasePage + 1) * 10)
                                                 .map((c) => (
-                                                    <TableRow 
-                                                        key={c.codigo} 
-                                                        hover 
+                                                    <TableRow
+                                                        key={c.codigo}
+                                                        hover
                                                         selected={selectedPurchase === c.numeroCompra}
-                                                        sx={{ 
+                                                        sx={{
                                                             '&.Mui-selected': { bgcolor: farmaColors.alpha.primary10 },
                                                             cursor: 'pointer'
                                                         }}
@@ -495,8 +777,8 @@ const AddProductsToTransferSection = ({
                                                             </Typography>
                                                         </TableCell>
                                                         <TableCell align="center">
-                                                            <IconButton 
-                                                                size="small" 
+                                                            <IconButton
+                                                                size="small"
                                                                 color={selectedPurchase === c.numeroCompra ? "primary" : "default"}
                                                             >
                                                                 <Visibility fontSize="small" />

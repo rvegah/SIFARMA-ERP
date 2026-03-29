@@ -33,7 +33,7 @@ const TransfersDispatcher = () => {
             {/* Dynamic Content */}
             <Box>
                 {viewState === "creating" ? (
-                    <CreateTransferSection 
+                    <CreateTransferSection
                         transferData={transferHook.transferData}
                         setTransferData={transferHook.setTransferData}
                         onCreate={transferHook.handleCreateTransfer}
@@ -42,7 +42,7 @@ const TransfersDispatcher = () => {
                         loadingCatalogs={transferHook.loadingCatalogs}
                     />
                 ) : (
-                    <AddProductsToTransferSection 
+                    <AddProductsToTransferSection
                         createdTransfer={transferHook.createdTransfer}
                         transferItems={transferHook.transferItems}
                         isReadOnly={transferHook.isReadOnly}
@@ -77,9 +77,9 @@ const TransfersDispatcher = () => {
 const TransfersPage = () => {
     return (
         <Routes>
-            <Route index element={<TransfersDispatcher />} />
-            <Route path="nuevo-traspaso" element={<TransfersDispatcher />} />
-            <Route path="*" element={<Navigate to="nuevo-traspaso" replace />} />
+            {/* <Route index element={<Navigate to="nuevo-traspaso" replace />} /> */}
+            <Route path="nuevo" element={<TransfersDispatcher />} />
+            {/* <Route path="*" element={<Navigate to="nuevo-traspaso" replace />} /> */}
         </Routes>
     );
 };

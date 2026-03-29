@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
 import {
   Box,
   Card,
@@ -16,6 +17,8 @@ import {
   CircularProgress,
   Tooltip,
   Chip,
+  Checkbox,
+  Button
 } from "@mui/material";
 import {
   ArrowBack,
@@ -32,8 +35,14 @@ import notificationService from "../services/notificationService";
 const NotificationDetailPage = () => {
   const { numeroTraspaso } = useParams();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+  // Selection state
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (numeroTraspaso) {
@@ -58,6 +67,32 @@ const NotificationDetailPage = () => {
   };
 
   const transferItems = data?.productos || [];
+  const isEnv = data?.estado === "ENV";
+
+  const handleToggleRow = (idx) => {
+    setSelectedRows((prev) => 
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
+    );
+  };
+
+  const handleRecibir = async () => {
+    setSubmitting(true);
+    try {
+      const res = await notificationService.cambiarEstadoTraspaso(data.numeroTraspaso, "REC");
+      if (res.exitoso) {
+        enqueueSnackbar("Traspaso marcado como Recibido", { variant: "success" });
+        setSelectedRows([]);
+        fetchDetalle();
+      } else {
+        enqueueSnackbar(res.mensaje || "Error al recibir traspaso", { variant: "error" });
+      }
+    } catch (error) {
+      console.error("Error al recibir traspaso:", error);
+      enqueueSnackbar("Error de red", { variant: "error" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200, margin: "0 auto", display: "flex", flexDirection: "column", gap: 4 }}>
@@ -167,6 +202,7 @@ const NotificationDetailPage = () => {
             <Table size="small">
               <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
                 <TableRow>
+                  {isEnv && <TableCell sx={{ width: 50, fontWeight: 800 }}></TableCell>}
                   <TableCell sx={{ fontWeight: 800 }}>Producto</TableCell>
                   <TableCell sx={{ fontWeight: 800 }}>Lote</TableCell>
                   <TableCell sx={{ fontWeight: 800 }}>Unidad / Línea / Lab</TableCell>
@@ -177,20 +213,32 @@ const NotificationDetailPage = () => {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                    <TableCell colSpan={isEnv ? 6 : 5} align="center" sx={{ py: 6 }}>
                       <CircularProgress size={24} />
                     </TableCell>
                   </TableRow>
                 ) : transferItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                    <TableCell colSpan={isEnv ? 6 : 5} align="center" sx={{ py: 6 }}>
                       <InventoryIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1, opacity: 0.5 }} />
                       <Typography color="text.secondary">La solicitud de productos devolvió lista vacía.</Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
                   transferItems.map((item, idx) => (
-                    <TableRow key={idx}>
+                    <TableRow 
+                      key={idx}
+                      sx={isEnv && selectedRows.includes(idx) ? { bgcolor: "#e8f5e9" } : {}}
+                    >
+                      {isEnv && (
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedRows.includes(idx)}
+                            onChange={() => handleToggleRow(idx)}
+                            color="success"
+                          />
+                        </TableCell>
+                      )}
                       <TableCell sx={{ py: 1.5 }}>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: farmaColors.secondary }}>
                           {item.producto}
@@ -232,6 +280,22 @@ const NotificationDetailPage = () => {
               </TableBody>
             </Table>
           </TableContainer>
+
+          {isEnv && (
+            <Box sx={{ p: 3, display: "flex", justifyContent: "flex-end", borderTop: `1px solid ${farmaColors.alpha.secondary10}` }}>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <AssignmentTurnedIn />}
+                onClick={handleRecibir}
+                disabled={submitting || transferItems.length === 0 || selectedRows.length !== transferItems.length}
+                sx={{ background: farmaColors.gradients.primary, px: 5, py: 1.5, borderRadius: 2 }}
+              >
+                {submitting ? "Procesando..." : "Recibido"}
+              </Button>
+            </Box>
+          )}
+
         </CardContent>
       </Card>
     </Box>

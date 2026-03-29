@@ -86,6 +86,22 @@ const transferService = {
             console.error(`Error fetching products for purchase ${numeroCompra}:`, error);
             throw error;
         }
+    },
+
+    /**
+     * Get products by branch report
+     * GET /Reportes/ProductosSucursal?Laboratorio={laboratorio}
+     */
+    getProductosSucursalReporte: async (laboratorio) => {
+        try {
+            const response = await pharmacyApiClient.get("/Reportes/ProductosSucursal", {
+                params: { Laboratorio: laboratorio }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching branch products report:", error);
+            throw error;
+        }
     }
 };
 

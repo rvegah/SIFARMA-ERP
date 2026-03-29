@@ -135,6 +135,22 @@ const purchaseService = {
             console.error('Error fetching compras credito:', error);
             throw error;
         }
+    },
+
+    /**
+     * Cambiar estado de una compra a ENV
+     * PUT /Compras/CambiarEstadoCompra?NumeroCompra=...&Estado=ENV
+     */
+    cambiarEstadoCompra: async (numeroCompra, estado) => {
+        try {
+            const response = await pharmacyApiClient.put('/Compras/CambiarEstadoCompra', null, {
+                params: { NumeroCompra: numeroCompra, Estado: estado }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error changing purchase state:', error);
+            throw error;
+        }
     }
 };
 

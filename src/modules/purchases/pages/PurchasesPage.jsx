@@ -120,20 +120,13 @@ const InventoryOutputWrapper = () => {
 const PurchasesPage = () => {
     return (
         <Routes>
-            <Route index element={<PurchasesDispatcher />} />
-            {/* Rutas para Nueva Compra */}
+            {/* <Route index element={<Navigate to="nueva" replace />} /> */}
             <Route path="nueva" element={<PurchasesDispatcher />} />
-            <Route path="nueva-compra" element={<PurchasesDispatcher />} />
-
-            {/* Rutas para Compras al Crédito */}
+            {/* <Route path="nueva-compra" element={<Navigate to="../nueva" replace />} /> */}
             <Route path="credito" element={<CreditPurchasesWrapper />} />
-            <Route path="compras-al-credito" element={<CreditPurchasesWrapper />} />
-
-            {/* Rutas para Nueva Salida de Inventario */}
-            <Route path="nueva-salida" element={<InventoryOutputWrapper />} />
-
-            {/* Redirigir cualquier otra sub-ruta a 'nueva' por ahora */}
-            <Route path="*" element={<Navigate to="nueva" replace />} />
+            {/* <Route path="compras-al-credito" element={<Navigate to="../credito" replace />} /> */}
+            <Route path="salida" element={<InventoryOutputWrapper />} />
+            {/* <Route path="*" element={<Navigate to="nueva" replace />} /> */}
         </Routes>
     );
 };

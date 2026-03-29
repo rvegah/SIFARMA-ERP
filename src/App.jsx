@@ -20,16 +20,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 // Componentes
 import LoginPage from "./shared/components/LoginPage";
 import DashboardLayout from "./shared/components/DashboardLayout";
-import Dashboard from "./shared/components/Dashboard";
-import UserManagementPage from "./modules/user-management/pages/UserManagementPage";
-import EditProfilePage from "./modules/user-management/components/EditProfilePage";
-import SalesPage from "./modules/sales/pages/SalesPage";
-import ProductManagementPage from "./modules/products/pages/ProductManagementPage";
-import ReportManagementPage from "./modules/reports/pages/ReportManagementPage";
-import PurchasesPage from "./modules/purchases/pages/PurchasesPage";
-import TransfersPage from "./modules/transfers/pages/TransfersPage";
-import NotificationsPage from "./shared/pages/NotificationsPage";
-import NotificationDetailPage from "./shared/pages/NotificationDetailPage";
+import DynamicRouter from "./components/DynamicRouter";
 
 // Redirección después de login
 function DashboardRedirect({ children }) {
@@ -64,29 +55,7 @@ function ProtectedRoutes() {
           onLogout={logout}
           currentUser={{ ...user, apiPermissions }}
         >
-          <Routes>
-            {/* Ruta principal */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/users/*" element={<UserManagementPage />} />
-            <Route path="/productos" element={<ProductManagementPage />} />
-            <Route path="/productos/ver" element={<ProductManagementPage />} />
-            <Route path="/productos/agregar" element={<ProductManagementPage />} />
-            <Route path="/productos/*" element={<ProductManagementPage />} />
-            <Route path="/profile" element={<EditProfilePage />} />
-            <Route path="/ventas/*" element={<SalesPage />} />
-            <Route path="/reportes/*" element={<ReportManagementPage />} />
-            <Route path="/reporte/*" element={<ReportManagementPage />} />
-            <Route path="/compras/*" element={<PurchasesPage />} />
-            <Route path="/Compras/*" element={<PurchasesPage />} />
-            <Route path="/traspasos/*" element={<TransfersPage />} />
-            <Route path="/traspaso/*" element={<TransfersPage />} />
-            <Route path="/Traspasos/*" element={<TransfersPage />} />
-            <Route path="/Traspaso/*" element={<TransfersPage />} />
-            <Route path="/notificaciones" element={<NotificationsPage />} />
-            <Route path="/notificaciones/:numeroTraspaso" element={<NotificationDetailPage />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
+          <DynamicRouter apiPermissions={apiPermissions} />
         </DashboardLayout>
       </DashboardRedirect>
     </UserProvider>
