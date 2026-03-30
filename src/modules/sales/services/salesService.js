@@ -10,7 +10,7 @@ import axios from "axios";
 // ─── CLIENTE AXIOS PARA API FARMACIA ─────────────────────────────────────────
 const farmaciaApiClient = axios.create({
   baseURL: "https://api-farmacia.farmadinamica.com.bo/api/farmalink-farmacia",
-  timeout: 30000,
+  timeout: 45000,
   headers: { "Content-Type": "application/json", Accept: "application/json" },
 });
 

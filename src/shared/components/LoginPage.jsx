@@ -19,7 +19,7 @@ import {
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
-import NetworkValidationService from '../../services/networkValidation';
+//import NetworkValidationService from '../../services/networkValidation';
 import ErrorDialog from '../../components/ErrorDialog';
 import { farmaColors } from '../../app/theme';
 import { useAuth } from '../../context/AuthContext';
@@ -118,8 +118,8 @@ function LoginPage() {
 
     try {
       // 1. Detectar IP local
-      console.log('🔍 Detectando IP local...');
-      let localIP;
+      //console.log('🔍 Detectando IP local...');
+      /*let localIP;
       
       try {
         localIP = await NetworkValidationService.getLocalIP();
@@ -127,8 +127,9 @@ function LoginPage() {
       } catch (ipError) {
         console.warn('⚠️ No se pudo detectar IP, usando fallback');
         localIP = '192.168.0.1';
-      }
+      }*/
 
+      const localIP = "127.0.0.1"; // Fallback para desarrollo
       // 2. Intentar login
       console.log('🔐 Intentando login con API...');
       const loginResult = await login({
