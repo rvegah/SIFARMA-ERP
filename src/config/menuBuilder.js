@@ -69,7 +69,7 @@ export const buildMenuFromApi = (apiPermissions) => {
       const menuItem = {
         texto: module.nombreOpcion,
         icono: getIconComponent(module.icono),
-        ruta: module.ruta || `/${cleanParentName}`,
+        ruta: module.ruta || `/${module.nombreOpcion.toLowerCase().replace(/\s+/g, '-')}`,
         color: module.color,
         subElementos: [],
       };
@@ -96,7 +96,7 @@ export const buildMenuFromApi = (apiPermissions) => {
 
             return {
               texto: subOption.nombreOpcion,
-              ruta: subRoute,
+              ruta: subOption.ruta || "/dashboard",
             };
           });
       }
@@ -117,7 +117,31 @@ export const buildMenuFromApi = (apiPermissions) => {
       return orderA - orderB;
     });
 
-  console.log("✅ menuBuilder: Menú construido exitosamente", {
+  // // 🛠️ INYECCIÓN MANUAL: Agregar "Configuración" si no viene del API o agregar sub-item
+  // const configMenuIndex = menu.findIndex(m => m.texto === "Configuracion" || m.texto === "Configuración");
+  // const certSubItem = {
+  //   texto: "Certificado de Cómputo",
+  //   ruta: "/configurar/certificados"
+  // };
+
+  // if (configMenuIndex !== -1) {
+  //   // Si ya existe, nos aseguramos de que tenga el sub-item
+  //   const subExists = menu[configMenuIndex].subElementos.some(s => s.ruta === certSubItem.ruta);
+  //   if (!subExists) {
+  //     menu[configMenuIndex].subElementos.push(certSubItem);
+  //   }
+  // } else {
+  //   // Si no existe, lo creamos
+  //   menu.push({
+  //     texto: "Configuracion",
+  //     icono: getIconComponent("Security"),
+  //     ruta: "/configurar",
+  //     color: "#05305A",
+  //     subElementos: [certSubItem]
+  //   });
+  // }
+
+  console.log('✅ menuBuilder: Menú construido exitosamente', {
     elementos: menu.length,
     menu: menu,
   });

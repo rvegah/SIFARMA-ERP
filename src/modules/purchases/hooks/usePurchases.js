@@ -217,6 +217,9 @@ export const usePurchases = () => {
                 numeroLote: "",
                 fechaVencimiento: "",
                 cantidad: 1,
+                numeroBlister: 0,
+                cantidadUnidadBlister: 0,
+                factorUnidad: 0,
                 costoUnitario: 0,
                 precioUnitario: 0,
                 precioCaja: 0
@@ -265,6 +268,9 @@ export const usePurchases = () => {
                     numeroLote: item.numeroLote,
                     fechaVencimiento: item.fechaVencimiento,
                     cantidad: Number(item.cantidad),
+                    numeroBlister: Number(item.numeroBlister) || 0,
+                    cantidadUnidadBlister: Number(item.cantidadUnidadBlister) || 0,
+                    factorUnidad: Number(item.factorUnidad) || 0,
                     costoUnitario: Number(item.costoUnitario),
                     precioUnitario: Number(item.precioUnitario),
                     precioCaja: Number(item.precioCaja)

@@ -46,6 +46,8 @@ import {
 import { useSnackbar } from "notistack";
 import { useUsers } from "../context/UserContext";
 import { farmaColors } from "/src/app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
+import { AccessTime as AccessTimeHeaderIcon } from "@mui/icons-material";
 import apiClient from "../../../services/api/apiClient";
 import userService from "../../../services/api/userService";
 
@@ -484,29 +486,11 @@ const AssignSchedule = ({ onCancel }) => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      {/* Encabezado */}
-      <Paper
-        sx={{
-          p: 3,
-          mb: 3,
-          background: `linear-gradient(135deg, ${farmaColors.alpha.secondary10} 0%, ${farmaColors.alpha.secondary20} 100%)`,
-          borderLeft: `4px solid ${farmaColors.secondary}`,
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 600,
-            color: farmaColors.secondary,
-            mb: 1,
-          }}
-        >
-          ASIGNACIÓN DE HORARIOS DE TRABAJO
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Configurar horarios y turnos de trabajo del personal
-        </Typography>
-      </Paper>
+      <PageHeader 
+        title="Asignación de Horarios"
+        subtitle="Configurar horarios y turnos de trabajo del personal del sistema."
+        icon={<AccessTimeHeaderIcon />}
+      />
 
       <Grid container spacing={3}>
         {/* Panel izquierdo: Selección de usuario y plantillas */}

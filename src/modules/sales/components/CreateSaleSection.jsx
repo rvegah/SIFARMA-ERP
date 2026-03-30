@@ -29,12 +29,14 @@ import {
   CloudOff,
   PersonAdd,
   Search,
+  LocalShipping,
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import { useSales } from "../hooks/useSales";
 import ClientForm from "../components/ClientForm";
 import SaleItemsTable from "../components/SaleItemsTable";
 import StockModal from "../components/StockModal";
+import BranchOrderModal from "../components/BranchOrderModal";
 import MySalesModal from "../components/MySalesModal";
 import PrintInvoiceModal from "../components/PrintInvoiceModal";
 import siatApiService from "../services/siatApiService";
@@ -42,6 +44,8 @@ import CancelInvoiceModal from "../components/CancelInvoiceModal";
 import ProductsModal from "../components/ProductsModal";
 import { useAuth } from "../../../context/AuthContext";
 import SalesService from "../services/salesService";
+import PageHeader from "../../../shared/components/PageHeader";
+import { ShoppingCart as ShoppingCartHeaderIcon } from "@mui/icons-material";
 
 // ✅ NUEVO: Hook de estado SIAT
 import { useSiatStatus } from "../hooks/useSiatStatus";
@@ -146,12 +150,12 @@ const SiatStatusBanner = ({
               <strong>Desde:</strong>{" "}
               {eventoActivo.fechaInicio
                 ? new Date(eventoActivo.fechaInicio).toLocaleString("es-BO", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
                 : "—"}
               {eventoActivo.fechaFin && (
                 <>
@@ -297,6 +301,7 @@ const CreateSaleSection = () => {
   const [unidadesMedida, setUnidadesMedida] = useState({});
 
   const [stockModalOpen, setStockModalOpen] = useState(false);
+  const [branchOrderModalOpen, setBranchOrderModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [mySalesModalOpen, setMySalesModalOpen] = useState(false);
   const [printModalOpen, setPrintModalOpen] = useState(false);
@@ -773,13 +778,13 @@ const CreateSaleSection = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* ✅ NUEVO: Banner de estado SIAT — visible para el vendedor */}
-      <SiatStatusBanner
-        siatOnline={siatOnline}
-        eventoActivo={eventoActivo}
-        loading={loadingSiat}
-        isContingencia={isContingencia}
+      <PageHeader 
+        title="Realizar Venta"
+        subtitle="Generación de facturas y gestión de ventas al cliente."
+        icon={<ShoppingCartHeaderIcon />}
       />
+
+      {/* ✅ NUEVO: Banner de estado SIAT — visible para el vendedor */}
 
       {/* FORMULARIO DE CONTINGENCIA (solo eventos 5-7) */}
       {eventoActivo && isContingencia && (
@@ -997,12 +1002,35 @@ const CreateSaleSection = () => {
             </Button>
           </Grid>
 
-          <Grid item xs={1.5}>
+          {/* <Grid item xs={1.5}>
             <Button
               fullWidth
               variant="outlined"
               startIcon={<Store />}
               onClick={handleViewStock}
+              sx={{
+                borderColor: "#757575",
+                color: "#424242",
+                py: 1,
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                "&:hover": {
+                  borderColor: "#424242",
+                  bgcolor: "rgba(0,0,0,0.04)",
+                },
+              }}
+            >
+              Ver Stock
+            </Button>
+          </Grid> */}
+
+          <Grid item xs={1.5}>
+            <Button
+              fullWidth
+              variant="outlined"
+              startIcon={<Store />}
+              // startIcon={<LocalShipping />}
+              onClick={() => setBranchOrderModalOpen(true)}
               sx={{
                 borderColor: "#757575",
                 color: "#424242",
@@ -1210,6 +1238,11 @@ const CreateSaleSection = () => {
         open={stockModalOpen}
         onClose={() => setStockModalOpen(false)}
         product={selectedProduct}
+      />
+
+      <BranchOrderModal
+        open={branchOrderModalOpen}
+        onClose={() => setBranchOrderModalOpen(false)}
       />
 
       <MySalesModal

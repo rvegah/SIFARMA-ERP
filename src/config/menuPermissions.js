@@ -20,13 +20,13 @@ const createMenuItems = () => [
     requiredPermissions: ['usuario_lista', 'usuario_crear'],
     requireAll: false,
     subElementos: [
-      { 
-        texto: 'Nuevo Usuario', 
+      {
+        texto: 'Nuevo Usuario',
         ruta: '/users/new',
         requiredPermissions: ['usuario_crear']
       },
-      { 
-        texto: 'Lista de Usuarios', 
+      {
+        texto: 'Lista de Usuarios',
         ruta: '/users/list',
         requiredPermissions: ['usuario_lista']
       }
@@ -38,13 +38,13 @@ const createMenuItems = () => [
     ruta: '/productos',
     requiredPermissions: ['producto_ver'],
     subElementos: [
-      { 
-        texto: 'Ver Productos', 
+      {
+        texto: 'Ver Productos',
         ruta: '/productos/ver',
         requiredPermissions: ['producto_ver']
       },
-      { 
-        texto: 'Agregar Producto', 
+      {
+        texto: 'Agregar Producto',
         ruta: '/productos/agregar',
         requiredPermissions: ['producto_crear']
       }
@@ -57,23 +57,23 @@ const createMenuItems = () => [
     requiredPermissions: ['compra_crear', 'compra_editar', 'compra_salida'],
     requireAll: false,
     subElementos: [
-      { 
-        texto: 'Nueva Compra', 
+      {
+        texto: 'Nueva Compra',
         ruta: '/compras/nueva',
         requiredPermissions: ['compra_crear']
       },
-      { 
-        texto: 'Nueva Salida', 
+      {
+        texto: 'Nueva Salida',
         ruta: '/compras/salida',
         requiredPermissions: ['compra_salida']
       },
-      { 
-        texto: 'Compras a Credito', 
+      {
+        texto: 'Compras a Credito',
         ruta: '/compras/credito',
         requiredPermissions: ['compra_credito']
       },
-      { 
-        texto: 'Ingresos del Día', 
+      {
+        texto: 'Ingresos del Día',
         ruta: '/compras/ingresos',
         requiredPermissions: ['compra_ingresos']
       }
@@ -86,8 +86,8 @@ const createMenuItems = () => [
     requiredPermissions: ['proveedor_ver', 'proveedor_crear'],
     requireAll: false,
     subElementos: [
-      { 
-        texto: 'Nuevo Proveedor', 
+      {
+        texto: 'Nuevo Proveedor',
         ruta: '/proveedor/nuevo',
         requiredPermissions: ['proveedor_crear']
       }
@@ -100,18 +100,18 @@ const createMenuItems = () => [
     requiredPermissions: ['venta_crear', 'venta_pedidos'],
     requireAll: false,
     subElementos: [
-      { 
-        texto: 'Nueva Venta', 
+      {
+        texto: 'Nueva Venta',
         ruta: '/ventas/nueva',
         requiredPermissions: ['venta_crear']
       },
-      { 
-        texto: 'Realizar Pedidos', 
+      {
+        texto: 'Realizar Pedidos',
         ruta: '/ventas/pedidos',
         requiredPermissions: ['venta_pedidos']
       },
-      { 
-        texto: 'Mis Pedidos', 
+      {
+        texto: 'Mis Pedidos',
         ruta: '/ventas/mis-pedidos',
         requiredPermissions: ['venta_mis_pedidos']
       }
@@ -124,8 +124,8 @@ const createMenuItems = () => [
     requiredPermissions: ['traspaso_crear', 'traspaso_aprobar'],
     requireAll: false,
     subElementos: [
-      { 
-        texto: 'Nuevo Traspaso', 
+      {
+        texto: 'Nuevo Traspaso',
         ruta: '/traspasos/nuevo',
         requiredPermissions: ['traspaso_crear']
       }
@@ -138,33 +138,33 @@ const createMenuItems = () => [
     requiredPermissions: ['reporte_diario', 'reporte_mensual', 'reporte_ventas'],
     requireAll: false,
     subElementos: [
-      { 
-        texto: 'Reporte Diario', 
+      {
+        texto: 'Reporte Diario',
         ruta: '/reportes/diario',
         requiredPermissions: ['reporte_diario']
       },
-      { 
-        texto: 'Reporte Mensual', 
+      {
+        texto: 'Reporte Mensual',
         ruta: '/reportes/mensual',
         requiredPermissions: ['reporte_mensual']
       },
-      { 
-        texto: 'Reporte Todos', 
+      {
+        texto: 'Reporte Todos',
         ruta: '/reportes/todos',
         requiredPermissions: ['reporte_ventas', 'reporte_compras']
       },
-      { 
-        texto: 'Reporte Productos', 
+      {
+        texto: 'Reporte Productos',
         ruta: '/reportes/productos',
         requiredPermissions: ['reporte_productos']
       },
-      { 
-        texto: 'Reporte por sucursales', 
+      {
+        texto: 'Reporte por sucursales',
         ruta: '/reportes/sucursales',
         requiredPermissions: ['reporte_sucursales']
       },
-      { 
-        texto: 'Kardex', 
+      {
+        texto: 'Kardex',
         ruta: '/reportes/kardex',
         requiredPermissions: ['reporte_kardex']
       }
@@ -177,8 +177,8 @@ const createMenuItems = () => [
     requiredPermissions: ['sistema_configuracion', 'sistema_sucursales'],
     requireAll: false,
     subElementos: [
-      { 
-        texto: 'Ordenar sucursales', 
+      {
+        texto: 'Ordenar sucursales',
         ruta: '/configuracion/sucursales',
         requiredPermissions: ['sistema_sucursales']
       }
@@ -216,10 +216,10 @@ export const getFilteredMenuItems = (userPermissions) => {
     .filter(item => hasMenuAccess(userPermissions, item.requiredPermissions, item.requireAll))
     .map(item => ({
       ...item,
-      subElementos: item.subElementos 
-        ? item.subElementos.filter(subItem => 
-            hasMenuAccess(userPermissions, subItem.requiredPermissions, false)
-          )
+      subElementos: item.subElementos
+        ? item.subElementos.filter(subItem =>
+          hasMenuAccess(userPermissions, subItem.requiredPermissions, false)
+        )
         : []
     }))
     .filter(item => !item.subElementos || item.subElementos.length > 0);

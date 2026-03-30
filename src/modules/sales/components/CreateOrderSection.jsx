@@ -17,12 +17,20 @@ const CreateOrderSection = ({ orderData, updateData, onNext, catalogs }) => {
     return (
         <Card sx={{ maxWidth: 700, mx: "auto", borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
             <CardContent sx={{ p: 4 }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: farmaColors.secondary }}>
+                {/* <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: farmaColors.secondary }}>
                     Crear Nuevo Pedido
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+                </Typography> */}
+                {/* <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
                     Complete la información básica del pedido para continuar añadiendo productos.
-                </Typography>
+                </Typography> */}
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                    <Box>
+                        <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
+                            Crear Nuevo Pedido
+                        </Typography>
+                    </Box>
+                </Box>
 
                 <Divider sx={{ mb: 4 }} />
 

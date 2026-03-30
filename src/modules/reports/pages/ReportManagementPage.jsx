@@ -18,6 +18,7 @@ import {
     ShoppingCart
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
 
 const ReportManagementPage = () => {
     const navigate = useNavigate();
@@ -25,24 +26,24 @@ const ReportManagementPage = () => {
     return (
         <Container maxWidth="xl" sx={{ py: 3 }}>
             {/* Header & Breadcrumbs */}
-            <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <Box>
-                    <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 1 }}>
-                        <Link
-                            component={RouterLink}
-                            underline="hover"
-                            color="inherit"
-                            to="/dashboard"
-                            sx={{ display: 'flex', alignItems: 'center' }}
-                        >
-                            Dashboard
-                        </Link>
-                        <Typography color="text.primary">Reportes</Typography>
-                    </Breadcrumbs>
-                    <Typography variant="h4" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
-                        Reporte por sucursales
-                    </Typography>
-                </Box>
+            <Box sx={{ mb: 4 }}>
+                <PageHeader 
+                    title="Reportes por Sucursales"
+                    subtitle="Gestión de reportes, descargas y pedidos de mercadería."
+                    icon={<Assessment />}
+                />
+                <Breadcrumbs aria-label="breadcrumb">
+                    <Link
+                        component={RouterLink}
+                        underline="hover"
+                        color="inherit"
+                        to="/dashboard"
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                    >
+                        Dashboard
+                    </Link>
+                    <Typography color="text.primary">Reportes</Typography>
+                </Breadcrumbs>
             </Box>
 
             {/* Main Content */}

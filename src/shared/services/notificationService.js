@@ -49,6 +49,22 @@ const notificationService = {
       throw error;
     }
   },
+
+  /**
+   * Change status of a transfer
+   * PUT /api/farmalink-farmacia/Traspasos/CambiarEstado?NumeroTraspaso={numero}&EstadoTraspaso={estado}
+   */
+  cambiarEstadoTraspaso: async (numeroTraspaso, estadoTraspaso) => {
+    try {
+      const response = await pharmacyApiClient.put("/Traspasos/CambiarEstado", null, {
+        params: { NumeroTraspaso: numeroTraspaso, EstadoTraspaso: estadoTraspaso },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error changing transfer state:", error);
+      throw error;
+    }
+  },
 };
 
 export default notificationService;

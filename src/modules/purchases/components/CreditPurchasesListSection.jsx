@@ -1,5 +1,4 @@
-// src/modules/purchases/components/CreditPurchasesListSection.jsx
-import React from "react";
+import React, { useState } from "react";
 import {
     Box,
     Card,
@@ -20,8 +19,16 @@ import {
     CircularProgress,
     IconButton,
     Chip,
-    Tooltip
+    Tooltip,
+    Divider,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { useAuth } from "../../../context/AuthContext";
+import purchaseService from "../services/purchaseService";
 import {
     Search,
     CreditCard,
@@ -33,6 +40,7 @@ import {
     LocalShipping
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
 
 const CreditPurchasesListSection = ({
     loading,
@@ -42,8 +50,62 @@ const CreditPurchasesListSection = ({
     updateFilter,
     onSearch
 }) => {
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const { user } = useAuth();
+    const { enqueueSnackbar } = useSnackbar();
+
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    // Modal states
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [openViewModal, setOpenViewModal] = useState(false);
+    const [openConfirmModal, setOpenConfirmModal] = useState(false);
+    const [paying, setPaying] = useState(false);
+
+    const handleOpenView = (item) => {
+        setSelectedItem(item);
+        setOpenViewModal(true);
+    };
+
+    const handlePayCredit = async () => {
+        setPaying(true);
+        try {
+            const now = new Date();
+            const timeString = now.toTimeString().split(' ')[0].substring(0, 5); // "19:10"
+            const dateString = now.toISOString().split('T')[0];
+
+            const payload = {
+                codigoComprobanteCompra: selectedItem.comprobanteCompra_ID,
+                fecha: dateString,
+                hora: timeString,
+                conceptoPago: selectedItem.conceptoPago || "Pago de Crédito",
+                montoDeuda: selectedItem.montoDeuda || 0,
+                montoPago: selectedItem.montoPago || 0,
+                montoSaldo: selectedItem.montoSaldo || 0,
+                numeroRecibo: selectedItem.numeroRecibo || "",
+                numeroCheque: selectedItem.numeroCheque || "",
+                bancoEmitido: selectedItem.bancoEmitido || "",
+                numeroDiasPago: selectedItem.numeroDiasPago || 0,
+                observaciones: selectedItem.observaciones || "Pago registrado desde UI",
+                codigoEmpleadoAlta: user?.codigoEmpleado || user?.id || 1
+            };
+
+            const response = await purchaseService.pagarCredito(payload);
+            if (response.exitoso || response.exito) {
+                enqueueSnackbar("Crédito pagado correctamente", { variant: "success" });
+                setOpenConfirmModal(false);
+                setOpenViewModal(false);
+                if (onSearch) onSearch();
+            } else {
+                enqueueSnackbar(response.mensaje || "Error al pagar crédito", { variant: "error" });
+            }
+        } catch (err) {
+            console.error(err);
+            enqueueSnackbar("Error de red", { variant: "error" });
+        } finally {
+            setPaying(false);
+        }
+    };
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -65,38 +127,30 @@ const CreditPurchasesListSection = ({
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {/* Header / Title */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
-                <Box
-                    sx={{
-                        background: farmaColors.gradients.primary,
-                        p: 1.5,
-                        borderRadius: 3,
-                        display: "flex",
-                        boxShadow: "0 4px 15px rgba(0,82,155,0.2)"
-                    }}
-                >
-                    <CreditCard sx={{ color: "white", fontSize: 30 }} />
-                </Box>
-                <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
-                        Compras al Crédito
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Gestión y seguimiento de facturas con pagos pendientes o realizados.
-                    </Typography>
-                </Box>
-            </Box>
+            {/* <PageHeader 
+                title="Compras al Crédito"
+                subtitle="Gestión y seguimiento de facturas con pagos pendientes o realizados."
+                icon={<CreditCard />}
+            /> */}
 
             {/* Search Filters Card */}
             <Card sx={{ borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)", overflow: "visible" }}>
                 <CardContent sx={{ p: 4 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
+                    {/* <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
                         <FilterList sx={{ color: farmaColors.primary }} />
                         <Typography variant="h6" sx={{ fontWeight: 700, color: farmaColors.secondary }}>
                             Filtros de Búsqueda
                         </Typography>
+                    </Box> */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                        <Box>
+                            <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
+                                Filtros de Búsqueda
+                            </Typography>
+                        </Box>
                     </Box>
+
+                    <Divider sx={{ mb: 4 }} />
 
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={6} md={4}>
@@ -309,7 +363,7 @@ const CreditPurchasesListSection = ({
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Tooltip title="Ver Detalle">
-                                                    <IconButton color="primary" size="small">
+                                                    <IconButton color="primary" size="small" onClick={() => handleOpenView(row)}>
                                                         <Visibility />
                                                     </IconButton>
                                                 </Tooltip>
@@ -331,6 +385,85 @@ const CreditPurchasesListSection = ({
                     labelRowsPerPage="Filas por página"
                 />
             </Card>
+
+            {/* View Modal */}
+            <Dialog open={openViewModal} onClose={() => setOpenViewModal(false)} maxWidth="sm" fullWidth>
+                <DialogTitle sx={{ bgcolor: farmaColors.secondary, color: 'white' }}>
+                    Detalles del Crédito
+                </DialogTitle>
+                <DialogContent sx={{ mt: 2 }}>
+                    {selectedItem && (
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" color="text.secondary">Proveedor</Typography>
+                                <Typography variant="body1" fontWeight={600}>{selectedItem.nombreProveedor || "-"}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" color="text.secondary">Número de Factura</Typography>
+                                <Typography variant="body1" fontWeight={600}>{selectedItem.numeroFacturaCompra || "-"}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" color="text.secondary">Monto Deuda</Typography>
+                                <Typography variant="body1" fontWeight={600} color="primary">Bs. {selectedItem.montoDeuda?.toFixed(2)}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" color="text.secondary">Monto Pago</Typography>
+                                <Typography variant="body1" fontWeight={600} color="success.main">Bs. {selectedItem.montoPago?.toFixed(2)}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" color="text.secondary">Saldo</Typography>
+                                <Typography variant="body1" fontWeight={600} color="error.main">Bs. {selectedItem.montoSaldo?.toFixed(2)}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" color="text.secondary">Fecha Compra</Typography>
+                                <Typography variant="body1" fontWeight={600}>{formatDate(selectedItem.fechaCompra)}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" color="text.secondary">Forma de Pago</Typography>
+                                <Typography variant="body1">{selectedItem.nombreTipoFormaPago || "-"}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" color="text.secondary">Días de Pago</Typography>
+                                <Typography variant="body1">{selectedItem.numeroDiasPago || "-"}</Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="caption" color="text.secondary">Observaciones</Typography>
+                                <Typography variant="body1">{selectedItem.observaciones || "Sin observaciones"}</Typography>
+                            </Grid>
+                        </Grid>
+                    )}
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button onClick={() => setOpenViewModal(false)}>Cerrar</Button>
+                    {selectedItem?.estado === "PEN" && (
+                        <Button variant="contained" color="primary" onClick={() => setOpenConfirmModal(true)}>
+                            Pagar Crédito
+                        </Button>
+                    )}
+                </DialogActions>
+            </Dialog>
+
+            {/* Confirm Payment Modal */}
+            <Dialog open={openConfirmModal} onClose={() => setOpenConfirmModal(false)}>
+                <DialogTitle sx={{ color: farmaColors.secondary }}>Confirmar Pago</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        ¿Está seguro que desea pagar este crédito por un pago de Bs. {selectedItem?.montoPago?.toFixed(2) || "0.00"}?
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button onClick={() => setOpenConfirmModal(false)} disabled={paying}>No</Button>
+                    <Button
+                        onClick={handlePayCredit}
+                        variant="contained"
+                        color="success"
+                        disabled={paying}
+                        startIcon={paying ? <CircularProgress size={20} color="inherit" /> : <Receipt />}
+                    >
+                        Sí, Pagar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
