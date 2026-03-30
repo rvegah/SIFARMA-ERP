@@ -19,6 +19,8 @@ import {
   Warning
 } from '@mui/icons-material'
 import { farmaColors } from '/src/app/theme'
+import PageHeader from './PageHeader'
+import { Assessment } from '@mui/icons-material'
 
 const tarjetasEstadisticas = [
   {
@@ -60,12 +62,11 @@ function Dashboard() {
     <Box>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1A202C', mb: 1 }}>
-          Dashboard
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Panel Administración - Vista general del sistema
-        </Typography>
+        <PageHeader 
+          title="Dashboard"
+          subtitle="Panel de Administración - Vista general y estadísticas clave del negocio en tiempo real."
+          icon={<Assessment />}
+        />
       </Box>
 
       {/* Stats Cards */}

@@ -109,7 +109,7 @@ const NotificationPanel = ({ open, onClose, anchorEl, onUnreadCountChange }) => 
                     <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#000' }}>
                         Notificaciones
                     </Typography>
-                    <Button 
+                    {/* <Button 
                         size="small" 
                         sx={{ 
                             textTransform: 'none', 
@@ -119,7 +119,7 @@ const NotificationPanel = ({ open, onClose, anchorEl, onUnreadCountChange }) => 
                         }}
                     >
                         Marcar todo como leído
-                    </Button>
+                    </Button> */}
                 </Box>
 
                 {/* List */}

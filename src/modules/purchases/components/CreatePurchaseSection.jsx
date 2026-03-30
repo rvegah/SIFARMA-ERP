@@ -24,13 +24,25 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
     return (
         <Card sx={{ maxWidth: 800, mx: "auto", borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
             <CardContent sx={{ p: 4 }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: farmaColors.secondary, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <ShoppingCart sx={{ color: farmaColors.primary }} /> Nueva Compra
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-                    Complete los datos de la cabecera para registrar la nueva compra.
-                </Typography>
-
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                    {/* <Box sx={{
+                                    background: farmaColors.gradients.primary,
+                                    p: 1.5,
+                                    borderRadius: 3,
+                                    display: 'flex',
+                                    boxShadow: "0 4px 15px rgba(0,82,155,0.2)"
+                                }}>
+                                    <Output sx={{ color: "white", fontSize: 30 }} />
+                                </Box> */}
+                    <Box>
+                        <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
+                            Nueva Compra
+                        </Typography>
+                        {/* <Typography variant="body2" color="text.secondary">
+                                        Complete la información para generar el registro de salida.
+                                    </Typography> */}
+                    </Box>
+                </Box>
                 <Divider sx={{ mb: 4 }} />
 
                 <Grid container spacing={3}>

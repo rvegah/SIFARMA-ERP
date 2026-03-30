@@ -4,8 +4,9 @@ import { Container, Box, Typography, Breadcrumbs, Link } from "@mui/material";
 import { useTransfers } from "../hooks/useTransfers";
 import CreateTransferSection from "../components/CreateTransferSection";
 import AddProductsToTransferSection from "../components/AddProductsToTransferSection";
-import { NavigateNext } from "@mui/icons-material";
+import { NavigateNext, SwapHoriz } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
 
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -17,23 +18,25 @@ const TransfersDispatcher = () => {
         <Container maxWidth="xl" sx={{ py: 4 }}>
             {/* Header & Breadcrumbs */}
             <Box sx={{ mb: 4 }}>
-                <Typography variant="h4" sx={{ fontWeight: 900, color: farmaColors.secondary, mb: 1 }}>
-                    Módulo de Traspasos
-                </Typography>
-                <Breadcrumbs separator={<NavigateNext fontSize="small" />} aria-label="breadcrumb">
+                <PageHeader
+                    title="Módulo de Traspasos"
+                    // subtitle="Gestión de movimiento de mercadería entre sucursales."
+                    icon={<SwapHoriz />}
+                />
+                {/* <Breadcrumbs separator={<NavigateNext fontSize="small" />} aria-label="breadcrumb">
                     <Link underline="hover" color="inherit" href="#">
                         Inventario
                     </Link>
                     <Typography color="text.primary" sx={{ fontWeight: 600 }}>
                         {viewState === "creating" ? "Nuevo Traspaso" : "Añadir Productos"}
                     </Typography>
-                </Breadcrumbs>
+                </Breadcrumbs> */}
             </Box>
 
             {/* Dynamic Content */}
             <Box>
                 {viewState === "creating" ? (
-                    <CreateTransferSection 
+                    <CreateTransferSection
                         transferData={transferHook.transferData}
                         setTransferData={transferHook.setTransferData}
                         onCreate={transferHook.handleCreateTransfer}
@@ -42,7 +45,7 @@ const TransfersDispatcher = () => {
                         loadingCatalogs={transferHook.loadingCatalogs}
                     />
                 ) : (
-                    <AddProductsToTransferSection 
+                    <AddProductsToTransferSection
                         createdTransfer={transferHook.createdTransfer}
                         transferItems={transferHook.transferItems}
                         isReadOnly={transferHook.isReadOnly}
@@ -77,9 +80,9 @@ const TransfersDispatcher = () => {
 const TransfersPage = () => {
     return (
         <Routes>
-            <Route index element={<TransfersDispatcher />} />
-            <Route path="nuevo-traspaso" element={<TransfersDispatcher />} />
-            <Route path="*" element={<Navigate to="nuevo-traspaso" replace />} />
+            {/* <Route index element={<Navigate to="nuevo-traspaso" replace />} /> */}
+            <Route path="nuevo" element={<TransfersDispatcher />} />
+            {/* <Route path="*" element={<Navigate to="nuevo-traspaso" replace />} /> */}
         </Routes>
     );
 };

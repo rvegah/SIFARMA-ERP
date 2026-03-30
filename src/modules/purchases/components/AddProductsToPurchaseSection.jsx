@@ -10,9 +10,11 @@ import {
     Add, Delete, Search, Save, Receipt, LocalShipping,
     ShoppingBag, Info, CheckCircle, Visibility, Edit,
     CalendarToday, Store, Inventory, LocalPostOffice,
-    CheckCircleOutline, AssignmentTurnedIn
+    CheckCircleOutline, AssignmentTurnedIn, HelpOutline
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
+import { useSnackbar } from "notistack";
+import purchaseService from "../services/purchaseService";
 
 const AddProductsToPurchaseSection = ({
     createdPurchase,
@@ -45,6 +47,12 @@ const AddProductsToPurchaseSection = ({
     const [labOptions, setLabOptions] = useState([]);
     const [labLoading, setLabLoading] = useState(false);
     const [labSearchText, setLabSearchText] = useState("");
+
+    // Finish Purchase State
+    const [isFinished, setIsFinished] = useState(false);
+    const [finishConfirmOpen, setFinishConfirmOpen] = useState(false);
+    const [finishing, setFinishing] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
 
     // Load Labs when searching
     useEffect(() => {
@@ -83,6 +91,9 @@ const AddProductsToPurchaseSection = ({
             numeroLote: "",
             fechaVencimiento: "",
             cantidad: 1,
+            numeroBlister: 0,
+            cantidadUnidadBlister: 0,
+            factorUnidad: 0,
             costoUnitario: 0,
             precioUnitario: 0,
             precioCaja: 0
@@ -139,6 +150,25 @@ const AddProductsToPurchaseSection = ({
         if (!createdPurchase?.sucursal_ID) return "-";
         const suc = (catalogs.sucursales || []).find(s => s.sucursal_ID === createdPurchase.sucursal_ID);
         return suc?.nombreSucursal || `Sucursal ${createdPurchase.sucursal_ID}`;
+    };
+
+    const handleTerminarCompra = async () => {
+        setFinishing(true);
+        try {
+            const res = await purchaseService.cambiarEstadoCompra(createdPurchase.comprobanteCompra_ID, "ENV");
+            if (res.exitoso) {
+                enqueueSnackbar("Compra terminada exitosamente", { variant: "success" });
+                setIsFinished(true);
+                setFinishConfirmOpen(false);
+            } else {
+                enqueueSnackbar(res.mensaje || "Error al terminar compra", { variant: "error" });
+            }
+        } catch (error) {
+            console.error("Error terminando compra:", error);
+            enqueueSnackbar("Error de red", { variant: "error" });
+        } finally {
+            setFinishing(false);
+        }
     };
 
     // Helper to render field in modal based on mode
@@ -258,40 +288,36 @@ const AddProductsToPurchaseSection = ({
                         <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <ShoppingBag sx={{ color: farmaColors.primary }} /> Productos de la Compra
                         </Typography>
-                        <Stack direction="row" spacing={1}>
-                            <Tooltip title="Añadir Producto">
-                                <IconButton
-                                    onClick={handleOpenAdd}
-                                    sx={{
-                                        color: farmaColors.primary,
-                                        bgcolor: farmaColors.alpha.primary10,
-                                        '&:hover': { bgcolor: farmaColors.alpha.primary20 }
-                                    }}
-                                >
-                                    <Add />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Guardar Productos">
-                                <IconButton
-                                    onClick={handleSaveProducts}
-                                    disabled={loading || purchaseItems.length === 0}
-                                    sx={{
-                                        color: 'white',
-                                        bgcolor: farmaColors.primary,
-                                        '&:hover': { bgcolor: farmaColors.secondary },
-                                        '&.Mui-disabled': { bgcolor: '#e0e0e0' }
-                                    }}
-                                // sx={{
-                                //     color: 'white',
-                                //     bgcolor: farmaColors.success || '#4caf50',
-                                //     '&:hover': { bgcolor: '#43a047' },
-                                //     '&.Mui-disabled': { bgcolor: '#e0e0e0' }
-                                // }}
-                                >
-                                    {loading ? <CircularProgress size={24} color="inherit" /> : <Save />}
-                                </IconButton>
-                            </Tooltip>
-                        </Stack>
+                        {!isFinished && (
+                            <Stack direction="row" spacing={1}>
+                                <Tooltip title="Añadir Producto">
+                                    <IconButton
+                                        onClick={handleOpenAdd}
+                                        sx={{
+                                            color: farmaColors.primary,
+                                            bgcolor: farmaColors.alpha.primary10,
+                                            '&:hover': { bgcolor: farmaColors.alpha.primary20 }
+                                        }}
+                                    >
+                                        <Add />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Guardar Productos">
+                                    <IconButton
+                                        onClick={handleSaveProducts}
+                                        disabled={loading || purchaseItems.length === 0}
+                                        sx={{
+                                            color: 'white',
+                                            bgcolor: farmaColors.primary,
+                                            '&:hover': { bgcolor: farmaColors.secondary },
+                                            '&.Mui-disabled': { bgcolor: '#e0e0e0' }
+                                        }}
+                                    >
+                                        {loading ? <CircularProgress size={24} color="inherit" /> : <Save />}
+                                    </IconButton>
+                                </Tooltip>
+                            </Stack>
+                        )}
                     </Box>
                     <Divider />
                     <TableContainer>
@@ -304,6 +330,9 @@ const AddProductsToPurchaseSection = ({
                                     <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Presentación</TableCell>
                                     <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Vencimiento</TableCell>
                                     <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Lote</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc', textAlign: 'center' }}>N° Blis.</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc', textAlign: 'center' }}>Cant. Blis.</TableCell>
+                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc', textAlign: 'center' }}>F. Unidad</TableCell>
                                     <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc', textAlign: 'center' }}>Acciones</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -316,6 +345,9 @@ const AddProductsToPurchaseSection = ({
                                         <TableCell>{item.presentacion || "-"}</TableCell>
                                         <TableCell>{item.fechaVencimiento || "-"}</TableCell>
                                         <TableCell>{item.numeroLote || "-"}</TableCell>
+                                        <TableCell sx={{ textAlign: 'center' }}>{item.numeroBlister || 0}</TableCell>
+                                        <TableCell sx={{ textAlign: 'center' }}>{item.cantidadUnidadBlister || 0}</TableCell>
+                                        <TableCell sx={{ textAlign: 'center' }}>{item.factorUnidad || 0}</TableCell>
                                         <TableCell sx={{ textAlign: 'center' }}>
                                             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
                                                 <Tooltip title="Ver">
@@ -323,16 +355,20 @@ const AddProductsToPurchaseSection = ({
                                                         <Visibility fontSize="small" />
                                                     </IconButton>
                                                 </Tooltip>
-                                                <Tooltip title="Editar">
-                                                    <IconButton size="small" color="primary" onClick={() => handleOpenEdit(item)}>
-                                                        <Edit fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Eliminar">
-                                                    <IconButton size="small" color="error" onClick={() => removeItemRow(item.id)}>
-                                                        <Delete fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
+                                                {!isFinished && (
+                                                    <>
+                                                        <Tooltip title="Editar">
+                                                            <IconButton size="small" color="primary" onClick={() => handleOpenEdit(item)}>
+                                                                <Edit fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Eliminar">
+                                                            <IconButton size="small" color="error" onClick={() => removeItemRow(item.id)}>
+                                                                <Delete fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </>
+                                                )}
                                             </Box>
                                         </TableCell>
                                     </TableRow>
@@ -359,45 +395,47 @@ const AddProductsToPurchaseSection = ({
                         <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Receipt sx={{ color: farmaColors.primary }} /> Datos de Facturación
                         </Typography>
-                        <Tooltip title="Guardar Factura">
-                            <IconButton
-                                onClick={handleSaveInvoice}
-                                disabled={loading}
-                                sx={{
-                                    color: 'white',
-                                    bgcolor: farmaColors.primary,
-                                    '&:hover': { bgcolor: farmaColors.secondary },
-                                    '&.Mui-disabled': { bgcolor: '#e0e0e0' }
-                                }}
-                            >
-                                {loading ? <CircularProgress size={24} color="inherit" /> : <Save />}
-                            </IconButton>
-                        </Tooltip>
+                        {!isFinished && (
+                            <Tooltip title="Guardar Factura">
+                                <IconButton
+                                    onClick={handleSaveInvoice}
+                                    disabled={loading}
+                                    sx={{
+                                        color: 'white',
+                                        bgcolor: farmaColors.primary,
+                                        '&:hover': { bgcolor: farmaColors.secondary },
+                                        '&.Mui-disabled': { bgcolor: '#e0e0e0' }
+                                    }}
+                                >
+                                    {loading ? <CircularProgress size={24} color="inherit" /> : <Save />}
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </Box>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={4}>
-                            <TextField fullWidth label="Número Factura" size="small" value={invoiceData.numeroFactura} onChange={(e) => updateInvoiceField("numeroFactura", e.target.value)} />
+                            <TextField fullWidth label="Número Factura" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.numeroFactura} onChange={(e) => updateInvoiceField("numeroFactura", e.target.value)} />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField fullWidth label="Fecha" type="date" size="small" value={invoiceData.fecha} onChange={(e) => updateInvoiceField("fecha", e.target.value)} InputLabelProps={{ shrink: true }} />
+                            <TextField fullWidth label="Fecha" type="date" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.fecha} onChange={(e) => updateInvoiceField("fecha", e.target.value)} InputLabelProps={{ shrink: true }} />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField fullWidth label="NIT" size="small" value={invoiceData.nit} onChange={(e) => updateInvoiceField("nit", e.target.value)} />
+                            <TextField fullWidth label="NIT" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.nit} onChange={(e) => updateInvoiceField("nit", e.target.value)} />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField fullWidth label="Nombre Proveedor" size="small" value={invoiceData.nombreProveedor} onChange={(e) => updateInvoiceField("nombreProveedor", e.target.value)} />
+                            <TextField fullWidth label="Nombre Proveedor" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.nombreProveedor} onChange={(e) => updateInvoiceField("nombreProveedor", e.target.value)} />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField fullWidth label="Número Pedido" size="small" value={invoiceData.numeroPedido} onChange={(e) => updateInvoiceField("numeroPedido", e.target.value)} />
+                            <TextField fullWidth label="Número Pedido" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.numeroPedido} onChange={(e) => updateInvoiceField("numeroPedido", e.target.value)} />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField fullWidth label="Total Compra" type="number" size="small" value={invoiceData.totalCompra} onChange={(e) => updateInvoiceField("totalCompra", Number(e.target.value))} />
+                            <TextField fullWidth label="Total Compra" type="number" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.totalCompra} onChange={(e) => updateInvoiceField("totalCompra", Number(e.target.value))} />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField fullWidth label="Desc. Comercial" type="number" size="small" value={invoiceData.descuentoComercial} onChange={(e) => updateInvoiceField("descuentoComercial", Number(e.target.value))} />
+                            <TextField fullWidth label="Desc. Comercial" type="number" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.descuentoComercial} onChange={(e) => updateInvoiceField("descuentoComercial", Number(e.target.value))} />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField fullWidth label="Desc. Especial" type="number" size="small" value={invoiceData.descuentoEspecial} onChange={(e) => updateInvoiceField("descuentoEspecial", Number(e.target.value))} />
+                            <TextField fullWidth label="Desc. Especial" type="number" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.descuentoEspecial} onChange={(e) => updateInvoiceField("descuentoEspecial", Number(e.target.value))} />
                         </Grid>
                         <Grid item xs={12} sm={3}>
                             <TextField
@@ -407,6 +445,7 @@ const AddProductsToPurchaseSection = ({
                                 size="small"
                                 value={invoiceData.importePagar}
                                 onChange={(e) => updateInvoiceField("importePagar", Number(e.target.value))}
+                                InputProps={{ readOnly: isFinished }}
                                 sx={{ bgcolor: 'rgba(74, 95, 255, 0.05)' }}
                             />
                         </Grid>
@@ -415,23 +454,50 @@ const AddProductsToPurchaseSection = ({
             </Card>
 
             {/* Final Action Button */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 4 }}>
-                <Button
-                    variant="contained"
-                    size="large"
-                    startIcon={<AssignmentTurnedIn />}
-                    sx={{
-                        px: 6,
-                        py: 2,
-                        borderRadius: 3,
-                        fontWeight: 700,
-                        background: farmaColors.gradients.primary,
-                        boxShadow: '0 8px 16px rgba(74, 95, 255, 0.3)'
-                    }}
-                >
-                    Terminar Compra
-                </Button>
-            </Box>
+            {!isFinished && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 4 }}>
+                    <Button
+                        variant="contained"
+                        size="large"
+                        startIcon={<AssignmentTurnedIn />}
+                        onClick={() => setFinishConfirmOpen(true)}
+                        sx={{
+                            px: 6,
+                            py: 2,
+                            borderRadius: 3,
+                            fontWeight: 700,
+                            background: farmaColors.gradients.primary,
+                            boxShadow: '0 8px 16px rgba(74, 95, 255, 0.3)'
+                        }}
+                    >
+                        Terminar Compra
+                    </Button>
+                </Box>
+            )}
+
+            {/* Confirmation Dialog */}
+            <Dialog open={finishConfirmOpen} onClose={() => setFinishConfirmOpen(false)}>
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, color: farmaColors.secondary }}>
+                    <HelpOutline color="primary" /> Confirmar Acción
+                </DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        ¿Desea terminar la compra? Esta acción fijará los datos y no podrá modificarlos posteriormente.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button onClick={() => setFinishConfirmOpen(false)} disabled={finishing}>No</Button>
+                    <Button 
+                        onClick={handleTerminarCompra} 
+                        variant="contained" 
+                        color="primary" 
+                        disabled={finishing}
+                        startIcon={finishing ? <CircularProgress size={20} color="inherit" /> : null}
+                    >
+                        Sí
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Product Modal (Add/Edit/View) */}
             <Dialog open={modalOpen} onClose={() => setModalOpen(false)} maxWidth="md" fullWidth>
@@ -530,8 +596,17 @@ const AddProductsToPurchaseSection = ({
                         <Grid item xs={12} sm={6}>
                             {renderModalField("Vencimiento", "fechaVencimiento", "date")}
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={3}>
                             {renderModalField("Cantidad", "cantidad", "number")}
+                        </Grid>
+                        <Grid item xs={12} sm={3}>
+                            {renderModalField("N° Blister", "numeroBlister", "number")}
+                        </Grid>
+                        <Grid item xs={12} sm={3}>
+                            {renderModalField("Cant. Blister", "cantidadUnidadBlister", "number")}
+                        </Grid>
+                        <Grid item xs={12} sm={3}>
+                            {renderModalField("Factor Unidad", "factorUnidad", "number")}
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             {renderModalField("Costo", "costoUnitario", "number")}

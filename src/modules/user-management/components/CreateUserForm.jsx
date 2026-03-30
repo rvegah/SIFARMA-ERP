@@ -25,6 +25,8 @@ import {
 import { Save, Visibility, VisibilityOff } from "@mui/icons-material";
 import { useUsers } from "../context/UserContext";
 import { farmaColors } from "/src/app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
+import { PersonAdd } from "@mui/icons-material";
 
 // 🆕 Opciones de título (estáticas)
 const TITULOS = [
@@ -103,30 +105,11 @@ const CreateUserForm = ({ onCancel }) => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Encabezado */}
-      <Paper
-        sx={{
-          p: 3,
-          mb: 3,
-          bgcolor: "#f8f9fa",
-          borderLeft: `4px solid ${farmaColors.secondary}`,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 600,
-            color: farmaColors.secondary,
-            mb: 1,
-          }}
-        >
-          REGISTRAR USUARIO
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Formulario de registro de usuarios del sistema
-        </Typography>
-      </Paper>
+      <PageHeader 
+        title="Registrar Usuario"
+        subtitle="Formulario de registro de nuevos usuarios para el personal del sistema."
+        icon={<PersonAdd fontSize="large" />}
+      />
 
       <Card
         key={formKey}

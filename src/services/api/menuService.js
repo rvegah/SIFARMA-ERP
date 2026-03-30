@@ -15,12 +15,12 @@ const menuService = {
       );
 
       console.log('✅ Permisos obtenidos para:', usuario);
-      
+
       // El API devuelve un array directamente
       if (Array.isArray(response.data)) {
         return response.data;
       }
-      
+
       // Si viene envuelto en un objeto
       if (response.data && response.data.datos) {
         return response.data.datos;
@@ -48,11 +48,11 @@ const menuService = {
       );
 
       console.log('✅ Permisos obtenidos para rol:', rol);
-      
+
       if (Array.isArray(response.data)) {
         return response.data;
       }
-      
+
       if (response.data && response.data.datos) {
         return response.data.datos;
       }

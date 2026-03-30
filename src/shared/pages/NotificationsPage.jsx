@@ -14,10 +14,12 @@ import {
   LocalShipping as SendIcon,
   CheckCircle as CheckCircleIcon,
   NotificationsNone as NotificationsNoneIcon,
+  Notifications as NotificationsIcon,
 } from "@mui/icons-material";
 import { farmaColors } from "../../app/theme";
 import { useAuth } from "../../context/AuthContext";
 import notificationService from "../services/notificationService";
+import PageHeader from "../components/PageHeader";
 
 // Helper function to pick a tone based on index
 const getCardTone = (index, esEnvio) => {
@@ -72,9 +74,11 @@ const NotificationsPage = () => {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200, margin: "0 auto" }}>
-      <Typography variant="h4" sx={{ fontWeight: 800, mb: 4, color: farmaColors.primary }}>
-        Todas las Notificaciones
-      </Typography>
+      <PageHeader 
+        title="Todas las Notificaciones" 
+        subtitle="Mantente al día con los traspasos y eventos importantes de tu sucursal."
+        icon={<NotificationsIcon />}
+      />
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", my: 10 }}>

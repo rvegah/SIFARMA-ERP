@@ -24,6 +24,7 @@ import {
     IconButton,
     CircularProgress,
     TablePagination,
+    Divider,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -35,9 +36,11 @@ import {
     Edit,
     Delete,
     Search,
+    Inventory,
 } from "@mui/icons-material";
 import { useProductContext } from "../context/ProductContext";
 import { farmaColors } from "/src/app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
 
 const ProductList = ({ onCreateProduct, onEditProduct }) => {
     const {
@@ -90,18 +93,23 @@ const ProductList = ({ onCreateProduct, onEditProduct }) => {
 
     return (
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-            <Typography
-                variant="h4"
-                sx={{ fontWeight: 700, color: farmaColors.secondary, mb: 1 }}
-            >
-                Gestión de Productos
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                Administración del inventario de productos
-            </Typography>
+            <PageHeader
+                title="Gestión de Productos"
+                // subtitle="Administración del inventario de productos"
+                icon={<Inventory />}
+            />
 
             {/* Panel de Filtros */}
             <Paper sx={{ p: 3, mb: 3, boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                    <Box>
+                        <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
+                            Filtros de Búsqueda
+                        </Typography>
+                    </Box>
+                </Box>
+
+                <Divider sx={{ mb: 4 }} />
                 <Grid container spacing={2} alignItems="center">
 
                     {/* Fila 1: Sucursal (Obligatorio), Código, Nombre */}

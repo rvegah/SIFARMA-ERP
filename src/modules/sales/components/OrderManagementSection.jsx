@@ -12,16 +12,17 @@ import {
   DialogActions,
   DialogContentText
 } from "@mui/material";
-import { 
-  ShoppingBasket, 
-  AddCircle, 
-  History as HistoryIcon, 
-  DeleteSweep 
+import {
+  ShoppingBasket,
+  AddCircle,
+  History as HistoryIcon,
+  DeleteSweep
 } from "@mui/icons-material";
 import { useOrders } from "../hooks/useOrders";
 import CreateOrderSection from "../components/CreateOrderSection";
 import AddProductsToOrderSection from "../components/AddProductsToOrderSection";
 import { farmaColors } from "../../../app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
 
 const OrderManagementSection = () => {
   const {
@@ -89,13 +90,12 @@ const OrderManagementSection = () => {
   if (viewState === "initial") {
     content = (
       <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
-        <ShoppingBasket sx={{ fontSize: 100, color: farmaColors.alpha.secondary20, mb: 4 }} />
-        <Typography variant="h3" sx={{ fontWeight: 800, color: farmaColors.secondary, mb: 2 }}>
-          Gestión de Pedidos
-        </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 6 }}>
-          Crea nuevos pedidos de stock para tu sucursal de manera rápida y sencilla.
-        </Typography>
+        <PageHeader
+          title="Gestión de Pedidos"
+          subtitle="Crea nuevos pedidos de stock para tu sucursal de manera rápida y sencilla."
+          icon={<ShoppingBasket fontSize="large" />}
+          center={true}
+        />
         <Button
           variant="contained"
           size="large"
@@ -118,9 +118,11 @@ const OrderManagementSection = () => {
   } else if (viewState === "creating") {
     content = (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, color: farmaColors.secondary, mb: 4 }}>
-          Realizar Pedido
-        </Typography>
+        <PageHeader
+          title="Realizar Pedido"
+          // subtitle="Configuración inicial del pedido de stock."
+          icon={<AddCircle />}
+        />
         <CreateOrderSection
           orderData={orderData}
           updateData={updateData}
@@ -133,9 +135,11 @@ const OrderManagementSection = () => {
   } else if (viewState === "adding_products") {
     content = (
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, color: farmaColors.secondary, mb: 4 }}>
-          {isReadOnly ? "Consulta de Pedido" : "Añadir Productos al Pedido"}
-        </Typography>
+        <PageHeader
+          title={isReadOnly ? "Consulta de Pedido" : "Añadir Productos al Pedido"}
+          subtitle="Selección de productos y cantidades para el pedido."
+          icon={<ShoppingBasket />}
+        />
         <AddProductsToOrderSection
           orderData={orderData}
           searchFilters={searchFilters}

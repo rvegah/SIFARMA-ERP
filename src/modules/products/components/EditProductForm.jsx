@@ -22,9 +22,10 @@ import {
   Divider,
   Alert,
 } from "@mui/material";
-import { Save } from "@mui/icons-material";
+import { Save, Edit as EditIcon } from "@mui/icons-material";
 import { useProductContext } from "../context/ProductContext";
 import { farmaColors } from "/src/app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
 import productService from "../../../services/api/productService";
 
 const LabelField = ({ children, required }) => (
@@ -138,22 +139,11 @@ const EditProductForm = ({ onCancel }) => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Paper
-        sx={{
-          p: 3, mb: 3,
-          bgcolor: "#f8f9fa",
-          borderLeft: `4px solid ${farmaColors.primary}`,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        <Typography variant="h5" sx={{ fontWeight: 600, color: farmaColors.secondary, mb: 0.5 }}>
-          EDITAR PRODUCTO
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Código: <strong>{selectedProduct?.codigoProducto || selectedProduct?.codigo || "—"}</strong>
-          &nbsp;| Los campos con <span style={{ color: "red" }}>*</span> son obligatorios.
-        </Typography>
-      </Paper>
+      <PageHeader 
+        title="Editar Producto"
+        subtitle={`Modificación de atributos y especificaciones técnicas del producto: ${selectedProduct?.codigoProducto || selectedProduct?.codigo || ""}`}
+        icon={<EditIcon />}
+      />
 
       {fetchError && (
         <Alert severity="error" sx={{ mb: 3 }}>{fetchError}</Alert>

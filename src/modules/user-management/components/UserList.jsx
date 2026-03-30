@@ -36,9 +36,11 @@ import {
   SupervisorAccount,
   AccessTime,
   VpnKey,
+  Group,
 } from "@mui/icons-material";
 import { useUsers } from "../context/UserContext";
 import { farmaColors } from "/src/app/theme"; // Importar colores corporativos
+import PageHeader from "../../../shared/components/PageHeader";
 
 const UserList = ({
   onCreateUser,
@@ -87,19 +89,11 @@ const UserList = ({
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: 700,
-          color: farmaColors.secondary, // Azul corporativo para el título principal
-          mb: 1,
-        }}
-      >
-        Gestión de Usuarios
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Administración y control de usuarios del sistema
-      </Typography>
+      <PageHeader
+        title="Gestión de Usuarios"
+        // subtitle="Administración y control de usuarios del sistema"
+        icon={<Group />}
+      />
 
       {/* Tabs de sucursales - Solo para administradores */}
       {isAdmin && (
@@ -381,14 +375,14 @@ const UserList = ({
                         user.rol === "ADMIN"
                           ? "error.main"
                           : user.rol === "FARMACEUTICO"
-                          ? farmaColors.primary
-                          : "grey.300",
+                            ? farmaColors.primary
+                            : "grey.300",
                       color:
                         user.rol === "ADMIN"
                           ? "white"
                           : user.rol === "FARMACEUTICO"
-                          ? "white"
-                          : "grey.700",
+                            ? "white"
+                            : "grey.700",
                     }}
                   />
                 </TableCell>

@@ -24,9 +24,10 @@ import {
   CircularProgress,
   Divider,
 } from "@mui/material";
-import { Save } from "@mui/icons-material";
+import { Save, AddBox } from "@mui/icons-material";
 import { useProductContext } from "../context/ProductContext";
 import { farmaColors } from "/src/app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
 
 const LabelField = ({ children, required }) => (
   <Typography variant="body2" sx={{ color: farmaColors.primary, mb: 1, fontWeight: 600 }}>
@@ -82,30 +83,27 @@ const CreateProductForm = ({ onCancel }) => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Paper
-        sx={{
-          p: 3, mb: 3,
-          bgcolor: "#f8f9fa",
-          borderLeft: "4px solid " + farmaColors.secondary,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        <Typography variant="h5" sx={{ fontWeight: 600, color: farmaColors.secondary, mb: 0.5 }}>
-          REGISTRAR PRODUCTO
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Complete los datos del nuevo producto. Los campos con <span style={{ color: "red" }}>*</span> son obligatorios.
-        </Typography>
-      </Paper>
+      <PageHeader
+        title="Registrar Producto"
+        // subtitle="Formulario de alta para nuevos productos e insumos de farmacia."
+        icon={<AddBox />}
+      />
 
       <Card sx={{ p: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
         <Grid container spacing={3}>
 
           {/* === SECCIÓN 1: Identificación === */}
           <Grid item xs={12}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: farmaColors.secondary, mb: 1 }}>
+            {/* <Typography variant="subtitle1" sx={{ fontWeight: 700, color: farmaColors.secondary, mb: 1 }}>
               Identificación del Producto
-            </Typography>
+            </Typography> */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
+                  Identificación del Producto
+                </Typography>
+              </Box>
+            </Box>
             <Divider sx={{ mb: 2 }} />
           </Grid>
 
