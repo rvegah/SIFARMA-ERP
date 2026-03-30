@@ -12,12 +12,12 @@ import {
     Divider,
     CircularProgress
 } from "@mui/material";
-import { 
-    SwapHoriz, 
-    Description as DescriptionIcon, 
-    Storefront, 
-    Event, 
-    Notes, 
+import {
+    SwapHoriz,
+    Description as DescriptionIcon,
+    Storefront,
+    Event,
+    Notes,
     Send,
     CompareArrows
 } from "@mui/icons-material";
@@ -40,7 +40,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
     return (
         <Card sx={{ maxWidth: 900, mx: "auto", borderRadius: 4, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
             <CardContent sx={{ p: 4 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                     <Box sx={{
                         background: farmaColors.gradients.primary,
                         p: 1.5,
@@ -56,6 +56,15 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                             Defina las sucursales de origen y destino para el movimiento de mercadería.
+                        </Typography>
+                    </Box>
+                </Box>
+
+                <Divider sx={{ mb: 4 }} /> */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                    <Box>
+                        <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
+                            Nuevo Traspaso entre Sucursales
                         </Typography>
                     </Box>
                 </Box>

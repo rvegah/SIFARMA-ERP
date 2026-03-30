@@ -87,6 +87,30 @@ export const buildMenuFromApi = (apiPermissions) => {
       return orderA - orderB;
     });
 
+  // 🛠️ INYECCIÓN MANUAL: Agregar "Configuración" si no viene del API o agregar sub-item
+  const configMenuIndex = menu.findIndex(m => m.texto === "Configuracion" || m.texto === "Configuración");
+  const certSubItem = {
+    texto: "Certificado de Cómputo",
+    ruta: "/configurar/certificados"
+  };
+
+  if (configMenuIndex !== -1) {
+    // Si ya existe, nos aseguramos de que tenga el sub-item
+    const subExists = menu[configMenuIndex].subElementos.some(s => s.ruta === certSubItem.ruta);
+    if (!subExists) {
+      menu[configMenuIndex].subElementos.push(certSubItem);
+    }
+  } else {
+    // Si no existe, lo creamos
+    menu.push({
+      texto: "Configuracion",
+      icono: getIconComponent("Security"),
+      ruta: "/configurar",
+      color: "#05305A",
+      subElementos: [certSubItem]
+    });
+  }
+
   console.log('✅ menuBuilder: Menú construido exitosamente', {
     elementos: menu.length,
     menu: menu

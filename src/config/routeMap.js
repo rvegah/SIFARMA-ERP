@@ -5,6 +5,7 @@ import ProductManagementPage from "../modules/products/pages/ProductManagementPa
 import PurchasesPage from "../modules/purchases/pages/PurchasesPage";
 import SalesPage from "../modules/sales/pages/SalesPage";
 import TransfersPage from "../modules/transfers/pages/TransfersPage";
+import CertificatePage from "../modules/configuration/pages/CertificatePage";
 
 /**
  * Mapeo exacto entre las rutas devueltas por la base de datos (API) a
@@ -20,4 +21,5 @@ export const routeMap = {
   "/compras": PurchasesPage,
   "/ventas": SalesPage,
   "/traspasos": TransfersPage,
+  "/configurar": CertificatePage,
 };

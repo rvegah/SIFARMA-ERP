@@ -31,6 +31,7 @@ import {
 } from "@mui/icons-material";
 import { farmaColors } from "../../app/theme";
 import notificationService from "../services/notificationService";
+import PageHeader from "../components/PageHeader";
 
 const NotificationDetailPage = () => {
   const { numeroTraspaso } = useParams();
@@ -95,7 +96,23 @@ const NotificationDetailPage = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, margin: "0 auto", display: "flex", flexDirection: "column", gap: 4 }}>
+    <Box sx={{ p: 4, maxWidth: 1200, margin: "0 auto", display: "flex", flexDirection: "column", gap: 3 }}>
+      <PageHeader 
+        title="Detalle de Traspaso"
+        subtitle={`Información detallada sobre el movimiento de mercadería: ${data?.numeroTraspaso || numeroTraspaso}`}
+        icon={<LocalShipping />}
+        action={
+          <Button 
+            variant="outlined" 
+            startIcon={<ArrowBack />} 
+            onClick={() => navigate(-1)}
+            sx={{ borderRadius: 2, borderColor: farmaColors.secondary, color: farmaColors.secondary }}
+          >
+            Volver
+          </Button>
+        }
+      />
+
       {/* 1. Detalle de la Cabecera */}
       <Card
         sx={{
@@ -106,31 +123,6 @@ const NotificationDetailPage = () => {
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Tooltip title="Volver a Notificaciones">
-                <IconButton onClick={() => navigate(-1)} size="small">
-                  <ArrowBack />
-                </IconButton>
-              </Tooltip>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: farmaColors.secondary,
-                  fontWeight: 700,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                }}
-              >
-                <LocalShipping sx={{ color: farmaColors.primary }} /> Detalle del Traspaso (Solo Vista)
-              </Typography>
-            </Box>
-            <Typography variant="h6" sx={{ color: farmaColors.primary, fontWeight: 800 }}>
-              {data?.numeroTraspaso || numeroTraspaso}
-            </Typography>
-          </Box>
-
           {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
               <CircularProgress color="primary" />

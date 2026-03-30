@@ -17,6 +17,7 @@ import {
     TableHead,
     TableRow,
     IconButton,
+    Divider,
     Chip,
     CircularProgress,
     Tooltip
@@ -31,6 +32,7 @@ import { farmaColors } from "../../../app/theme";
 import userService from "../../../services/api/userService";
 import orderService from "../services/orderService";
 import { useNavigate } from "react-router-dom";
+import PageHeader from "../../../shared/components/PageHeader";
 
 const STATUS_OPTIONS = [
     { value: "PEN", label: "Pendiente" },
@@ -112,22 +114,29 @@ const MyOrdersSection = () => {
 
     return (
         <Container maxWidth="xl" sx={{ py: 3 }}>
-            <Box sx={{ mb: 4 }}>
-                <Typography variant="h4" sx={{ fontWeight: 800, color: farmaColors.secondary, display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <History fontSize="large" sx={{ color: farmaColors.primary }} /> Mis Pedidos
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    Consulta el historial y estado de tus pedidos realizados.
-                </Typography>
-            </Box>
+            <PageHeader
+                title="Mis Pedidos"
+                // subtitle="Consulta el historial y estado de tus pedidos realizados."
+                icon={<History fontSize="large" />}
+            />
 
             {/* Filtros de Búsqueda */}
             <Card sx={{ borderRadius: 3, mb: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                 <CardContent sx={{ p: 4 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                    {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                         <FilterList color="primary" />
                         <Typography variant="h6" sx={{ fontWeight: 700 }}>Filtros de Búsqueda</Typography>
+                    </Box> */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                        <Box>
+                            <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
+                                Filtros de Búsqueda
+                            </Typography>
+                        </Box>
                     </Box>
+
+                    <Divider sx={{ mb: 4 }} />
+
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={6} md={2.4}>
                             <TextField

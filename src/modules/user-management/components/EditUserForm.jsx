@@ -25,6 +25,8 @@ import {
 import { Save, Cancel, Visibility, VisibilityOff } from "@mui/icons-material";
 import { useUsers } from "../context/UserContext";
 import { farmaColors } from "/src/app/theme";
+import PageHeader from "../../../shared/components/PageHeader";
+import { Edit as EditIcon } from "@mui/icons-material";
 
 // 🆕 Opciones de título (estáticas)
 const TITULOS = [
@@ -120,29 +122,11 @@ const EditUserForm = ({ onCancel }) => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Encabezado */}
-      <Paper
-        sx={{
-          p: 3,
-          mb: 3,
-          background: `linear-gradient(135deg, ${farmaColors.alpha.primary10} 0%, ${farmaColors.alpha.primary20} 100%)`,
-          borderLeft: `4px solid ${farmaColors.primary}`,
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 600,
-            color: farmaColors.secondary,
-            mb: 1,
-          }}
-        >
-          EDITAR USUARIO: {userToEdit.nombreCompleto}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Modificar información del usuario existente
-        </Typography>
-      </Paper>
+      <PageHeader 
+        title={`Editar Usuario: ${userToEdit.nombreCompleto}`}
+        subtitle="Modificar información del usuario existente del sistema."
+        icon={<EditIcon fontSize="large" />}
+      />
 
       <Card sx={{ p: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
         <Grid container spacing={3}>

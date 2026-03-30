@@ -44,6 +44,8 @@ import CancelInvoiceModal from "../components/CancelInvoiceModal";
 import ProductsModal from "../components/ProductsModal";
 import { useAuth } from "../../../context/AuthContext";
 import SalesService from "../services/salesService";
+import PageHeader from "../../../shared/components/PageHeader";
+import { ShoppingCart as ShoppingCartHeaderIcon } from "@mui/icons-material";
 
 // ✅ NUEVO: Hook de estado SIAT
 import { useSiatStatus } from "../hooks/useSiatStatus";
@@ -776,13 +778,13 @@ const CreateSaleSection = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      {/* ✅ NUEVO: Banner de estado SIAT — visible para el vendedor */}
-      <SiatStatusBanner
-        siatOnline={siatOnline}
-        eventoActivo={eventoActivo}
-        loading={loadingSiat}
-        isContingencia={isContingencia}
+      <PageHeader 
+        title="Realizar Venta"
+        subtitle="Generación de facturas y gestión de ventas al cliente."
+        icon={<ShoppingCartHeaderIcon />}
       />
+
+      {/* ✅ NUEVO: Banner de estado SIAT — visible para el vendedor */}
 
       {/* FORMULARIO DE CONTINGENCIA (solo eventos 5-7) */}
       {eventoActivo && isContingencia && (

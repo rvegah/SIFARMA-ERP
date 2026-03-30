@@ -22,16 +22,19 @@ const authService = {
       // Verificar respuesta exitosa
       if (response.data && response.data.exitoso) {
         const userData = response.data.datos;
-        
         console.log('✅ Login exitoso:', {
           usuario: userData.usuario,
           rol: userData.rol,
           sucursal: userData.sucursal,
+          equipo: userData.codigoEquipoComputo_ID,
         });
 
         return {
           success: true,
-          user: userData,
+          user: {
+            ...userData,
+            codigoEquipoComputo_ID: userData.codigoEquipoComputo_ID || null
+          },
           message: response.data.mensaje,
         };
       } else {

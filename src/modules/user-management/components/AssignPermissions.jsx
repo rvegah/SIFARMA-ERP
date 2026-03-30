@@ -33,14 +33,12 @@ import {
   DialogActions,
 } from "@mui/material";
 import {
-  ExpandMore,
-  Person,
-  Save,
-  Cancel,
   CheckCircle,
   SelectAll,
   ClearAll as DeselectAll,
+  VpnKey,
 } from "@mui/icons-material";
+import PageHeader from "../../../shared/components/PageHeader";
 import { useUsers } from "../context/UserContext";
 import { farmaColors } from "/src/app/theme";
 
@@ -441,26 +439,11 @@ const AssignPermissions = ({ onCancel }) => {
   // ========================================
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Encabezado */}
-      <Paper
-        sx={{
-          p: 3,
-          mb: 3,
-          bgcolor: "#f3e5f5",
-          borderLeft: `4px solid ${farmaColors.secondary}`,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: 600, color: "#1A202C", mb: 1 }}
-        >
-          ASIGNAR PERMISOS
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Gestionar permisos y roles de usuario
-        </Typography>
-      </Paper>
+      <PageHeader 
+        title="Asignar Permisos"
+        subtitle="Gestión de accesos y roles detallados para los usuarios del sistema."
+        icon={<VpnKey />}
+      />
 
       <Grid container spacing={3}>
         {/* ========================================

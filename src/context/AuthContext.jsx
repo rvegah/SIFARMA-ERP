@@ -152,6 +152,7 @@ export const AuthProvider = ({ children }) => {
     hasAccess,
     refreshPermissions,
     codigoEmpleado: user?.codigoEmpleado || null,
+    codigoEquipoComputo_ID: user?.codigoEquipoComputo_ID || null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

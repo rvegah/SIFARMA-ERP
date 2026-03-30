@@ -11,11 +11,18 @@ import { useCreditPurchases } from "../hooks/useCreditPurchases";
 import { useInventoryOutput } from "../hooks/useInventoryOutput";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Container, Box } from "@mui/material";
+import { ShoppingCart } from "@mui/icons-material";
+import PageHeader from "../../../shared/components/PageHeader";
 
 const CreditPurchasesWrapper = () => {
     const creditPurchases = useCreditPurchases();
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
+            <PageHeader
+                title="Compras al Crédito"
+                // subtitle="Gestión y seguimiento de facturas con pagos pendientes o realizados."
+                icon={<ShoppingCart />}
+            />
             <CreditPurchasesListSection {...creditPurchases} />
         </Container>
     );
@@ -50,6 +57,11 @@ const PurchasesDispatcher = () => {
 
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
+            <PageHeader
+                title="Módulo de Compras"
+                // subtitle="Gestión de órdenes de compra y abastecimiento de sucursales."
+                icon={<ShoppingCart />}
+            />
             <Box sx={{ mt: 2 }}>
                 {viewState === "creating" && (
                     <CreatePurchaseSection
@@ -101,6 +113,11 @@ const InventoryOutputWrapper = () => {
 
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
+            <PageHeader
+                title="Módulo de Compras"
+                // subtitle="Gestión de órdenes de compra y abastecimiento de sucursales."
+                icon={<ShoppingCart />}
+            />
             {viewState === "creating" ? (
                 <CreateInventoryOutputSection
                     outputData={outputData}

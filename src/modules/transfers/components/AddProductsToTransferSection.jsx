@@ -584,22 +584,32 @@ const AddProductsToTransferSection = ({
             {/* 5. Productos por Sucursal Report */}
             <Card sx={{ borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
                 <CardContent sx={{ p: 0 }}>
-                    <Box sx={{ p: 2, borderBottom: `1px solid ${farmaColors.alpha.secondary10}` }}>
-                        <Typography variant="h6" sx={{ color: farmaColors.secondary, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Assessment sx={{ color: farmaColors.primary }} /> Lista de productos del Laboratorio
+                    <Box sx={{ p: 2, borderBottom: `1px solid ${farmaColors.alpha.secondary10}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="h6" sx={{ color: farmaColors.secondary, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Assessment sx={{ color: farmaColors.primary }} /> Reporte: Productos por Sucursal
                         </Typography>
+                        {reportData.length > 0 && (
+                            <Chip 
+                                label={`${reportData.length} productos encontrados`} 
+                                color="primary" 
+                                variant="outlined" 
+                                size="small" 
+                                sx={{ fontWeight: 600 }}
+                            />
+                        )}
                     </Box>
-                    {/* <Box sx={{ p: 3 }}>
+                    <Box sx={{ p: 3, bgcolor: '#fafafa', borderBottom: `1px solid ${farmaColors.alpha.secondary10}` }}>
                         <Grid container spacing={2} alignItems="center">
                             <Grid item xs={12} sm={6} md={4}>
                                 <TextField
                                     fullWidth
-                                    label="Laboratorio"
+                                    label="Laboratorio / Proveedor"
                                     placeholder="Ej: INTI"
                                     size="small"
                                     value={reportLabInput}
                                     onChange={(e) => setReportLabInput(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleFetchReport()}
+                                    sx={{ bgcolor: 'white' }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={4} md={3}>
@@ -607,20 +617,26 @@ const AddProductsToTransferSection = ({
                                     <Button
                                         variant="contained"
                                         fullWidth
-                                        startIcon={reportLoading ? <CircularProgress size={20} color="inherit" /> : <Assessment />}
+                                        startIcon={reportLoading ? <CircularProgress size={20} color="inherit" /> : <Search />}
                                         onClick={handleFetchReport}
                                         disabled={reportLoading}
-                                        sx={{ background: farmaColors.gradients.primary }}
+                                        sx={{ 
+                                            background: farmaColors.gradients.primary,
+                                            fontWeight: 700,
+                                            borderRadius: 2
+                                        }}
                                     >
-                                        Buscar Productos
+                                        Buscar
                                     </Button>
                                     <Tooltip title="Reestablecer">
                                         <IconButton
                                             onClick={handleResetReport}
+                                            disabled={reportLoading}
                                             sx={{
-                                                bgcolor: farmaColors.alpha.secondary10,
-                                                '&:hover': { bgcolor: farmaColors.alpha.secondary20 },
-                                                color: 'text.secondary'
+                                                bgcolor: 'rgba(0,0,0,0.05)',
+                                                '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' },
+                                                color: farmaColors.secondary,
+                                                borderRadius: 2
                                             }}
                                         >
                                             <RestartAlt />
@@ -629,7 +645,7 @@ const AddProductsToTransferSection = ({
                                 </Box>
                             </Grid>
                         </Grid>
-                    </Box> */}
+                    </Box>
 
                     {reportData.length > 0 && (
                         <TableContainer sx={{ maxHeight: 600 }}>
