@@ -10,7 +10,8 @@ import {
     Add, Delete, Search, Save, Receipt, LocalShipping,
     ShoppingBag, Info, CheckCircle, Visibility, Edit,
     CalendarToday, Store, Inventory, LocalPostOffice,
-    CheckCircleOutline, AssignmentTurnedIn, HelpOutline
+    CheckCircleOutline, AssignmentTurnedIn, HelpOutline,
+    Badge, Payments, Discount, MonetizationOn
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import { useSnackbar } from "notistack";
@@ -199,7 +200,7 @@ const AddProductsToPurchaseSection = ({
                     value={value}
                     onChange={(e) => updateEditingField(field, e.target.value)}
                 >
-                    <MenuItem value="">Seleccione...</MenuItem>
+                    <MenuItem value="" disabled>Seleccione...</MenuItem>
                     {(selectOptions || []).map(opt => (
                         <MenuItem key={opt.id} value={opt.id}>{opt.nombre}</MenuItem>
                     ))}
@@ -213,7 +214,7 @@ const AddProductsToPurchaseSection = ({
                 label={label}
                 size="small"
                 type={type}
-                value={value}
+                value={value || (type === "number" ? 0 : "")}
                 onChange={(e) => updateEditingField(field, type === "number" ? Number(e.target.value) : e.target.value)}
                 InputLabelProps={type === "date" ? { shrink: true } : {}}
             />
@@ -323,20 +324,20 @@ const AddProductsToPurchaseSection = ({
                     <TableContainer>
                         <Table size="small">
                             <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Código</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Nombre Genérico</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Concentración</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Presentación</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Vencimiento</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc' }}>Lote</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc', textAlign: 'center' }}>N° Blis.</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc', textAlign: 'center' }}>Cant. Blis.</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc', textAlign: 'center' }}>F. Unidad</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, bgcolor: '#f8fafc', textAlign: 'center' }}>Acciones</TableCell>
+                                <TableRow sx={{ bgcolor: farmaColors.alpha.secondary10, height: 56 }}>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Código</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Nombre Genérico</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Concentración</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Presentación</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Vencimiento</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Lote</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary, textAlign: 'center' }}>N° Blis.</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary, textAlign: 'center' }}>Cant. Blis.</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary, textAlign: 'center' }}>F. Unidad</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary, textAlign: 'center' }}>Acciones</TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+                            <TableBody sx={{ bgcolor: "white" }}>
                                 {purchaseItems.map((item) => (
                                     <TableRow key={item.id} hover>
                                         <TableCell sx={{ fontWeight: 600 }}>{item.codigo || "-"}</TableCell>
@@ -414,28 +415,113 @@ const AddProductsToPurchaseSection = ({
                     </Box>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={4}>
-                            <TextField fullWidth label="Número Factura" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.numeroFactura} onChange={(e) => updateInvoiceField("numeroFactura", e.target.value)} />
+                            <TextField 
+                                fullWidth 
+                                label="Número Factura" 
+                                size="small" 
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <Receipt sx={{ color: "action.active", mr: 1 }} />
+                                }} 
+                                value={invoiceData.numeroFactura} 
+                                onChange={(e) => updateInvoiceField("numeroFactura", e.target.value)} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField fullWidth label="Fecha" type="date" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.fecha} onChange={(e) => updateInvoiceField("fecha", e.target.value)} InputLabelProps={{ shrink: true }} />
+                            <TextField 
+                                fullWidth 
+                                label="Fecha" 
+                                type="date" 
+                                size="small" 
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <CalendarToday sx={{ color: "action.active", mr: 1 }} />
+                                }} 
+                                value={invoiceData.fecha} 
+                                onChange={(e) => updateInvoiceField("fecha", e.target.value)} 
+                                InputLabelProps={{ shrink: true }} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField fullWidth label="NIT" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.nit} onChange={(e) => updateInvoiceField("nit", e.target.value)} />
+                            <TextField 
+                                fullWidth 
+                                label="NIT" 
+                                size="small" 
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <Badge sx={{ color: "action.active", mr: 1 }} />
+                                }} 
+                                value={invoiceData.nit} 
+                                onChange={(e) => updateInvoiceField("nit", e.target.value)} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField fullWidth label="Nombre Proveedor" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.nombreProveedor} onChange={(e) => updateInvoiceField("nombreProveedor", e.target.value)} />
+                            <TextField 
+                                fullWidth 
+                                label="Nombre Proveedor" 
+                                size="small" 
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <Business sx={{ color: "action.active", mr: 1 }} />
+                                }} 
+                                value={invoiceData.nombreProveedor} 
+                                onChange={(e) => updateInvoiceField("nombreProveedor", e.target.value)} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField fullWidth label="Número Pedido" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.numeroPedido} onChange={(e) => updateInvoiceField("numeroPedido", e.target.value)} />
+                            <TextField 
+                                fullWidth 
+                                label="Número Pedido" 
+                                size="small" 
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <ShoppingCart sx={{ color: "action.active", mr: 1 }} />
+                                }} 
+                                value={invoiceData.numeroPedido} 
+                                onChange={(e) => updateInvoiceField("numeroPedido", e.target.value)} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField fullWidth label="Total Compra" type="number" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.totalCompra} onChange={(e) => updateInvoiceField("totalCompra", Number(e.target.value))} />
+                            <TextField 
+                                fullWidth 
+                                label="Total Compra" 
+                                type="number" 
+                                size="small" 
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <Payments sx={{ color: "action.active", mr: 1 }} />
+                                }} 
+                                value={invoiceData.totalCompra} 
+                                onChange={(e) => updateInvoiceField("totalCompra", Number(e.target.value))} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField fullWidth label="Desc. Comercial" type="number" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.descuentoComercial} onChange={(e) => updateInvoiceField("descuentoComercial", Number(e.target.value))} />
+                            <TextField 
+                                fullWidth 
+                                label="Desc. Comercial" 
+                                type="number" 
+                                size="small" 
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <Discount sx={{ color: "action.active", mr: 1 }} />
+                                }} 
+                                value={invoiceData.descuentoComercial} 
+                                onChange={(e) => updateInvoiceField("descuentoComercial", Number(e.target.value))} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField fullWidth label="Desc. Especial" type="number" size="small" InputProps={{ readOnly: isFinished }} value={invoiceData.descuentoEspecial} onChange={(e) => updateInvoiceField("descuentoEspecial", Number(e.target.value))} />
+                            <TextField 
+                                fullWidth 
+                                label="Desc. Especial" 
+                                type="number" 
+                                size="small" 
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <Discount sx={{ color: "action.active", mr: 1 }} />
+                                }} 
+                                value={invoiceData.descuentoEspecial} 
+                                onChange={(e) => updateInvoiceField("descuentoEspecial", Number(e.target.value))} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={3}>
                             <TextField
@@ -443,10 +529,13 @@ const AddProductsToPurchaseSection = ({
                                 label="Importe a Pagar"
                                 type="number"
                                 size="small"
-                                value={invoiceData.importePagar}
+                                value={invoiceData.importePagar || 0}
                                 onChange={(e) => updateInvoiceField("importePagar", Number(e.target.value))}
-                                InputProps={{ readOnly: isFinished }}
-                                sx={{ bgcolor: 'rgba(74, 95, 255, 0.05)' }}
+                                InputProps={{ 
+                                    readOnly: isFinished,
+                                    startAdornment: <MonetizationOn sx={{ color: farmaColors.primary, mr: 1 }} />
+                                }}
+                                sx={{ bgcolor: farmaColors.alpha.primary10 }}
                             />
                         </Grid>
                     </Grid>
@@ -455,7 +544,7 @@ const AddProductsToPurchaseSection = ({
 
             {/* Final Action Button */}
             {!isFinished && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, mb: 4 }}>
                     <Button
                         variant="contained"
                         size="large"
@@ -463,11 +552,12 @@ const AddProductsToPurchaseSection = ({
                         onClick={() => setFinishConfirmOpen(true)}
                         sx={{
                             px: 6,
-                            py: 2,
-                            borderRadius: 3,
+                            py: 1.5,
+                            borderRadius: 2,
                             fontWeight: 700,
                             background: farmaColors.gradients.primary,
-                            boxShadow: '0 8px 16px rgba(74, 95, 255, 0.3)'
+                            boxShadow: '0 8px 16px rgba(204, 108, 6, 0.2)',
+                            '&:hover': { background: farmaColors.gradients.primary, transform: 'translateY(-2px)' }
                         }}
                     >
                         Terminar Compra

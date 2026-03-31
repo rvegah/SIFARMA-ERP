@@ -165,7 +165,7 @@ const CreditPurchasesListSection = ({
                                     startAdornment: <Storefront sx={{ color: "action.active", mr: 1 }} />
                                 }}
                             >
-                                <MenuItem value="" disabled>Seleccione una sucursal</MenuItem>
+                                <MenuItem value="" disabled>Seleccione...</MenuItem>
                                 {catalogs.sucursales.map((s) => (
                                     <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                         {s.nombreSucursal}
@@ -183,7 +183,7 @@ const CreditPurchasesListSection = ({
                                 value={filters.TipoFormaPago}
                                 onChange={(e) => updateFilter("TipoFormaPago", e.target.value)}
                             >
-                                <MenuItem value="" disabled>Seleccione forma de pago</MenuItem>
+                                <MenuItem value="" disabled>Seleccione...</MenuItem>
                                 {catalogs.formasPago.map((f) => (
                                     <MenuItem key={f.tipoFormaPago} value={f.tipoFormaPago}>
                                         {f.nombre}
@@ -221,7 +221,7 @@ const CreditPurchasesListSection = ({
                                 value={filters.TieneSaldoPago}
                                 onChange={(e) => updateFilter("TieneSaldoPago", e.target.value)}
                             >
-                                <MenuItem value="" disabled>Seleccione saldo</MenuItem>
+                                <MenuItem value="" disabled>Seleccione...</MenuItem>
                                 <MenuItem value={true}>Con monto a Pagar</MenuItem>
                                 <MenuItem value={false}>Pagados</MenuItem>
                             </TextField>
@@ -261,7 +261,6 @@ const CreditPurchasesListSection = ({
                             <TextField
                                 fullWidth
                                 label="Número de Factura"
-                                placeholder="Ingrese número de factura"
                                 value={filters.NumeroFactura}
                                 onChange={(e) => updateFilter("NumeroFactura", e.target.value)}
                                 InputProps={{
@@ -280,10 +279,11 @@ const CreditPurchasesListSection = ({
                                 disabled={loading}
                                 sx={{
                                     height: 56,
-                                    borderRadius: 3,
+                                    borderRadius: 2,
                                     background: farmaColors.gradients.primary,
                                     fontSize: "1.1rem",
-                                    fontWeight: 700
+                                    fontWeight: 700,
+                                    boxShadow: "0 4px 12px rgba(204, 108, 6, 0.2)"
                                 }}
                             >
                                 {loading ? "Buscando..." : "Buscar"}
@@ -298,7 +298,7 @@ const CreditPurchasesListSection = ({
                 <TableContainer>
                     <Table>
                         <TableHead>
-                            <TableRow sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
+                            <TableRow sx={{ bgcolor: farmaColors.alpha.secondary10, height: 56 }}>
                                 <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Proveedor</TableCell>
                                 <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>No. Factura</TableCell>
                                 <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }} align="right">Monto Deuda</TableCell>
@@ -309,7 +309,7 @@ const CreditPurchasesListSection = ({
                                 <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }} align="center">Acciones</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody>
+                        <TableBody sx={{ bgcolor: "white" }}>
                             {loading && results.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={8} align="center" sx={{ py: 10 }}>

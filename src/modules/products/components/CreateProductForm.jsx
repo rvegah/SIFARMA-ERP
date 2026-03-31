@@ -24,16 +24,28 @@ import {
   CircularProgress,
   Divider,
 } from "@mui/material";
-import { Save, AddBox } from "@mui/icons-material";
+import {
+  Save,
+  AddBox,
+  Edit,
+  Label,
+  Category,
+  Medication,
+  Scale,
+  LocalHospital,
+  List,
+  Science,
+  Public,
+  Description,
+  FormatListBulleted,
+  Layers,
+  Cancel
+} from "@mui/icons-material";
 import { useProductContext } from "../context/ProductContext";
 import { farmaColors } from "/src/app/theme";
 import PageHeader from "../../../shared/components/PageHeader";
 
-const LabelField = ({ children, required }) => (
-  <Typography variant="body2" sx={{ color: farmaColors.primary, mb: 1, fontWeight: 600 }}>
-    {children} {required && <span style={{ color: "red" }}>*</span>}
-  </Typography>
-);
+
 
 const CreateProductForm = ({ onCancel }) => {
   const {
@@ -82,79 +94,77 @@ const CreateProductForm = ({ onCancel }) => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       <PageHeader
         title="Registrar Producto"
         // subtitle="Formulario de alta para nuevos productos e insumos de farmacia."
-        icon={<AddBox />}
+        icon={<AddBox fontSize="large" />}
       />
 
-      <Card sx={{ p: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
+      <Card sx={{ p: 4, borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
         <Grid container spacing={3}>
 
           {/* === SECCIÓN 1: Identificación === */}
           <Grid item xs={12}>
-            {/* <Typography variant="subtitle1" sx={{ fontWeight: 700, color: farmaColors.secondary, mb: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: farmaColors.secondary, mb: 1 }}>
               Identificación del Producto
-            </Typography> */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
-                  Identificación del Producto
-                </Typography>
-              </Box>
-            </Box>
+            </Typography>
             <Divider sx={{ mb: 2 }} />
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField required>Principio Activo</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: Ibuprofeno"
+              required
+              label="Principio Activo"
               value={productForm.principioActivo || ""}
               onChange={handleChange("principioActivo")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Medication sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
           <Grid item xs={12} md={4}>
-            <LabelField required>Nombre Genérico</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: Ibuprofeno 400mg"
+              required
+              label="Nombre Genérico"
               value={productForm.nombreGenerico || ""}
               onChange={handleChange("nombreGenerico")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Label sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
           <Grid item xs={12} md={4}>
-            <LabelField required>Nombre Comercial</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: Advil"
+              required
+              label="Nombre Comercial"
               value={productForm.nombreComercial || ""}
               onChange={handleChange("nombreComercial")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Label sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <LabelField required>Nombre del Producto</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: Paracetamol 500mg"
+              required
+              label="Nombre del Producto"
               value={productForm.nombre || ""}
               onChange={handleChange("nombre")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Description sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
 
           {/* Radio: Tipo de producto */}
           <Grid item xs={12} md={6}>
-            <FormControl>
-              <FormLabel sx={{ color: farmaColors.primary, fontWeight: 600, mb: 1 }}>
-                Tipo de Producto <span style={{ color: "red" }}>*</span>
-              </FormLabel>
+            <FormControl component="fieldset">
               <RadioGroup
                 row
                 value={productForm.esProductoMedicamento === true ? "true" : productForm.esProductoMedicamento === false ? "false" : ""}
@@ -175,102 +185,112 @@ const CreateProductForm = ({ onCancel }) => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField required>Tipo Forma Farmacéutica</LabelField>
-            <FormControl fullWidth>
-              <Select
-                displayEmpty
-                value={productForm.tipoFormaFarmaceutica || ""}
-                onChange={handleChange("tipoFormaFarmaceutica")}
-                sx={{ bgcolor: "white" }}
-              >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
-                {catalogs?.formasFarmaceuticas?.map(i => (
-                  <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <TextField
+              select
+              fullWidth
+              required
+              label="Tipo Forma Farmacéutica"
+              value={productForm.tipoFormaFarmaceutica || ""}
+              onChange={handleChange("tipoFormaFarmaceutica")}
+              InputProps={{
+                startAdornment: <FormatListBulleted sx={{ color: "action.active", mr: 1 }} />
+              }}
+            >
+              <MenuItem value="" disabled>Seleccione...</MenuItem>
+              {catalogs?.formasFarmaceuticas?.map(i => (
+                <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField>Forma Farmacéutica</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: Comprimido recubierto"
+              label="Forma Farmacéutica"
               value={productForm.formaFarmaceuticaTexto || ""}
               onChange={handleChange("formaFarmaceuticaTexto")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Category sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField>Concentración</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: 500mg/5ml"
+              label="Concentración"
               value={productForm.concentracion || ""}
               onChange={handleChange("concentracion")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Layers sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField>Presentación</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: Caja x 20 tabletas"
+              label="Presentación"
               value={productForm.presentacionTexto || ""}
               onChange={handleChange("presentacionTexto")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Description sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField required>Unidad de Medida</LabelField>
-            <FormControl fullWidth>
-              <Select
-                displayEmpty
-                value={productForm.unidadMedida || ""}
-                onChange={handleChange("unidadMedida")}
-                sx={{ bgcolor: "white" }}
-              >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
-                {catalogs?.unidadesMedida?.map(i => (
-                  <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <TextField
+              select
+              fullWidth
+              required
+              label="Unidad de Medida"
+              value={productForm.unidadMedida || ""}
+              onChange={handleChange("unidadMedida")}
+              InputProps={{
+                startAdornment: <Scale sx={{ color: "action.active", mr: 1 }} />
+              }}
+            >
+              <MenuItem value="" disabled>Seleccione...</MenuItem>
+              {catalogs?.unidadesMedida?.map(i => (
+                <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField>Dosis</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: 500mg c/8h"
+              label="Dosis"
               value={productForm.dosis || ""}
               onChange={handleChange("dosis")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Description sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <LabelField>Vía de Administración</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: Oral, Tópica"
+              label="Vía de Administración"
               value={productForm.viaAdministracion || ""}
               onChange={handleChange("viaAdministracion")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <LocalHospital sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <LabelField>Acción Terapéutica</LabelField>
             <TextField
               fullWidth
-              placeholder="Ej: Analgésico, Antipirético"
+              label="Acción Terapéutica"
               value={productForm.accionTerapeutica || ""}
               onChange={handleChange("accionTerapeutica")}
-              sx={{ bgcolor: "white" }}
+              InputProps={{
+                startAdornment: <Medication sx={{ color: "action.active", mr: 1 }} />
+              }}
             />
           </Grid>
 
@@ -283,76 +303,101 @@ const CreateProductForm = ({ onCancel }) => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField required>Línea</LabelField>
-            <FormControl fullWidth>
-              <Select
-                displayEmpty
-                value={productForm.linea || ""}
-                onChange={handleChange("linea")}
-                sx={{ bgcolor: "white" }}
-              >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
-                {catalogs?.lineas?.map(i => (
-                  <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <TextField
+              select
+              fullWidth
+              required
+              label="Línea"
+              value={productForm.linea || ""}
+              onChange={handleChange("linea")}
+              InputProps={{
+                startAdornment: <List sx={{ color: "action.active", mr: 1 }} />
+              }}
+            >
+              <MenuItem value="" disabled>Seleccione...</MenuItem>
+              {catalogs?.lineas?.map(i => (
+                <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField required>Laboratorio</LabelField>
-            <FormControl fullWidth>
-              <Select
-                displayEmpty
-                value={productForm.laboratorio || ""}
-                onChange={handleChange("laboratorio")}
-                disabled={!productForm.linea || catalogs?.laboratorios?.length === 0}
-                sx={{ bgcolor: productForm.linea ? "white" : "#f0f0f0" }}
-              >
-                <MenuItem value="" disabled>
-                  {!productForm.linea ? "Seleccione Línea primero" : "Seleccione..."}
-                </MenuItem>
-                {catalogs?.laboratorios?.map(i => (
-                  <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <TextField
+              select
+              fullWidth
+              required
+              label="Laboratorio"
+              value={productForm.laboratorio || ""}
+              onChange={handleChange("laboratorio")}
+              disabled={!productForm.linea || catalogs?.laboratorios?.length === 0}
+              InputProps={{
+                startAdornment: <Science sx={{ color: "action.active", mr: 1 }} />
+              }}
+            >
+              <MenuItem value="" disabled>Seleccione...</MenuItem>
+              {catalogs?.laboratorios?.map(i => (
+                <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <LabelField required>Industria (País)</LabelField>
-            <FormControl fullWidth>
-              <Select
-                displayEmpty
-                value={productForm.industria || ""}
-                onChange={handleChange("industria")}
-                sx={{ bgcolor: "white" }}
-              >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
-                {catalogs?.industrias?.map(i => (
-                  <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <TextField
+              select
+              fullWidth
+              required
+              label="Industria (País)"
+              value={productForm.industria || ""}
+              onChange={handleChange("industria")}
+              InputProps={{
+                startAdornment: <Public sx={{ color: "action.active", mr: 1 }} />
+              }}
+            >
+              <MenuItem value="" disabled>Seleccione...</MenuItem>
+              {catalogs?.industrias?.map(i => (
+                <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
           {/* Botones */}
           <Grid item xs={12}>
             <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
-              <Button variant="outlined" onClick={onCancel} disabled={loading}>
+              <Button
+                variant="outlined"
+                onClick={onCancel}
+                disabled={loading}
+                startIcon={<Cancel />}
+                sx={{
+                  borderColor: farmaColors.secondary,
+                  color: farmaColors.secondary,
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  "&:hover": {
+                    borderColor: farmaColors.secondaryDark,
+                    bgcolor: farmaColors.alpha.secondary10,
+                  },
+                }}
+              >
                 Cancelar
               </Button>
               <Button
                 variant="contained"
-                startIcon={loading ? <CircularProgress size={20} /> : <Save />}
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
                 onClick={handleSave}
                 disabled={loading}
                 sx={{
+                  borderRadius: 2,
+                  px: 4,
                   background: farmaColors.gradients.primary,
+                  fontWeight: 700,
                   "&:hover": { background: farmaColors.gradients.primary },
+                  boxShadow: "0 4px 12px rgba(204, 108, 6, 0.2)"
                 }}
               >
-                Guardar Producto
+                {loading ? "Guardando..." : "Guardar Producto"}
               </Button>
             </Box>
           </Grid>

@@ -14,7 +14,17 @@ import {
     Switch,
     InputAdornment
 } from "@mui/material";
-import { ReceiptLong, AccountBalance, Payment } from "@mui/icons-material";
+import { 
+    ReceiptLong, 
+    AccountBalance, 
+    Payment, 
+    CalendarToday, 
+    AccessTime, 
+    Description, 
+    MonetizationOn,
+    EventRepeat,
+    Comment
+} from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 
 const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) => {
@@ -39,7 +49,7 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
     };
 
     return (
-        <Card sx={{ maxWidth: 900, mx: "auto", borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
+        <Card sx={{ width: "100%", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
             <CardContent sx={{ p: 4 }}>
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: farmaColors.secondary, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Payment sx={{ color: farmaColors.primary }} /> Registro de Crédito
@@ -61,6 +71,9 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             onChange={(e) => updateField("fecha", e.target.value)}
                             InputLabelProps={{ shrink: true }}
                             required
+                            InputProps={{
+                                startAdornment: <CalendarToday sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -72,6 +85,9 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             onChange={(e) => updateField("hora", e.target.value)}
                             InputLabelProps={{ shrink: true }}
                             required
+                            InputProps={{
+                                startAdornment: <AccessTime sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         />
                     </Grid>
 
@@ -80,10 +96,12 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                         <TextField
                             fullWidth
                             label="Concepto de Pago"
-                            placeholder="Ej: Pago inicial de compra stock"
                             value={creditData.conceptoPago}
                             onChange={(e) => updateField("conceptoPago", e.target.value)}
                             required
+                            InputProps={{
+                                startAdornment: <Description sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         />
                     </Grid>
 
@@ -96,7 +114,8 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             value={creditData.montoDeuda}
                             onChange={(e) => updateField("montoDeuda", Number(e.target.value))}
                             InputProps={{
-                                startAdornment: <InputAdornment position="start">Bs.</InputAdornment>,
+                                startAdornment: <MonetizationOn sx={{ color: "action.active", mr: 1 }} />,
+                                endAdornment: <InputAdornment position="end">Bs.</InputAdornment>
                             }}
                             required
                         />
@@ -109,7 +128,8 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             value={creditData.montoPago}
                             onChange={(e) => updateField("montoPago", Number(e.target.value))}
                             InputProps={{
-                                startAdornment: <InputAdornment position="start">Bs.</InputAdornment>,
+                                startAdornment: <MonetizationOn sx={{ color: "success.main", mr: 1 }} />,
+                                endAdornment: <InputAdornment position="end">Bs.</InputAdornment>
                             }}
                             required
                         />
@@ -122,7 +142,8 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             value={creditData.montoSaldo}
                             onChange={(e) => updateField("montoSaldo", Number(e.target.value))}
                             InputProps={{
-                                startAdornment: <InputAdornment position="start">Bs.</InputAdornment>,
+                                startAdornment: <MonetizationOn sx={{ color: "error.main", mr: 1 }} />,
+                                endAdornment: <InputAdornment position="end">Bs.</InputAdornment>
                             }}
                             required
                         />
@@ -149,11 +170,10 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             <TextField
                                 fullWidth
                                 label="Número de Recibo"
-                                placeholder="Ej: REC-1001"
                                 value={creditData.numeroRecibo}
                                 onChange={(e) => updateField("numeroRecibo", e.target.value)}
                                 InputProps={{
-                                    startAdornment: <InputAdornment position="start"><ReceiptLong fontSize="small" /></InputAdornment>,
+                                    startAdornment: <ReceiptLong sx={{ color: "action.active", mr: 1 }} />,
                                 }}
                             />
                         </Grid>
@@ -163,11 +183,10 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                                 <TextField
                                     fullWidth
                                     label="Número de Cheque"
-                                    placeholder="Ej: CHQ-550"
                                     value={creditData.numeroCheque}
                                     onChange={(e) => updateField("numeroCheque", e.target.value)}
                                     InputProps={{
-                                        startAdornment: <InputAdornment position="start"><Payment fontSize="small" /></InputAdornment>,
+                                        startAdornment: <Payment sx={{ color: "action.active", mr: 1 }} />,
                                     }}
                                 />
                             </Grid>
@@ -175,11 +194,10 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                                 <TextField
                                     fullWidth
                                     label="Banco de Emisión"
-                                    placeholder="Ej: Banco Mercantil"
                                     value={creditData.bancoEmitido}
                                     onChange={(e) => updateField("bancoEmitido", e.target.value)}
                                     InputProps={{
-                                        startAdornment: <InputAdornment position="start"><AccountBalance fontSize="small" /></InputAdornment>,
+                                        startAdornment: <AccountBalance sx={{ color: "action.active", mr: 1 }} />,
                                     }}
                                 />
                             </Grid>
@@ -194,6 +212,9 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             type="number"
                             value={creditData.numeroDiasPago}
                             onChange={(e) => updateField("numeroDiasPago", Number(e.target.value))}
+                            InputProps={{
+                                startAdornment: <EventRepeat sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         />
                     </Grid>
 
@@ -206,23 +227,27 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             rows={3}
                             value={creditData.observaciones}
                             onChange={(e) => updateField("observaciones", e.target.value)}
+                            InputProps={{
+                                startAdornment: <Comment sx={{ color: "action.active", mr: 1, mt: 1, alignSelf: 'flex-start' }} />
+                            }}
                         />
                     </Grid>
 
-                    <Grid item xs={12} sx={{ mt: 2 }}>
+                    <Grid item xs={12} sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
                         <Button
-                            fullWidth
                             variant="contained"
                             size="large"
                             disabled={loading}
                             onClick={onSave}
-                            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
                             sx={{
-                                py: 2,
+                                px: 4,
+                                py: 1.5,
                                 borderRadius: 2,
                                 background: farmaColors.gradients.primary,
                                 fontWeight: 700,
-                                fontSize: "1rem"
+                                fontSize: "1rem",
+                                boxShadow: "0 4px 12px rgba(204, 108, 6, 0.2)"
                             }}
                         >
                             {loading ? "Procesando..." : "Crear Crédito"}

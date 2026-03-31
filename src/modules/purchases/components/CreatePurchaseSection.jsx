@@ -12,7 +12,18 @@ import {
     Divider,
     CircularProgress
 } from "@mui/material";
-import { ShoppingCart } from "@mui/icons-material";
+import {
+    Description,
+    CalendarToday,
+    Store,
+    Business,
+    Receipt,
+    Payment,
+    Info,
+    ShoppingCart,
+    Save,
+    Cancel
+} from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 
 const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalogs, loading, loadingOrders }) => {
@@ -22,57 +33,50 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
     };
 
     return (
-        <Card sx={{ maxWidth: 800, mx: "auto", borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
+        <Card sx={{ width: "100%", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
             <CardContent sx={{ p: 4 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                    {/* <Box sx={{
-                                    background: farmaColors.gradients.primary,
-                                    p: 1.5,
-                                    borderRadius: 3,
-                                    display: 'flex',
-                                    boxShadow: "0 4px 15px rgba(0,82,155,0.2)"
-                                }}>
-                                    <Output sx={{ color: "white", fontSize: 30 }} />
-                                </Box> */}
-                    <Box>
-                        <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
-                            Nueva Compra
-                        </Typography>
-                        {/* <Typography variant="body2" color="text.secondary">
-                                        Complete la información para generar el registro de salida.
-                                    </Typography> */}
-                    </Box>
+                <Box sx={{ mb: 3 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
+                        Nueva Compra
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Complete la información para generar el registro de compra.
+                    </Typography>
                 </Box>
                 <Divider sx={{ mb: 4 }} />
 
                 <Grid container spacing={3}>
-                    {/* Título */}
-                    <Grid item xs={12}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             label="Título / Descripción"
-                            placeholder="Ej: Compra de stock mensual"
                             value={purchaseData.descripcion}
                             onChange={(e) => updateField("descripcion", e.target.value)}
                             required
+                            InputProps={{
+                                startAdornment: <Description sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         />
                     </Grid>
 
                     {/* Fecha de Compra */}
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} md={3}>
                         <TextField
                             fullWidth
                             label="Fecha de Compra"
                             type="date"
-                            value={purchaseData.fechaCompra}
+                            value={purchaseData.fechaCompra || new Date().toISOString().split('T')[0]}
                             onChange={(e) => updateField("fechaCompra", e.target.value)}
                             InputLabelProps={{ shrink: true }}
                             required
+                            InputProps={{
+                                startAdornment: <CalendarToday sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         />
                     </Grid>
 
                     {/* Sucursal */}
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} md={3}>
                         <TextField
                             select
                             fullWidth
@@ -80,8 +84,11 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                             value={purchaseData.sucursalId}
                             onChange={(e) => updateField("sucursalId", e.target.value)}
                             required
+                            InputProps={{
+                                startAdornment: <Store sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         >
-                            <MenuItem value="">Seleccione sucursal</MenuItem>
+                            <MenuItem value="" disabled>Seleccione...</MenuItem>
                             {(catalogs.sucursales || []).map((s) => (
                                 <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                     {s.nombreSucursal}
@@ -91,7 +98,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                     </Grid>
 
                     {/* Laboratorio / Proveedor */}
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} md={4}>
                         <TextField
                             select
                             fullWidth
@@ -99,8 +106,11 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                             value={purchaseData.codigoProveedor}
                             onChange={(e) => updateField("codigoProveedor", e.target.value)}
                             required
+                            InputProps={{
+                                startAdornment: <Business sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         >
-                            <MenuItem value="">Seleccione proveedor</MenuItem>
+                            <MenuItem value="" disabled>Seleccione...</MenuItem>
                             {(catalogs.proveedores || []).map((p) => (
                                 <MenuItem key={p.codigo} value={p.codigo}>
                                     {p.nombre}
@@ -110,18 +120,20 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                     </Grid>
 
                     {/* Numero Factura (Referencia) */}
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} md={4}>
                         <TextField
                             fullWidth
                             label="Número de Factura"
-                            placeholder="Ej: FAC-12345"
                             value={purchaseData.referencia}
                             onChange={(e) => updateField("referencia", e.target.value)}
+                            InputProps={{
+                                startAdornment: <Receipt sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         />
                     </Grid>
 
                     {/* Forma de Pago */}
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} md={4}>
                         <TextField
                             select
                             fullWidth
@@ -129,8 +141,11 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                             value={purchaseData.tipoFormaPago}
                             onChange={(e) => updateField("tipoFormaPago", e.target.value)}
                             required
+                            InputProps={{
+                                startAdornment: <Payment sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         >
-                            <MenuItem value="">Seleccione forma de pago</MenuItem>
+                            <MenuItem value="" disabled>Seleccione...</MenuItem>
                             {(catalogs.formasPago || []).map((f) => (
                                 <MenuItem key={f.tipoFormaPago} value={f.tipoFormaPago}>
                                     {f.nombre}
@@ -144,14 +159,16 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                         <TextField
                             fullWidth
                             label="Detalle Forma de Pago"
-                            placeholder="Ej: Pago con cheque 987"
                             value={purchaseData.detalleFormaPago}
                             onChange={(e) => updateField("detalleFormaPago", e.target.value)}
+                            InputProps={{
+                                startAdornment: <Info sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         />
                     </Grid>
 
                     {/* Pedido (Dinámico) */}
-                    <Grid item xs={12}>
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             select
                             fullWidth
@@ -160,10 +177,13 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                             onChange={(e) => updateField("codigoPedido", e.target.value)}
                             required
                             disabled={!purchaseData.sucursalId || loadingOrders}
-                            helperText={!purchaseData.sucursalId ? "Selecciona una sucursal para ver pedidos disponibles" : ""}
+                            helperText={!purchaseData.sucursalId ? "Selecciona una sucursal para ver pedidos" : ""}
+                            InputProps={{
+                                startAdornment: <ShoppingCart sx={{ color: "action.active", mr: 1 }} />
+                            }}
                         >
-                            <MenuItem value="">
-                                {loadingOrders ? "Buscando..." : (catalogs.pedidos.length > 0 ? "Seleccione un pedido" : "No hay pedidos pendientes")}
+                            <MenuItem value="" disabled>
+                                {loadingOrders ? "Buscando..." : "Seleccione..."}
                             </MenuItem>
                             {(catalogs.pedidos || []).map((p) => (
                                 <MenuItem key={p.codigo} value={p.codigo}>
@@ -173,20 +193,51 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                         </TextField>
                     </Grid>
 
-                    <Grid item xs={12} sx={{ mt: 2 }}>
+                    <Grid item xs={12} sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
                         <Button
-                            fullWidth
+                            variant="outlined"
+                            size="large"
+                            disabled={loading}
+                            onClick={() => setPurchaseData({
+                                descripcion: "",
+                                fechaCompra: new Date().toISOString().split("T")[0],
+                                sucursalId: "",
+                                tipoFormaPago: "",
+                                detalleFormaPago: "",
+                                codigoProveedor: "",
+                                referencia: "",
+                                codigoPedido: ""
+                            })}
+                            startIcon={<Cancel />}
+                            sx={{
+                                borderColor: farmaColors.secondary,
+                                color: farmaColors.secondary,
+                                px: 4,
+                                py: 1.5,
+                                borderRadius: 2,
+                                fontWeight: 700,
+                                "&:hover": {
+                                    borderColor: farmaColors.secondaryDark,
+                                    bgcolor: farmaColors.alpha.secondary10,
+                                },
+                            }}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
                             variant="contained"
                             size="large"
                             disabled={loading}
                             onClick={onCreate}
-                            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Save />}
                             sx={{
-                                py: 2,
+                                px: 5,
+                                py: 1.5,
                                 borderRadius: 2,
                                 background: farmaColors.gradients.primary,
                                 fontWeight: 700,
-                                fontSize: "1rem"
+                                fontSize: "1rem",
+                                boxShadow: "0 4px 12px rgba(204, 108, 6, 0.2)"
                             }}
                         >
                             {loading ? "Registrando..." : "Guardar Compra"}
