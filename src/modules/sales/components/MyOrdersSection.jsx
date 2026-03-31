@@ -23,10 +23,13 @@ import {
     Tooltip
 } from "@mui/material";
 import {
-    Search as SearchIcon,
-    Edit as EditIcon,
     History,
-    FilterList
+    FilterList,
+    Storefront,
+    CalendarMonth,
+    Numbers,
+    Rule,
+    Search
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import userService from "../../../services/api/userService";
@@ -47,8 +50,8 @@ const MyOrdersSection = () => {
     const [filters, setFilters] = useState({
         codigoSucursal: "",
         numeroPedido: "",
-        fechaInicio: "",
-        fechaFinal: "",
+        fechaInicio: new Date().toISOString().split("T")[0],
+        fechaFinal: new Date().toISOString().split("T")[0],
         estadoPedido: ""
     });
 
@@ -143,10 +146,12 @@ const MyOrdersSection = () => {
                                 select
                                 fullWidth
                                 label="Sucursal"
-                                size="small"
                                 value={filters.codigoSucursal}
                                 onChange={(e) => handleFilterChange("codigoSucursal", e.target.value)}
                                 required
+                                InputProps={{
+                                    startAdornment: <Storefront sx={{ color: "action.active", mr: 1 }} />
+                                }}
                             >
                                 <MenuItem value="">Seleccione sucursal</MenuItem>
                                 {catalogs.sucursales.map(s => (
@@ -159,10 +164,12 @@ const MyOrdersSection = () => {
                                 fullWidth
                                 label="Fecha Inicio"
                                 type="date"
-                                size="small"
                                 InputLabelProps={{ shrink: true }}
                                 value={filters.fechaInicio}
                                 onChange={(e) => handleFilterChange("fechaInicio", e.target.value)}
+                                InputProps={{
+                                    startAdornment: <CalendarMonth sx={{ color: "action.active", mr: 1 }} />
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6} md={2.4}>
@@ -170,20 +177,24 @@ const MyOrdersSection = () => {
                                 fullWidth
                                 label="Fecha Fin"
                                 type="date"
-                                size="small"
                                 InputLabelProps={{ shrink: true }}
                                 value={filters.fechaFinal}
                                 onChange={(e) => handleFilterChange("fechaFinal", e.target.value)}
+                                InputProps={{
+                                    startAdornment: <CalendarMonth sx={{ color: "action.active", mr: 1 }} />
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6} md={2.4}>
                             <TextField
                                 fullWidth
                                 label="Nº de Pedido"
-                                placeholder="Ej: PED-2026-..."
-                                size="small"
+                                // placeholder="Ej: PED-2026-..."
                                 value={filters.numeroPedido}
                                 onChange={(e) => handleFilterChange("numeroPedido", e.target.value)}
+                                InputProps={{
+                                    startAdornment: <Numbers sx={{ color: "action.active", mr: 1 }} />
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6} md={2.4}>
@@ -191,10 +202,12 @@ const MyOrdersSection = () => {
                                 select
                                 fullWidth
                                 label="Estado"
-                                size="small"
                                 value={filters.estadoPedido}
                                 onChange={(e) => handleFilterChange("estadoPedido", e.target.value)}
                                 required
+                                InputProps={{
+                                    startAdornment: <Rule sx={{ color: "action.active", mr: 1 }} />
+                                }}
                             >
                                 <MenuItem value="">Seleccione estado</MenuItem>
                                 {STATUS_OPTIONS.map(opt => (
@@ -206,14 +219,15 @@ const MyOrdersSection = () => {
                             <Button
                                 variant="contained"
                                 size="large"
-                                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SearchIcon />}
+                                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Search />}
                                 onClick={handleSearch}
                                 disabled={loading}
                                 sx={{
                                     background: farmaColors.gradients.primary,
                                     px: 6,
                                     borderRadius: 2,
-                                    fontWeight: 700
+                                    fontWeight: 700,
+                                    height: 56
                                 }}
                             >
                                 {loading ? "Buscando..." : "Buscar Pedidos"}
@@ -228,17 +242,17 @@ const MyOrdersSection = () => {
                 <TableContainer>
                     <Table>
                         <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
-                            <TableRow>
-                                <TableCell sx={{ fontWeight: 700 }}>Nº Pedido</TableCell>
-                                <TableCell sx={{ fontWeight: 700 }}>Usuario</TableCell>
-                                <TableCell sx={{ fontWeight: 700 }}>Sucursal</TableCell>
-                                <TableCell sx={{ fontWeight: 700 }}>Descripción</TableCell>
-                                <TableCell sx={{ fontWeight: 700 }}>Fecha</TableCell>
-                                <TableCell sx={{ fontWeight: 700 }}>Estado</TableCell>
-                                <TableCell sx={{ fontWeight: 700 }} align="center">Acciones</TableCell>
+                            <TableRow sx={{ height: 56 }}>
+                                <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Nº Pedido</TableCell>
+                                <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Usuario</TableCell>
+                                <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Sucursal</TableCell>
+                                <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Descripción</TableCell>
+                                <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Fecha</TableCell>
+                                <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Estado</TableCell>
+                                <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }} align="center">Acciones</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody>
+                        <TableBody sx={{ bgcolor: "white" }}>
                             {searchResults.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} align="center" sx={{ py: 10 }}>

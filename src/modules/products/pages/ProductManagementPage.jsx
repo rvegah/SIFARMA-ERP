@@ -14,23 +14,20 @@ function ProductManagementPageContent() {
 
     return (
         <Routes>
-            {/* <Route index element={<Navigate to="lista" replace />} /> */}
             <Route
                 path="lista"
                 element={
                     <ProductList
-                        onCreateProduct={() => navigate("../agregar")}
+                        onCreateProduct={() => navigate("/productos/agregar")}
                         onEditProduct={(product) => {
                             setSelectedProduct(product);
-                            navigate("../editar");
+                            navigate("/productos/editar");
                         }}
                     />
                 }
             />
-            <Route path="agregar" element={<CreateProductForm onCancel={() => navigate("../lista")} />} />
-            {/* <Route path="agregar-productos" element={<Navigate to="../agregar" replace />} /> */}
-            {/* <Route path="editar" element={<EditProductForm onCancel={() => navigate("../list")} />} />
-            <Route path="editar-productos" element={<Navigate to="../editar" replace />} /> */}
+            <Route path="agregar" element={<CreateProductForm onCancel={() => navigate("/productos/lista")} />} />
+            <Route path="editar" element={<EditProductForm onCancel={() => navigate("/productos/lista")} />} />
             {/* <Route path="ver-productos" element={<Navigate to="../list" replace />} /> */}
             {/* <Route path="*" element={<Navigate to="list" replace />} /> */}
         </Routes>

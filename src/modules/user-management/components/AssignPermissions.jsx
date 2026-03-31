@@ -37,11 +37,16 @@ import {
   SelectAll,
   ClearAll as DeselectAll,
   VpnKey,
+  Person,
+  Store,
+  ExpandMore,
+  Cancel,
+  Save,
+  AdminPanelSettings
 } from "@mui/icons-material";
 import PageHeader from "../../../shared/components/PageHeader";
 import { useUsers } from "../context/UserContext";
 import { farmaColors } from "/src/app/theme";
-
 // ========================================
 // CONSTANTES
 // ========================================
@@ -438,7 +443,7 @@ const AssignPermissions = ({ onCancel }) => {
   // RENDERIZADO
   // ========================================
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       <PageHeader 
         title="Asignar Permisos"
         subtitle="Gestión de accesos y roles detallados para los usuarios del sistema."
@@ -450,73 +455,63 @@ const AssignPermissions = ({ onCancel }) => {
             PANEL IZQUIERDO
             ======================================== */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
+          <Card sx={{ mb: 3, borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+            <CardContent sx={{ p: 3 }}>
               <Typography
                 variant="h6"
-                sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}
+                sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1.5, fontWeight: 700, color: farmaColors.secondary }}
               >
                 <Person />
                 Seleccionar Usuario
               </Typography>
 
-              {/* Selector de usuario */}
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Usuario</InputLabel>
-                <Select
-                  value={selectedUserId}
-                  onChange={handleUserChange}
-                  label="Usuario"
-                >
-                  {users.map((user) => (
-                    <MenuItem key={user.id} value={user.id}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Avatar
-                          sx={{
-                            width: 24,
-                            height: 24,
-                            fontSize: "0.75rem",
-                            bgcolor: farmaColors.primary,
-                          }}
-                        >
-                          {user.avatar ||
-                            user.nombreCompleto
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                        </Avatar>
-                        {user.nombreCompleto}
-                        <Chip label={user.rol} size="small" />
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                fullWidth
+                label="Usuario"
+                value={selectedUserId}
+                onChange={handleUserChange}
+                variant="outlined"
+                sx={{ mb: 3 }}
+                InputProps={{
+                  startAdornment: <Person sx={{ color: "action.active", mr: 1 }} />
+                }}
+              >
+                <MenuItem value="" disabled>Seleccione usuario</MenuItem>
+                {users.map((user) => (
+                  <MenuItem key={user.id} value={user.id}>
+                    {user.nombreCompleto} ({user.rol})
+                  </MenuItem>
+                ))}
+              </TextField>
 
               {/* Selector de sucursal */}
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Sucursal</InputLabel>
-                <Select
-                  value={selectedSucursalId}
-                  onChange={(e) => {
-                    setSelectedSucursalId(e.target.value);
-                    setHasChanges(true);
-                  }}
-                  label="Sucursal"
-                  disabled={!selectedUserId}
-                >
-                  {sucursales.map((sucursal) => (
-                    <MenuItem
-                      key={sucursal.sucursal_ID}
-                      value={sucursal.sucursal_ID}
-                    >
-                      {sucursal.nombreSucursal}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                fullWidth
+                label="Sucursal"
+                value={selectedSucursalId}
+                onChange={(e) => {
+                  setSelectedSucursalId(e.target.value);
+                  setHasChanges(true);
+                }}
+                variant="outlined"
+                disabled={!selectedUserId}
+                sx={{ mb: 3 }}
+                InputProps={{
+                  startAdornment: <Store sx={{ color: "action.active", mr: 1 }} />
+                }}
+              >
+                <MenuItem value="" disabled>Seleccione sucursal</MenuItem>
+                {sucursales.map((sucursal) => (
+                  <MenuItem
+                    key={sucursal.sucursal_ID}
+                    value={sucursal.sucursal_ID}
+                  >
+                    {sucursal.nombreSucursal}
+                  </MenuItem>
+                ))}
+              </TextField>
 
               {/* Info del usuario */}
               {currentUser && (
@@ -542,48 +537,49 @@ const AssignPermissions = ({ onCancel }) => {
                 Plantillas de Roles
               </Typography>
 
-              {filteredRoles.length === 0 ? (
-                <Alert severity="info">No hay roles disponibles</Alert>
-              ) : (
-                filteredRoles.map((role) => (
-                  <Button
-                    key={role.rol_ID}
-                    fullWidth
-                    variant="outlined"
-                    onClick={() => applyRoleTemplate(role.nombre_Rol)}
-                    disabled={!selectedUserId}
-                    sx={{
-                      mb: 1,
-                      justifyContent: "flex-start",
-                      "&:hover": {
-                        bgcolor: farmaColors.alpha.primary10,
-                      },
-                    }}
-                  >
-                    {role.nombre_Rol}
-                  </Button>
-                ))
-              )}
+              {filteredRoles.map((role) => (
+                <Button
+                  key={role.rol_ID}
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => applyRoleTemplate(role.nombre_Rol)}
+                  disabled={!selectedUserId}
+                  startIcon={<AdminPanelSettings />}
+                  sx={{
+                    mb: 1,
+                    justifyContent: "flex-start",
+                    textTransform: "none",
+                    borderColor: farmaColors.alpha.secondary20,
+                    color: farmaColors.secondary,
+                    "&:hover": {
+                      bgcolor: farmaColors.alpha.secondary10,
+                      borderColor: farmaColors.secondary,
+                    },
+                  }}
+                >
+                  {role.nombre_Rol}
+                </Button>
+              ))}
             </CardContent>
           </Card>
 
           {/* Resumen */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
+          <Card sx={{ borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: farmaColors.secondary }}>
                 Resumen
               </Typography>
               <Box
-                sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+                sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
               >
-                <Typography variant="body2">Permisos seleccionados:</Typography>
-                <Badge badgeContent={selectedPermissions} color="primary">
-                  <CheckCircle color="action" />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>Permisos seleccionados:</Typography>
+                <Badge badgeContent={selectedPermissions} color="primary" sx={{ "& .MuiBadge-badge": { fontWeight: 800 } }}>
+                  <CheckCircle sx={{ color: farmaColors.primary }} />
                 </Badge>
               </Box>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography variant="body2">Total permisos:</Typography>
-                <Typography variant="body2">{totalPermissions}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>Total permisos disponibles:</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>{totalPermissions}</Typography>
               </Box>
             </CardContent>
           </Card>
@@ -813,11 +809,15 @@ const AssignPermissions = ({ onCancel }) => {
               onClick={handleSavePermissions}
               disabled={!hasChanges || !selectedUserId || loading}
               sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
                 background: farmaColors.gradients.primary,
+                fontWeight: 700,
                 "&:hover": {
                   background: farmaColors.gradients.primary,
                   transform: "translateY(-2px)",
-                  boxShadow: `0 6px 25px ${farmaColors.alpha.primary30}`,
+                  boxShadow: `0 8px 25px ${farmaColors.alpha.primary30}`,
                 },
                 "&:disabled": {
                   background: "rgba(0, 0, 0, 0.12)",

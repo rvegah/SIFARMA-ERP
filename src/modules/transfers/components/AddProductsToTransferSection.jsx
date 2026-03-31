@@ -45,7 +45,9 @@ import {
     ContentCopy,
     Visibility,
     Assessment,
-    RestartAlt
+    RestartAlt,
+    Business,
+    QrCodeScanner
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import transferService from "../services/transferService";
@@ -258,12 +260,14 @@ const AddProductsToTransferSection = ({
                             <Grid item xs={12} sm={6} md={4}>
                                 <TextField
                                     fullWidth
-                                    label="Laboratorio"
-                                    placeholder="Ej: INTI"
+                                    label="Laboratorio / Proveedor"
                                     size="small"
                                     value={reportLabInput}
                                     onChange={(e) => setReportLabInput(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleFetchReport()}
+                                    InputProps={{
+                                        startAdornment: <Business sx={{ color: "action.active", mr: 1 }} />
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={4} md={3}>
@@ -320,22 +324,26 @@ const AddProductsToTransferSection = ({
                                 <TextField
                                     fullWidth
                                     label="Buscar por Código"
-                                    placeholder="Ej: COD123"
                                     size="small"
                                     value={searchFilters.codigo}
                                     onChange={(e) => setSearchFilters(prev => ({ ...prev, codigo: e.target.value }))}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    InputProps={{
+                                        startAdornment: <QrCodeScanner sx={{ color: "action.active", mr: 1 }} />
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={5}>
                                 <TextField
                                     fullWidth
                                     label="Buscar por Nombre"
-                                    placeholder="Ej: Paracetamol"
                                     size="small"
                                     value={searchFilters.nombre}
                                     onChange={(e) => setSearchFilters(prev => ({ ...prev, nombre: e.target.value }))}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    InputProps={{
+                                        startAdornment: <InventoryIcon sx={{ color: "action.active", mr: 1 }} />
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={2}>
@@ -366,15 +374,15 @@ const AddProductsToTransferSection = ({
                         </Box>
                         <TableContainer>
                             <Table size="small">
-                                <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
+                                <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10, height: 56 }}>
                                     <TableRow>
-                                        <TableCell sx={{ fontWeight: 600 }}>Código</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Detalle del Producto</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Lote / Vence</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }} align="right">Acción</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Código</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Detalle del Producto</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Lote / Vence</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }} align="right">Acción</TableCell>
                                     </TableRow>
                                 </TableHead>
-                                <TableBody>
+                                <TableBody sx={{ bgcolor: "white" }}>
                                     {searchResults.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
@@ -472,16 +480,16 @@ const AddProductsToTransferSection = ({
 
                     <TableContainer>
                         <Table size="small">
-                            <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
+                            <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10, height: 56 }}>
                                 <TableRow>
-                                    <TableCell sx={{ fontWeight: 800 }}>Producto</TableCell>
-                                    <TableCell sx={{ fontWeight: 800 }}>Lote / Vence</TableCell>
-                                    <TableCell sx={{ fontWeight: 800, width: 120 }}>Cantidad</TableCell>
-                                    <TableCell sx={{ fontWeight: 800 }}>Observaciones</TableCell>
-                                    {!isReadOnly && <TableCell align="center">Acción</TableCell>}
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Producto</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Lote / Vence</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary, width: 120 }}>Cantidad</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Observaciones</TableCell>
+                                    {!isReadOnly && <TableCell align="center" sx={{ fontWeight: 800, color: farmaColors.secondary }}>Acción</TableCell>}
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+                            <TableBody sx={{ bgcolor: "white" }}>
                                 {transferItems.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={isReadOnly ? 4 : 5} align="center" sx={{ py: 6 }}>

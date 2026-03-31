@@ -19,7 +19,8 @@ import {
     Event,
     Notes,
     Send,
-    CompareArrows
+    CompareArrows,
+    Cancel
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 
@@ -38,34 +39,16 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
     }
 
     return (
-        <Card sx={{ maxWidth: 900, mx: "auto", borderRadius: 4, boxShadow: "0 8px 32px rgba(0,0,0,0.08)" }}>
+        <Card sx={{ width: "100%", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
             <CardContent sx={{ p: 4 }}>
-                {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                    <Box sx={{
-                        background: farmaColors.gradients.primary,
-                        p: 1.5,
-                        borderRadius: 3,
-                        display: 'flex',
-                        boxShadow: "0 4px 15px rgba(0,82,155,0.2)"
-                    }}>
-                        <SwapHoriz sx={{ color: "white", fontSize: 30 }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
-                            Nuevo Traspaso entre Sucursales
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Defina las sucursales de origen y destino para el movimiento de mercadería.
-                        </Typography>
-                    </Box>
-                </Box>
-
-                <Divider sx={{ mb: 4 }} /> */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                     <Box>
                         <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
                             Nuevo Traspaso entre Sucursales
                         </Typography>
+                        {/* <Typography variant="body2" color="text.secondary">
+                            Defina las sucursales de origen y destino para el movimiento de mercadería.
+                        </Typography> */}
                     </Box>
                 </Box>
 
@@ -78,7 +61,6 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                             fullWidth
                             required
                             label="Resumen del Traspaso"
-                            placeholder="Ej: Traspaso de stock crítico - Sucursal San Martín"
                             value={transferData.descripcion}
                             onChange={(e) => updateField("descripcion", e.target.value)}
                             InputProps={{
@@ -100,7 +82,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                                 startAdornment: <Storefront sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione origen</MenuItem>
+                            <MenuItem value="" disabled>Seleccione...</MenuItem>
                             {catalogs.sucursales.map((s) => (
                                 <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                     {s.nombreSucursal}
@@ -122,7 +104,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                                 startAdornment: <CompareArrows sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione destino</MenuItem>
+                            <MenuItem value="" disabled>Seleccione...</MenuItem>
                             {catalogs.sucursales.map((s) => (
                                 <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                     {s.nombreSucursal}
@@ -138,7 +120,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                             required
                             label="Fecha Estimada de Envío"
                             type="date"
-                            value={transferData.fechaEnvio}
+                            value={transferData.fechaEnvio || new Date().toISOString().split('T')[0]}
                             onChange={(e) => updateField("fechaEnvio", e.target.value)}
                             InputLabelProps={{ shrink: true }}
                             InputProps={{
@@ -154,7 +136,6 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                             multiline
                             rows={3}
                             label="Observaciones"
-                            placeholder="Instrucciones adicionales para el transporte o motivo del traspaso..."
                             value={transferData.observaciones}
                             onChange={(e) => updateField("observaciones", e.target.value)}
                             InputProps={{
@@ -164,24 +145,45 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                         />
                     </Grid>
 
-                    <Grid item xs={12} sx={{ mt: 2 }}>
+                    <Grid item xs={12} sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
                         <Button
-                            fullWidth
+                            variant="outlined"
+                            size="large"
+                            disabled={loading}
+                            onClick={() => window.history.back()}
+                            startIcon={<Cancel />}
+                            sx={{
+                                borderColor: farmaColors.secondary,
+                                color: farmaColors.secondary,
+                                px: 4,
+                                py: 1.5,
+                                borderRadius: 2,
+                                fontWeight: 700,
+                                "&:hover": {
+                                    borderColor: farmaColors.secondaryDark,
+                                    bgcolor: farmaColors.alpha.secondary10,
+                                },
+                            }}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
                             variant="contained"
                             size="large"
                             disabled={loading}
                             onClick={onCreate}
                             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Send />}
                             sx={{
-                                py: 2,
-                                borderRadius: 3,
+                                px: 4,
+                                py: 1.5,
+                                borderRadius: 2,
                                 background: farmaColors.gradients.primary,
-                                fontWeight: 800,
-                                fontSize: "1.1rem",
-                                boxShadow: "0 6px 20px rgba(0,82,155,0.3)"
+                                fontWeight: 700,
+                                fontSize: "1rem",
+                                boxShadow: "0 4px 12px rgba(204, 108, 6, 0.2)"
                             }}
                         >
-                            {loading ? "Iniciando Traspaso..." : "Iniciar Traspaso y Añadir Productos"}
+                            {loading ? "Iniciando..." : "Iniciar Traspaso"}
                         </Button>
                     </Grid>
                 </Grid>

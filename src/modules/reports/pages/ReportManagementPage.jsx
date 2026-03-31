@@ -9,7 +9,8 @@ import {
     CardContent,
     Grid,
     Breadcrumbs,
-    Link
+    Link,
+    Divider
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
@@ -47,18 +48,33 @@ const ReportManagementPage = () => {
             </Box>
 
             {/* Main Content */}
-            <Box sx={{ minHeight: '400px', border: '2px dashed #05305A', p: 3, borderRadius: 2, bgcolor: "#fff" }}>
-                <Card sx={{ maxWidth: 600, mx: "auto", mt: 2, borderRadius: 3, boxShadow: "0 8px 32px rgba(0,0,0,0.1)" }}>
-                    <CardContent sx={{ p: 4, textAlign: "center" }}>
-                        <Assessment sx={{ fontSize: 60, color: farmaColors.primary, mb: 2, opacity: 0.8 }} />
-                        <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: farmaColors.secondary }}>
-                            Reportes por Sucursales
+            <Box sx={{ minHeight: '400px', p: 3, borderRadius: 4, bgcolor: "rgba(0,0,0,0.01)", border: `1px solid ${farmaColors.alpha.secondary10}` }}>
+                <Card sx={{ width: '100%', maxWidth: 800, mx: "auto", mt: 2, borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+                    <CardContent sx={{ p: 6, textAlign: "center" }}>
+                        <Box sx={{ 
+                            width: 80, 
+                            height: 80, 
+                            borderRadius: '50%', 
+                            bgcolor: farmaColors.alpha.primary10, 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            mx: 'auto',
+                            mb: 3
+                        }}>
+                            <Assessment sx={{ fontSize: 40, color: farmaColors.primary }} />
+                        </Box>
+                        
+                        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, color: farmaColors.secondary }}>
+                            Gestión de Reportes
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-                            Seleccione una acción para gestionar los reportes y pedidos de sucursal.
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 5, maxWidth: 500, mx: 'auto' }}>
+                            Acceda a las herramientas de generación de reportes detallados por sucursal y la gestión de pedidos de mercadería.
                         </Typography>
 
-                        <Grid container spacing={3}>
+                        <Divider sx={{ mb: 5 }} />
+
+                        <Grid container spacing={3} justifyContent="center">
                             <Grid item xs={12} sm={6}>
                                 <Button
                                     fullWidth
@@ -66,15 +82,17 @@ const ReportManagementPage = () => {
                                     size="large"
                                     startIcon={<GetApp />}
                                     sx={{
-                                        py: 2,
-                                        borderRadius: 2,
+                                        py: 2.5,
+                                        borderRadius: 3,
+                                        borderWidth: 2,
                                         borderColor: farmaColors.primary,
                                         color: farmaColors.primary,
-                                        "&:hover": { borderColor: farmaColors.primaryDark, bgcolor: "rgba(0,0,0,0.02)" }
+                                        fontWeight: 700,
+                                        "&:hover": { borderWidth: 2, borderColor: farmaColors.primaryDark, bgcolor: farmaColors.alpha.primary10 }
                                     }}
                                     onClick={() => window.alert("Generando Excel...")}
                                 >
-                                    Generar Excel
+                                    Descargar Reporte Excel
                                 </Button>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -84,14 +102,15 @@ const ReportManagementPage = () => {
                                     size="large"
                                     startIcon={<ShoppingCart />}
                                     sx={{
-                                        py: 2,
-                                        borderRadius: 2,
+                                        py: 2.5,
+                                        borderRadius: 3,
                                         background: farmaColors.gradients.primary,
-                                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+                                        fontWeight: 700,
+                                        boxShadow: `0 8px 20px ${farmaColors.alpha.primary30}`
                                     }}
                                     onClick={() => navigate("/ventas/pedidos/crear")}
                                 >
-                                    Realizar Pedido
+                                    Realizar Nuevo Pedido
                                 </Button>
                             </Grid>
                         </Grid>
