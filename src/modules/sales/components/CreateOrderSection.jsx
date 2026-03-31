@@ -53,7 +53,7 @@ const CreateOrderSection = ({ orderData, updateData, onNext, catalogs }) => {
                                 startAdornment: <Storefront sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {(catalogs.sucursales || []).map((s) => (
                                 <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                     {s.nombreSucursal}
@@ -74,7 +74,7 @@ const CreateOrderSection = ({ orderData, updateData, onNext, catalogs }) => {
                                 startAdornment: <LocalShipping sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {(catalogs.proveedores || []).map((p) => (
                                 <MenuItem key={p.codigo} value={p.codigo}>
                                     {p.nombre}
@@ -110,7 +110,7 @@ const CreateOrderSection = ({ orderData, updateData, onNext, catalogs }) => {
                                 startAdornment: <Category sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {(catalogs.lineas || []).map((l) => (
                                 <MenuItem key={l.id} value={l.id}>
                                     {l.nombre}
@@ -132,7 +132,7 @@ const CreateOrderSection = ({ orderData, updateData, onNext, catalogs }) => {
                                 startAdornment: <Science sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {(catalogs.laboratorios || []).map((l) => (
                                 <MenuItem key={l.id} value={l.id}>
                                     {l.nombre}

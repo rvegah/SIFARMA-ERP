@@ -261,12 +261,8 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
                       mb: 0.5,
                       cursor: "pointer",
                       minHeight: 48,
-                      background: isActive
-                        ? "rgba(255,255,255,0.12)"
-                        : "transparent",
-                      border: isActive
-                        ? "1px solid rgba(255,255,255,0.2)"
-                        : "none",
+                      background: "transparent",
+                      border: "none",
                       "&:hover": {
                         bgcolor: "rgba(255,255,255,0.05)",
                         transform: collapsed ? "none" : "translateX(4px)",
@@ -274,11 +270,12 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
                       },
                       justifyContent: collapsed ? "center" : "flex-start",
                       px: collapsed ? 1 : 2,
+
                     }}
                   >
                     <ListItemIcon
                       sx={{
-                        color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.7)",
+                        color: "rgba(255,255,255,0.7)",
                         minWidth: collapsed ? "unset" : 56,
                         mr: collapsed ? 0 : 2,
                         justifyContent: "center",
@@ -294,10 +291,8 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
                           primaryTypographyProps={{
                             variant: "body2",
                             sx: {
-                              color: isActive
-                                ? "white"
-                                : "rgba(255,255,255,0.8)",
-                              fontWeight: isActive ? 600 : 400,
+                              color: "rgba(255,255,255,0.8)",
+                              fontWeight: 400,
                             },
                           }}
                         />

@@ -88,7 +88,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                                 startAdornment: <Store sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {(catalogs.sucursales || []).map((s) => (
                                 <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                     {s.nombreSucursal}
@@ -110,7 +110,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                                 startAdornment: <Business sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {(catalogs.proveedores || []).map((p) => (
                                 <MenuItem key={p.codigo} value={p.codigo}>
                                     {p.nombre}
@@ -145,7 +145,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                                 startAdornment: <Payment sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {(catalogs.formasPago || []).map((f) => (
                                 <MenuItem key={f.tipoFormaPago} value={f.tipoFormaPago}>
                                     {f.nombre}
@@ -182,7 +182,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                                 startAdornment: <ShoppingCart sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>
+                            <MenuItem value="">
                                 {loadingOrders ? "Buscando..." : "Seleccione..."}
                             </MenuItem>
                             {(catalogs.pedidos || []).map((p) => (

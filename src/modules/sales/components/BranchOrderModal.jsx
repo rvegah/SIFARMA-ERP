@@ -25,6 +25,7 @@ import {
   Chip,
   Divider,
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 import { Close, Store, Add, Save, Search, Delete, LibraryAdd, Warning, CheckCircle } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import { useAuth } from "../../../context/AuthContext";
@@ -33,6 +34,7 @@ import userService from "../../../services/api/userService";
 import CopyTransfersDialog from "./CopyTransfersDialog";
 
 const BranchOrderModal = ({ open, onClose }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const { user } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
 
@@ -108,7 +110,7 @@ const BranchOrderModal = ({ open, onClose }) => {
   // ─── STEP 1 HANDLERS ────────────────────────────────────────────────────────
   const handleCreateOrder = async () => {
     if (!formData.descripcion || !formData.sucursalSolicitante || !formData.sucursalProveedor) {
-      alert("Por favor, complete los campos obligatorios (Descripción, Sucursal Solicitante, Sucursal Proveedor).");
+      enqueueSnackbar("Por favor, complete los campos obligatorios (Descripción, Sucursal Solicitante, Sucursal Proveedor).", { variant: "warning" });
       return;
     }
     
@@ -130,10 +132,10 @@ const BranchOrderModal = ({ open, onClose }) => {
         setCreatedOrderAuth(response.datos); // Contains pedidoProductos_ID, numeroPedido, etc
         setActiveStep(1);
       } else {
-        alert(response.mensaje || "Error al crear el pedido");
+        enqueueSnackbar(response.mensaje || "Error al crear el pedido", { variant: "error" });
       }
     } catch (error) {
-      alert("Ocurrió un error de conexión al crear el pedido.");
+      enqueueSnackbar("Ocurrió un error de conexión al crear el pedido.", { variant: "error" });
     } finally {
       setSavingStep1(false);
     }
@@ -150,7 +152,7 @@ const BranchOrderModal = ({ open, onClose }) => {
       if (response.exitoso) {
         setSearchResults(response.datos || []);
       } else {
-        alert(response.mensaje || "Error al buscar productos");
+        enqueueSnackbar(response.mensaje || "Error al buscar productos", { variant: "error" });
         setSearchResults([]);
       }
     } catch (error) {
@@ -191,15 +193,15 @@ const BranchOrderModal = ({ open, onClose }) => {
     setCopyDialogOpen(false);
     // Notify user of copied items
     if (addedCount > 0) {
-      alert(`Se han añadido ${addedCount} productos a la lista.`);
+      enqueueSnackbar(`Se han añadido ${addedCount} productos a la lista.`, { variant: "success" });
     } else {
-      alert("No se añadieron productos nuevos (ya estaban en la lista o la lista estaba vacía).");
+      enqueueSnackbar("No se añadieron productos nuevos (ya estaban en la lista o la lista estaba vacía).", { variant: "info" });
     }
   };
 
   const handleSaveOrder = async () => {
     if (orderItems.length === 0) {
-      alert("Agregue al menos un producto al pedido.");
+      enqueueSnackbar("Agregue al menos un producto al pedido.", { variant: "warning" });
       return;
     }
     setShowConfirmSave(true);
@@ -226,13 +228,13 @@ const BranchOrderModal = ({ open, onClose }) => {
       const response = await branchOrderService.guardarPedido(payload);
       if (response.exitoso) {
         setOrderCompleted(true);
-        alert(response.mensaje || "Pedido guardado exitosamente");
+        enqueueSnackbar(response.mensaje || "Pedido guardado exitosamente", { variant: "success" });
       } else {
-        alert(response.mensaje || "Error al guardar los productos del pedido");
+        enqueueSnackbar(response.mensaje || "Error al guardar los productos del pedido", { variant: "error" });
       }
     } catch (error) {
       console.error(error);
-      alert("Ocurrió un error al guardar el pedido.");
+      enqueueSnackbar("Ocurrió un error al guardar el pedido.", { variant: "error" });
     } finally {
       setSavingStep2(false);
     }

@@ -477,7 +477,7 @@ const AssignPermissions = ({ onCancel }) => {
                   startAdornment: <Person sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione usuario</MenuItem>
+                <MenuItem value="">Seleccione usuario</MenuItem>
                 {users.map((user) => (
                   <MenuItem key={user.id} value={user.id}>
                     {user.nombreCompleto} ({user.rol})
@@ -502,7 +502,7 @@ const AssignPermissions = ({ onCancel }) => {
                   startAdornment: <Store sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione sucursal</MenuItem>
+                <MenuItem value="">Seleccione sucursal</MenuItem>
                 {sucursales.map((sucursal) => (
                   <MenuItem
                     key={sucursal.sucursal_ID}

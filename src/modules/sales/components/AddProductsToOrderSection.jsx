@@ -39,7 +39,9 @@ import {
     ShoppingCart,
     FileDownload,
     PictureAsPdf,
-    TableView
+    TableView,
+    QrCode,
+    Title
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 
@@ -417,9 +419,11 @@ const AddProductsToOrderSection = ({
                                     fullWidth
                                     label="Buscar por Código"
                                     placeholder="Ej: MED001"
-                                    size="small"
                                     value={searchFilters.codigo}
                                     onChange={(e) => setSearchFilters(prev => ({ ...prev, codigo: e.target.value }))}
+                                    InputProps={{
+                                        startAdornment: <QrCode sx={{ color: "action.active", mr: 1 }} />
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={5}>
@@ -427,9 +431,11 @@ const AddProductsToOrderSection = ({
                                     fullWidth
                                     label="Buscar por Nombre"
                                     placeholder="Ej: Ibuprofeno"
-                                    size="small"
                                     value={searchFilters.nombre}
                                     onChange={(e) => setSearchFilters(prev => ({ ...prev, nombre: e.target.value }))}
+                                    InputProps={{
+                                        startAdornment: <Title sx={{ color: "action.active", mr: 1 }} />
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} sm={2}>
@@ -440,7 +446,12 @@ const AddProductsToOrderSection = ({
                                         startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Search />}
                                         onClick={handleSearch}
                                         disabled={loading}
-                                        sx={{ background: farmaColors.gradients.primary }}
+                                        sx={{ 
+                                            background: farmaColors.gradients.primary,
+                                            height: 56,
+                                            borderRadius: 2,
+                                            fontWeight: 700
+                                        }}
                                     >
                                         Buscar
                                     </Button>
@@ -463,14 +474,16 @@ const AddProductsToOrderSection = ({
                         <TableContainer>
                             <Table size="small">
                                 <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
-                                    <TableRow>
-                                        <TableCell sx={{ fontWeight: 600 }}>Código</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Detalle del Producto</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }}>Precio</TableCell>
-                                        <TableCell sx={{ fontWeight: 600 }} align="right">Acción</TableCell>
+                                    <TableRow sx={{ height: 56 }}>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Código</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Detalle del Producto</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Stock</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Lote</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Vencimiento</TableCell>
+                                        <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }} align="right">Acción</TableCell>
                                     </TableRow>
                                 </TableHead>
-                                <TableBody>
+                                <TableBody sx={{ bgcolor: "white" }}>
                                     {searchResults.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
@@ -493,17 +506,30 @@ const AddProductsToOrderSection = ({
                                                                 {p.linea} | {p.laboratorio}
                                                             </Typography>
                                                         </TableCell>
-                                                        <TableCell sx={{ fontWeight: 600, color: farmaColors.primary }}>Bs. {p.precio?.toFixed(2)}</TableCell>
+                                                        <TableCell sx={{ fontWeight: 700, color: farmaColors.primary }}>
+                                                            {p.stockProducto || p.stock || 0}
+                                                        </TableCell>
+                                                        <TableCell sx={{ fontWeight: 500 }}>
+                                                            {p.numeroLote || "S/N"}
+                                                        </TableCell>
+                                                        <TableCell sx={{ fontWeight: 500 }}>
+                                                            {formatDate(p.fechaVencimiento) || "-"}
+                                                        </TableCell>
                                                         <TableCell align="right">
                                                             {isAdded ? (
-                                                                <Chip label="Añadido" size="small" variant="outlined" color="success" />
+                                                                <Chip label="Añadido" size="small" variant="outlined" color="success" sx={{ fontWeight: 700 }} />
                                                             ) : (
                                                                 <Button
                                                                     size="small"
                                                                     variant="contained"
                                                                     startIcon={<Add />}
                                                                     onClick={() => onAdd(p)}
-                                                                    sx={{ bgcolor: farmaColors.primary, borderRadius: 2 }}
+                                                                    sx={{ 
+                                                                        bgcolor: farmaColors.primary, 
+                                                                        borderRadius: 2,
+                                                                        fontWeight: 700,
+                                                                        px: 2
+                                                                    }}
                                                                 >
                                                                     Añadir
                                                                 </Button>
@@ -542,14 +568,14 @@ const AddProductsToOrderSection = ({
                     <TableContainer>
                         <Table size="small">
                             <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 600 }}>Producto</TableCell>
-                                    <TableCell sx={{ fontWeight: 600, width: 120 }}>Cantidad</TableCell>
-                                    <TableCell sx={{ fontWeight: 600 }}>Observación</TableCell>
-                                    <TableCell sx={{ fontWeight: 600 }} align="right">Acción</TableCell>
+                                <TableRow sx={{ height: 56 }}>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Producto</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary, width: 150 }}>Cantidad</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Observación</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }} align="right">Acción</TableCell>
                                 </TableRow>
                             </TableHead>
-                            <TableBody>
+                            <TableBody sx={{ bgcolor: "white" }}>
                                 {selectedProducts.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={4} align="center" sx={{ py: 5 }}>
@@ -577,11 +603,13 @@ const AddProductsToOrderSection = ({
                                                     {canEdit && !p.isReadOnlyRow ? (
                                                         <TextField
                                                             type="number"
-                                                            size="small"
                                                             disabled={isReadOnly}
                                                             value={p.cantidad}
                                                             onChange={(e) => onUpdateQty(p.producto_ID || p.id, e.target.value)}
                                                             inputProps={{ min: 1 }}
+                                                            sx={{
+                                                                "& .MuiInputBase-root": { height: 44 }
+                                                            }}
                                                         />
                                                     ) : (
                                                         <Typography variant="body2">{p.cantidad}</Typography>
@@ -591,8 +619,7 @@ const AddProductsToOrderSection = ({
                                                     {canEdit && !p.isReadOnlyRow ? (
                                                         <TextField
                                                             fullWidth
-                                                            placeholder="Observación..."
-                                                            size="small"
+                                                            placeholder="Añadir observación..."
                                                             variant="standard"
                                                             disabled={isReadOnly}
                                                             value={p.observacionesFila || ""}
@@ -600,6 +627,9 @@ const AddProductsToOrderSection = ({
                                                                 if (onUpdateQty) {
                                                                     onUpdateQty(p.producto_ID || p.id, p.cantidad, e.target.value);
                                                                 }
+                                                            }}
+                                                            sx={{
+                                                                "& .MuiInput-underline:before": { borderBottomColor: farmaColors.alpha.secondary20 }
                                                             }}
                                                         />
                                                     ) : (
@@ -647,7 +677,13 @@ const AddProductsToOrderSection = ({
                                 startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CheckCircle />}
                                 onClick={onSave}
                                 disabled={loading || selectedProducts.length === 0}
-                                sx={{ background: farmaColors.gradients.primary, px: 5, py: 1.5, borderRadius: 2 }}
+                                sx={{ 
+                                    background: farmaColors.gradients.primary, 
+                                    px: 5, 
+                                    height: 56, 
+                                    borderRadius: 2,
+                                    fontWeight: 700 
+                                }}
                             >
                                 {loading ? "Guardando..." : "Guardar Pedido"}
                             </Button>

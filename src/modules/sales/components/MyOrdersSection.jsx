@@ -22,6 +22,7 @@ import {
     CircularProgress,
     Tooltip
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 import {
     History,
     FilterList,
@@ -29,7 +30,8 @@ import {
     CalendarMonth,
     Numbers,
     Rule,
-    Search
+    Search,
+    Edit
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import userService from "../../../services/api/userService";
@@ -47,6 +49,7 @@ const STATUS_OPTIONS = [
 
 const MyOrdersSection = () => {
     const navigate = useNavigate();
+    const { enqueueSnackbar } = useSnackbar();
     const [filters, setFilters] = useState({
         codigoSucursal: "",
         numeroPedido: "",
@@ -76,13 +79,13 @@ const MyOrdersSection = () => {
 
     const handleSearch = async () => {
         if (!filters.codigoSucursal || !filters.estadoPedido) {
-            window.alert("Sucursal y Estado de Pedido son obligatorios.");
+            enqueueSnackbar("Sucursal y Estado de Pedido son obligatorios.", { variant: "warning" });
             return;
         }
 
         const hasNumAndDatesSet = filters.numeroPedido || (filters.fechaInicio && filters.fechaFinal);
         if (!hasNumAndDatesSet) {
-            window.alert("Debe ingresar Numero de Pedido o el rango de Fechas.");
+            enqueueSnackbar("Debe ingresar Numero de Pedido o el rango de Fechas.", { variant: "warning" });
             return;
         }
 
@@ -100,19 +103,24 @@ const MyOrdersSection = () => {
             if (response.exitoso) {
                 setSearchResults(response.datos || []);
                 setPage(0);
+                if ((response.datos || []).length === 0) {
+                    enqueueSnackbar("No se encontraron pedidos con los criterios ingresados.", { variant: "info" });
+                }
             } else {
-                window.alert(response.mensaje || "Error al buscar pedidos");
+                enqueueSnackbar(response.mensaje || "Error al buscar pedidos", { variant: "error" });
             }
         } catch (error) {
             console.error(error);
-            window.alert("Error de conexión");
+            enqueueSnackbar("Error de conexión al buscar pedidos", { variant: "error" });
         } finally {
             setLoading(false);
         }
     };
 
     const handleEditOrder = (order) => {
-        navigate(`/ventas/pedidos/crear?numeroPedido=${order.numeroPedido}`);
+        // Redirigir a la gestión de pedidos con el ID correspondiente
+        // Esto activará la carga automática del detalle en OrderManagementSection.jsx
+        navigate(`/ventas/realizar-pedidos?numeroPedido=${order.numeroPedido}`);
     };
 
     return (
@@ -296,7 +304,7 @@ const MyOrdersSection = () => {
                                             <TableCell align="center">
                                                 <Tooltip title="Editar detalles del pedido">
                                                     <IconButton color="primary" onClick={() => handleEditOrder(order)}>
-                                                        <EditIcon />
+                                                        <Edit />
                                                     </IconButton>
                                                 </Tooltip>
                                             </TableCell>

@@ -82,7 +82,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                                 startAdornment: <Storefront sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {catalogs.sucursales.map((s) => (
                                 <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                     {s.nombreSucursal}
@@ -104,7 +104,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                                 startAdornment: <CompareArrows sx={{ color: "action.active", mr: 1 }} />
                             }}
                         >
-                            <MenuItem value="" disabled>Seleccione...</MenuItem>
+                            <MenuItem value="">Seleccione...</MenuItem>
                             {catalogs.sucursales.map((s) => (
                                 <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                     {s.nombreSucursal}

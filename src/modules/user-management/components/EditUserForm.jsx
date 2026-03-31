@@ -262,7 +262,7 @@ const EditUserForm = ({ onCancel }) => {
                 startAdornment: <Store sx={{ color: "action.active", mr: 1 }} />
               }}
             >
-              <MenuItem value="" disabled>Seleccione sucursal</MenuItem>
+              <MenuItem value="">Seleccione sucursal</MenuItem>
               {sucursales.map((sucursal) => (
                 <MenuItem key={sucursal.sucursal_ID} value={sucursal.sucursal_ID}>
                   {sucursal.nombreSucursal}
@@ -285,7 +285,7 @@ const EditUserForm = ({ onCancel }) => {
                 startAdornment: <Group sx={{ color: "action.active", mr: 1 }} />
               }}
             >
-              <MenuItem value="" disabled>Seleccione rol</MenuItem>
+              <MenuItem value="">Seleccione rol</MenuItem>
               {roles.map((role) => (
                 <MenuItem key={role.rol_ID} value={role.rol_ID}>
                   {role.nombre_Rol}
@@ -308,7 +308,7 @@ const EditUserForm = ({ onCancel }) => {
                 startAdornment: <AdminPanelSettings sx={{ color: "action.active", mr: 1 }} />
               }}
             >
-              <MenuItem value="" disabled>Seleccione tipo</MenuItem>
+              <MenuItem value="">Seleccione tipo</MenuItem>
               {tipoUsuarios.map((tipo) => (
                 <MenuItem key={tipo.codigo} value={tipo.codigo}>
                   {tipo.descripcion}
@@ -334,7 +334,7 @@ const EditUserForm = ({ onCancel }) => {
                 startAdornment: <School sx={{ color: "action.active", mr: 1 }} />
               }}
             >
-              <MenuItem value="" disabled>Seleccione título</MenuItem>
+              <MenuItem value="">Seleccione título</MenuItem>
               <MenuItem value=""><em>Sin título</em></MenuItem>
               {TITULOS.map((titulo) => (
                 <MenuItem key={titulo.codigo} value={titulo.codigo}>
