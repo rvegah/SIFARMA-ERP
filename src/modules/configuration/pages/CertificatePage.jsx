@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import {
   Box,
+  Container,
   Card,
   CardContent,
   Typography,
@@ -42,13 +43,8 @@ const CertificatePage = () => {
 
     setLoading(true);
     try {
-      const payload = {
-        codigoEquipoComputo: codigoEquipoComputo_ID,
-        motivoCambio: "Cambio de certificado por seguridad.",
-        empleadoAlta: user?.id || user?.codigoEmpleado || 1
-      };
-
-      const result = await configurationService.guardarCertificado(payload);
+      // Según requerimiento: enviando el "codigoEquipoComputo_ID"
+      const result = await configurationService.guardarCertificado(codigoEquipoComputo_ID);
 
       if (result.success) {
         setSuccessModal(true);
@@ -61,19 +57,19 @@ const CertificatePage = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1000, margin: '0 auto' }}>
+    <Container maxWidth="xl" sx={{ py: 3 }}>
       <PageHeader
         title="Certificado de Cómputo"
         subtitle="Configuración y actualización de certificados digitales de seguridad."
         icon={<SecurityIcon />}
       />
 
-      <Grid container spacing={4} justifyContent="center">
+      <Grid container spacing={4} justifyContent="center" sx={{ mt: 2 }}>
         <Grid item xs={12} md={8}>
           <Card
             sx={{
               borderRadius: 4,
-              boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.05)',
               overflow: 'hidden',
               border: `1px solid ${farmaColors.alpha.secondary10}`
             }}
@@ -126,9 +122,6 @@ const CertificatePage = () => {
                   >
                     XXX-XX-XXX-XXXXX
                   </Typography>
-                  {/* <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                    * Este certificado es estático y de solo lectura.
-                  </Typography> */}
                 </Paper>
               </Box>
 
@@ -147,26 +140,21 @@ const CertificatePage = () => {
                   </Box>
                 </Box>
 
-                <Box sx={{ mt: 2 }}>
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
                   <Button
-                    fullWidth
                     variant="contained"
                     size="large"
                     startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <UpdateIcon />}
                     onClick={handleUpdateCertificate}
                     disabled={loading}
                     sx={{
-                      py: 2,
-                      borderRadius: 3,
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 2,
                       background: farmaColors.gradients.primary,
-                      fontSize: '1.1rem',
-                      fontWeight: 800,
-                      boxShadow: `0 8px 25px ${farmaColors.alpha.primary30}`,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 12px 35px ${farmaColors.alpha.primary40}`,
-                      }
+                      fontWeight: 700,
+                      fontSize: "1rem",
+                      boxShadow: "0 4px 12px rgba(204, 108, 6, 0.2)"
                     }}
                   >
                     {loading ? 'ACTUALIZANDO...' : 'ACTUALIZAR CERTIFICADO'}
@@ -211,7 +199,7 @@ const CertificatePage = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Container>
   );
 };
 

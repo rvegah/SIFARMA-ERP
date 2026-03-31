@@ -96,7 +96,7 @@ const NotificationDetailPage = () => {
   };
 
   return (
-    <Box sx={{ p: 4, maxWidth: 1200, margin: "0 auto", display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box sx={{ p: 4, maxWidth: "1400px", margin: "0 auto", display: "flex", flexDirection: "column", gap: 3 }}>
       <PageHeader 
         title="Detalle de Traspaso"
         subtitle={`Información detallada sobre el movimiento de mercadería: ${data?.numeroTraspaso || numeroTraspaso}`}
@@ -106,9 +106,9 @@ const NotificationDetailPage = () => {
             variant="outlined" 
             startIcon={<ArrowBack />} 
             onClick={() => navigate(-1)}
-            sx={{ borderRadius: 2, borderColor: farmaColors.secondary, color: farmaColors.secondary }}
+            sx={{ borderRadius: 3, borderWidth: 2, borderColor: farmaColors.secondary, color: farmaColors.secondary, fontWeight: 700, "&:hover": { borderWidth: 2, borderColor: farmaColors.secondaryDark } }}
           >
-            Volver
+            Volver a Notificaciones
           </Button>
         }
       />
@@ -192,17 +192,17 @@ const NotificationDetailPage = () => {
 
           <TableContainer>
             <Table size="small">
-              <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10 }}>
+              <TableHead sx={{ bgcolor: farmaColors.alpha.secondary10, height: 56 }}>
                 <TableRow>
-                  {isEnv && <TableCell sx={{ width: 50, fontWeight: 800 }}></TableCell>}
-                  <TableCell sx={{ fontWeight: 800 }}>Producto</TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>Lote</TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>Unidad / Línea / Lab</TableCell>
-                  <TableCell sx={{ fontWeight: 800, width: 120 }}>Cantidad</TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>Acción Ref.</TableCell>
+                  {isEnv && <TableCell sx={{ width: 50, fontWeight: 800, color: farmaColors.secondary }}></TableCell>}
+                  <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Producto</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Lote</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Unidad / Línea / Lab</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary, width: 120 }}>Cantidad</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: farmaColors.secondary }}>Acción Ref.</TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody>
+              <TableBody sx={{ bgcolor: "white" }}>
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={isEnv ? 6 : 5} align="center" sx={{ py: 6 }}>
@@ -281,9 +281,17 @@ const NotificationDetailPage = () => {
                 startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <AssignmentTurnedIn />}
                 onClick={handleRecibir}
                 disabled={submitting || transferItems.length === 0 || selectedRows.length !== transferItems.length}
-                sx={{ background: farmaColors.gradients.primary, px: 5, py: 1.5, borderRadius: 2 }}
+                sx={{ 
+                  background: farmaColors.gradients.primary, 
+                  px: 4, 
+                  py: 1.5, 
+                  borderRadius: 2, 
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  boxShadow: "0 4px 12px rgba(204, 108, 6, 0.2)"
+                }}
               >
-                {submitting ? "Procesando..." : "Recibido"}
+                {submitting ? "PROCESANDO..." : "MARCAR COMO RECIBIDO"}
               </Button>
             </Box>
           )}

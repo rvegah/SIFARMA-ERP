@@ -4,15 +4,15 @@ import apiClient from '../../../services/api/apiClient';
 const configurationService = {
   /**
    * Actualiza el certificado de cómputo
-   * @param {Object} data - Datos del certificado
-   * @param {number} data.codigoEquipoComputo - ID del equipo
-   * @param {string} data.motivoCambio - Motivo del cambio
-   * @param {number} data.empleadoAlta - ID del empleado que realiza el cambio
+   * @param {number} codigoEquipoComputo_ID - ID del equipo
    * @returns {Promise<Object>} Resultado de la operación
    */
-  async guardarCertificado(data) {
+  async guardarCertificado(codigoEquipoComputo_ID) {
     try {
-      const response = await apiClient.put('/Organizacion/GuardarCertificado', data);
+      // Según requerimiento: Call /InicioSesion/ActualizarCertificadoComputo
+      const response = await apiClient.put('/InicioSesion/ActualizarCertificadoComputo', {
+        codigoEquipoComputo_ID: codigoEquipoComputo_ID
+      });
       
       if (response.data && response.data.exitoso) {
         return {

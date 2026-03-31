@@ -73,7 +73,7 @@ const NotificationsPage = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, margin: "0 auto" }}>
+    <Box sx={{ p: 3, maxWidth: "1400px", margin: "0 auto" }}>
       <PageHeader 
         title="Todas las Notificaciones" 
         subtitle="Mantente al día con los traspasos y eventos importantes de tu sucursal."
@@ -88,16 +88,20 @@ const NotificationsPage = () => {
         <Paper
           elevation={0}
           sx={{
-            p: 6,
+            p: 8,
             textAlign: "center",
-            bgcolor: "transparent",
-            border: "1px dashed rgba(0,0,0,0.2)",
-            borderRadius: 3,
+            bgcolor: "rgba(0,0,0,0.01)",
+            border: `2px dashed ${farmaColors.alpha.secondary20}`,
+            borderRadius: 4,
+            mt: 4
           }}
         >
-          <NotificationsNoneIcon sx={{ fontSize: 64, color: "text.disabled", mb: 2 }} />
-          <Typography variant="h6" color="text.secondary">
-            No tienes notificaciones por el momento
+          <NotificationsNoneIcon sx={{ fontSize: 80, color: "text.disabled", mb: 2, opacity: 0.5 }} />
+          <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 700 }}>
+            No tienes notificaciones
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Te avisaremos cuando haya nuevos traspasos o eventos.
           </Typography>
         </Paper>
       ) : (

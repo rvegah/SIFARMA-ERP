@@ -42,6 +42,8 @@ import {
   NightsStay,
   Brightness3,
   WbTwilight,
+  Store,
+  Computer,
 } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import { useUsers } from "../context/UserContext";
@@ -495,15 +497,16 @@ const AssignSchedule = ({ onCancel }) => {
       <Grid container spacing={3}>
         {/* Panel izquierdo: Selección de usuario y plantillas */}
         <Grid item xs={12} lg={3}>
-          <Card sx={{ mb: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-            <CardContent>
+          <Card sx={{ mb: 3, borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+            <CardContent sx={{ p: 3 }}>
               <Typography
                 variant="h6"
                 sx={{
-                  mb: 2,
+                  mb: 3,
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
+                  gap: 1.5,
+                  fontWeight: 700,
                   color: farmaColors.secondary,
                 }}
               >
@@ -511,39 +514,26 @@ const AssignSchedule = ({ onCancel }) => {
                 Usuario
               </Typography>
 
-              {/* Selector de Usuario */}
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Seleccionar Usuario</InputLabel>
-                <Select
-                  value={selectedUserId}
-                  onChange={(e) => setSelectedUserId(e.target.value)}
-                  label="Seleccionar Usuario"
-                  disabled={loading}
-                >
-                  {users.map((user) => (
-                    <MenuItem key={user.id} value={user.id}>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Avatar
-                          sx={{
-                            width: 24,
-                            height: 24,
-                            fontSize: "0.75rem",
-                            background: farmaColors.gradients.secondary,
-                          }}
-                        >
-                          {user.nombreCompleto
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </Avatar>
-                        {user.nombreCompleto}
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                fullWidth
+                label="Seleccionar Usuario"
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+                variant="outlined"
+                sx={{ mb: 3 }}
+                disabled={loading}
+                InputProps={{
+                  startAdornment: <Person sx={{ color: "action.active", mr: 1 }} />
+                }}
+              >
+                <MenuItem value="" disabled>Seleccione usuario</MenuItem>
+                {users.map((user) => (
+                  <MenuItem key={user.id} value={user.id}>
+                    {user.nombreCompleto}
+                  </MenuItem>
+                ))}
+              </TextField>
 
               {currentUser && (
                 <Alert
@@ -559,41 +549,51 @@ const AssignSchedule = ({ onCancel }) => {
               )}
 
               {/* 🆕 Selector de Sucursal */}
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel>Sucursal</InputLabel>
-                <Select
-                  value={selectedSucursal_ID}
-                  onChange={handleSucursalChange}
-                  label="Sucursal"
-                  disabled={loading || !selectedUserId}
-                >
-                  {sucursales.map((suc) => (
-                    <MenuItem key={suc.sucursal_ID} value={suc.sucursal_ID}>
-                      {suc.nombreSucursal}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                fullWidth
+                label="Sucursal"
+                value={selectedSucursal_ID}
+                onChange={handleSucursalChange}
+                variant="outlined"
+                sx={{ mb: 2 }}
+                disabled={loading || !selectedUserId}
+                InputProps={{
+                  startAdornment: <Store sx={{ color: "action.active", mr: 1 }} />
+                }}
+              >
+                <MenuItem value="" disabled>Seleccione sucursal</MenuItem>
+                {sucursales.map((suc) => (
+                  <MenuItem key={suc.sucursal_ID} value={suc.sucursal_ID}>
+                    {suc.nombreSucursal}
+                  </MenuItem>
+                ))}
+              </TextField>
 
               {/* 🆕 Selector de Equipo */}
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Equipo</InputLabel>
-                <Select
-                  value={selectedEquipo_ID}
-                  onChange={(e) => setSelectedEquipo_ID(e.target.value)}
-                  label="Equipo"
-                  disabled={loading || !selectedSucursal_ID}
-                >
-                  {equipos.map((eq) => (
-                    <MenuItem
-                      key={eq.equipoComputo_ID}
-                      value={eq.equipoComputo_ID}
-                    >
-                      {eq.nombreHost}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                select
+                fullWidth
+                label="Equipo"
+                value={selectedEquipo_ID}
+                onChange={(e) => setSelectedEquipo_ID(e.target.value)}
+                variant="outlined"
+                sx={{ mb: 3 }}
+                disabled={loading || !selectedSucursal_ID}
+                InputProps={{
+                  startAdornment: <Computer sx={{ color: "action.active", mr: 1 }} />
+                }}
+              >
+                <MenuItem value="" disabled>Seleccione equipo</MenuItem>
+                {equipos.map((eq) => (
+                  <MenuItem
+                    key={eq.equipoComputo_ID}
+                    value={eq.equipoComputo_ID}
+                  >
+                    {eq.nombreHost}
+                  </MenuItem>
+                ))}
+              </TextField>
 
               <Divider sx={{ my: 2 }} />
 
@@ -650,15 +650,16 @@ const AssignSchedule = ({ onCancel }) => {
           </Card>
 
           {/* Resumen semanal */}
-          <Card sx={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-            <CardContent>
+          <Card sx={{ borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+            <CardContent sx={{ p: 3 }}>
               <Typography
                 variant="h6"
                 sx={{
                   mb: 2,
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
+                  gap: 1.5,
+                  fontWeight: 700,
                   color: farmaColors.secondary,
                 }}
               >
@@ -1074,15 +1075,15 @@ const AssignSchedule = ({ onCancel }) => {
                     "&:hover": {
                       background: farmaColors.gradients.primary,
                       transform: "translateY(-2px)",
-                      boxShadow: `0 6px 25px ${farmaColors.alpha.primary30}`,
+                      boxShadow: `0 12px 35px ${farmaColors.alpha.primary40}`,
                     },
                     "&:disabled": {
                       background: "rgba(0, 0, 0, 0.12)",
                       color: "rgba(0, 0, 0, 0.26)",
-                    },
+                    }
                   }}
                 >
-                  {loading ? "Guardando..." : "Guardar Horarios"}
+                  {loading ? "GUARDANDO..." : "GUARDAR HORARIOS"}
                 </Button>
               </Box>
             </CardContent>

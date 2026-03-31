@@ -778,9 +778,9 @@ const CreateSaleSection = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      <PageHeader 
+      <PageHeader
         title="Realizar Venta"
-        subtitle="Generación de facturas y gestión de ventas al cliente."
+        // subtitle="Generación de facturas y gestión de ventas al cliente."
         icon={<ShoppingCartHeaderIcon />}
       />
 
