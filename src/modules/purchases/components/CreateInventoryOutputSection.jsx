@@ -90,7 +90,7 @@ const CreateInventoryOutputSection = ({ outputData, setOutputData, onCreate, cat
                                     startAdornment: <Storefront sx={{ color: "action.active", mr: 1 }} />
                                 }}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 {catalogs.sucursales.map((s) => (
                                     <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                         {s.nombreSucursal}
@@ -112,7 +112,7 @@ const CreateInventoryOutputSection = ({ outputData, setOutputData, onCreate, cat
                                     startAdornment: <Category sx={{ color: "action.active", mr: 1 }} />
                                 }}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 {catalogs.motivosSalida.map((m) => (
                                     <MenuItem key={m.tipoMotivoSalidaId} value={m.tipoMotivoSalidaId}>
                                         {m.nombre}
@@ -171,7 +171,7 @@ const CreateInventoryOutputSection = ({ outputData, setOutputData, onCreate, cat
                                     startAdornment: <Person sx={{ color: "action.active", mr: 1 }} />
                                 }}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 {catalogs.responsables.map((r) => (
                                     <MenuItem key={r.codigoUsuario} value={r.codigoUsuario}>
                                         {r.nombreCompleto}

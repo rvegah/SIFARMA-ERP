@@ -18,11 +18,13 @@ import {
   CircularProgress,
   Divider,
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 import { Visibility, Close, ContentCopy } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import branchOrderService from "../services/branchOrderService";
 
 const CopyTransfersDialog = ({ open, onClose, onCopy }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const [transfers, setTransfers] = useState([]);
   const [loadingTransfers, setLoadingTransfers] = useState(false);
   const [page, setPage] = useState(0);
@@ -52,10 +54,11 @@ const CopyTransfersDialog = ({ open, onClose, onCopy }) => {
         );
         setTransfers(sorted);
       } else {
-        alert(response.mensaje || "Error al cargar traspasos");
+        enqueueSnackbar(response.mensaje || "Error al cargar traspasos", { variant: "error" });
       }
     } catch (error) {
       console.error(error);
+      enqueueSnackbar("Error de conexión al cargar traspasos", { variant: "error" });
     } finally {
       setLoadingTransfers(false);
     }
@@ -72,10 +75,11 @@ const CopyTransfersDialog = ({ open, onClose, onCopy }) => {
         setTransferProducts(response.datos || []);
       } else {
         setTransferProducts([]);
-        alert(response.mensaje || "Error al cargar productos del traspaso");
+        enqueueSnackbar(response.mensaje || "Error al cargar productos del traspaso", { variant: "error" });
       }
     } catch (error) {
       console.error(error);
+      enqueueSnackbar("Error de conexión al cargar productos del traspaso", { variant: "error" });
     } finally {
       setLoadingProducts(false);
     }

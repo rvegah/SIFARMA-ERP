@@ -290,6 +290,8 @@ const ProductsModal = ({ open, onClose, onSelectProduct }) => {
   const [filteredProducts, setFilteredProducts] = useState(MOCK_PRODUCTS);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingProduct, setPendingProduct] = useState(null);
   const searchInputRef = useRef(null);
 
   // Auto-focus en el campo de búsqueda
@@ -338,15 +340,27 @@ const ProductsModal = ({ open, onClose, onSelectProduct }) => {
 
   const handleSelectProduct = (product) => {
     if (product.stock === 0) {
-      // Mostrar confirmación para productos sin stock
-      const confirm = window.confirm(
-        `⚠️ PRODUCTO SIN STOCK\n\n${product.nombre}\n\n¿Desea agregarlo de todas formas?\n(Podrá verificar en otras sucursales)`
-      );
-      if (!confirm) return;
+      setPendingProduct(product);
+      setConfirmDialogOpen(true);
+      return;
     }
     
     onSelectProduct(product);
     onClose();
+  };
+
+  const handleConfirmSelect = () => {
+    if (pendingProduct) {
+      onSelectProduct(pendingProduct);
+      setConfirmDialogOpen(false);
+      setPendingProduct(null);
+      onClose();
+    }
+  };
+
+  const handleCancelSelect = () => {
+    setConfirmDialogOpen(false);
+    setPendingProduct(null);
   };
 
   const handleClose = () => {
@@ -725,6 +739,32 @@ const ProductsModal = ({ open, onClose, onSelectProduct }) => {
           Cerrar
         </Button>
       </DialogActions>
+
+      {/* Dialog de confirmación para productos sin stock */}
+      <Dialog open={confirmDialogOpen} onClose={handleCancelSelect}>
+        <DialogTitle sx={{ bgcolor: "#f57c00", color: "white", display: "flex", alignItems: "center", gap: 1 }}>
+           <Warning /> Confirmar Accion
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+            ⚠️ PRODUCTO SIN STOCK
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            {pendingProduct?.nombre}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            ¿Desea agregarlo de todas formas? Podrá verificar la disponibilidad en otras sucursales.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCancelSelect} variant="outlined">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmSelect} variant="contained" color="warning">
+            Sí, agregar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 };

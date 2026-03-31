@@ -268,7 +268,7 @@ const EditProductForm = ({ onCancel }) => {
                   startAdornment: <FormatListBulleted sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                <MenuItem value="">Seleccione...</MenuItem>
                 {catalogs?.formasFarmaceuticas?.map(i => (
                   <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
                 ))}
@@ -327,7 +327,7 @@ const EditProductForm = ({ onCancel }) => {
                   startAdornment: <Scale sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                <MenuItem value="">Seleccione...</MenuItem>
                 {catalogs?.unidadesMedida?.map(i => (
                   <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
                 ))}
@@ -394,7 +394,7 @@ const EditProductForm = ({ onCancel }) => {
                   startAdornment: <List sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                <MenuItem value="">Seleccione...</MenuItem>
                 {catalogs?.lineas?.map(i => (
                   <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
                 ))}
@@ -414,7 +414,7 @@ const EditProductForm = ({ onCancel }) => {
                   startAdornment: <Science sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                <MenuItem value="">Seleccione...</MenuItem>
                 {catalogs?.laboratorios?.map(i => (
                   <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
                 ))}
@@ -434,7 +434,7 @@ const EditProductForm = ({ onCancel }) => {
                   startAdornment: <Public sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                <MenuItem value="">Seleccione...</MenuItem>
                 {catalogs?.industrias?.map(i => (
                   <MenuItem key={i.id} value={i.id}>{i.nombre}</MenuItem>
                 ))}

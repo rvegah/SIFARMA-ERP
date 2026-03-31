@@ -126,7 +126,7 @@ const ProductList = ({ onCreateProduct, onEditProduct }) => {
                                     startAdornment: <Storefront sx={{ color: "action.active", mr: 1 }} />
                                 }}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 {catalogs?.sucursales?.map((s) => (
                                     <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                         {s.nombreSucursal}
@@ -193,7 +193,7 @@ const ProductList = ({ onCreateProduct, onEditProduct }) => {
                                     startAdornment: <Category sx={{ color: "action.active", mr: 1 }} />
                                 }}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 {catalogs?.lineas?.map((l) => (
                                     <MenuItem key={l.id} value={l.id}>
                                         {l.nombre}
@@ -214,7 +214,7 @@ const ProductList = ({ onCreateProduct, onEditProduct }) => {
                                     startAdornment: <Science sx={{ color: "action.active", mr: 1 }} />
                                 }}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 {catalogs?.filterLaboratorios?.map((lab) => (
                                     <MenuItem key={lab.id} value={lab.id}>
                                         {lab.nombre}

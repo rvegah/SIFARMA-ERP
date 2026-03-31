@@ -43,6 +43,7 @@ import {
   LocationOn,
   ArrowForward,
 } from '@mui/icons-material';
+import { useSnackbar } from 'notistack';
 import { farmaColors } from '../../../app/theme';
 
 // Mock de sucursales
@@ -98,6 +99,7 @@ const MOCK_STOCK_DATA = {
 };
 
 const StockModal = ({ open, onClose, product = null, currentSucursalId = 1 }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [stockBySucursal, setStockBySucursal] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -156,7 +158,7 @@ const StockModal = ({ open, onClose, product = null, currentSucursalId = 1 }) =>
   // Iniciar proceso de traspaso
   const handleStartTransfer = (fromSucursal) => {
     if (fromSucursal.stock === 0) {
-      alert('No hay stock disponible en esta sucursal');
+      enqueueSnackbar('No hay stock disponible en esta sucursal', { variant: 'warning' });
       return;
     }
     
@@ -203,7 +205,7 @@ const StockModal = ({ open, onClose, product = null, currentSucursalId = 1 }) =>
       setStockBySucursal(updatedStock);
       
       // Mostrar éxito
-      alert(`✅ Traspaso autorizado!\n\nSe traspadarán ${transferData.cantidad} unidades de ${selectedProduct.nombre}\nDesde: ${transferData.fromSucursal.nombre}\nHacia: ${SUCURSALES.find(s => s.id === transferData.toSucursal)?.nombre}\n\n⏱️ Tiempo estimado: ${transferData.tiempoEstimado}\n\n📞 El responsable de ${transferData.fromSucursal.nombre} ha sido notificado.`);
+      enqueueSnackbar(`✅ Traspaso autorizado de ${transferData.cantidad} unidades de ${selectedProduct.nombre}`, { variant: 'success', autoHideDuration: 6000 });
       
       // Resetear
       setTransferMode(false);
@@ -220,7 +222,7 @@ const StockModal = ({ open, onClose, product = null, currentSucursalId = 1 }) =>
       
     } catch (error) {
       console.error('Error en traspaso:', error);
-      alert('❌ Error al procesar el traspaso. Intente nuevamente.');
+      enqueueSnackbar('Error al procesar el traspaso. Intente nuevamente.', { variant: 'error' });
     } finally {
       setTransferLoading(false);
     }
@@ -631,7 +633,7 @@ const StockModal = ({ open, onClose, product = null, currentSucursalId = 1 }) =>
                       icon={<Phone />}
                       label={transferData.fromSucursal?.telefono}
                       color="warning"
-                      onClick={() => alert(`Llamar a: ${transferData.fromSucursal?.telefono}`)}
+                      onClick={() => enqueueSnackbar(`Llamar a: ${transferData.fromSucursal?.telefono}`, { variant: 'info' })}
                     />
                     <Typography variant="body2" color="text.secondary">
                       Horario: {transferData.fromSucursal?.horario}
@@ -740,13 +742,13 @@ const StockModal = ({ open, onClose, product = null, currentSucursalId = 1 }) =>
                       // Validaciones por paso
                       if (transferStep === 0) {
                         if (!transferData.motivo) {
-                          alert('Por favor ingrese el motivo del traspaso');
+                          enqueueSnackbar('Por favor ingrese el motivo del traspaso', { variant: 'warning' });
                           return;
                         }
                       }
                       if (transferStep === 1) {
                         if (!transferData.contactoDestino) {
-                          alert('Por favor ingrese quién recogerá el producto');
+                          enqueueSnackbar('Por favor ingrese quién recogerá el producto', { variant: 'warning' });
                           return;
                         }
                       }
