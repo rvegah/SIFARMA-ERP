@@ -165,7 +165,7 @@ const CreditPurchasesListSection = ({
                                     startAdornment: <Storefront sx={{ color: "action.active", mr: 1 }} />
                                 }}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 {catalogs.sucursales.map((s) => (
                                     <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
                                         {s.nombreSucursal}
@@ -183,7 +183,7 @@ const CreditPurchasesListSection = ({
                                 value={filters.TipoFormaPago}
                                 onChange={(e) => updateFilter("TipoFormaPago", e.target.value)}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 {catalogs.formasPago.map((f) => (
                                     <MenuItem key={f.tipoFormaPago} value={f.tipoFormaPago}>
                                         {f.nombre}
@@ -221,7 +221,7 @@ const CreditPurchasesListSection = ({
                                 value={filters.TieneSaldoPago}
                                 onChange={(e) => updateFilter("TieneSaldoPago", e.target.value)}
                             >
-                                <MenuItem value="" disabled>Seleccione...</MenuItem>
+                                <MenuItem value="">Seleccione...</MenuItem>
                                 <MenuItem value={true}>Con monto a Pagar</MenuItem>
                                 <MenuItem value={false}>Pagados</MenuItem>
                             </TextField>

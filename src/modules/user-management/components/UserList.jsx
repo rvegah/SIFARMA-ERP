@@ -164,7 +164,6 @@ const UserList = ({
                   startAdornment: <FilterList sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione...</MenuItem>
                 <MenuItem value="">Todos los roles</MenuItem>
                 {roles?.map((role) => (
                   <MenuItem key={role.rol_ID} value={role.nombre_Rol}>

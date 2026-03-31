@@ -527,7 +527,7 @@ const AssignSchedule = ({ onCancel }) => {
                   startAdornment: <Person sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione usuario</MenuItem>
+                <MenuItem value="">Seleccione usuario</MenuItem>
                 {users.map((user) => (
                   <MenuItem key={user.id} value={user.id}>
                     {user.nombreCompleto}
@@ -562,7 +562,7 @@ const AssignSchedule = ({ onCancel }) => {
                   startAdornment: <Store sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione sucursal</MenuItem>
+                <MenuItem value="">Seleccione sucursal</MenuItem>
                 {sucursales.map((suc) => (
                   <MenuItem key={suc.sucursal_ID} value={suc.sucursal_ID}>
                     {suc.nombreSucursal}
@@ -584,7 +584,7 @@ const AssignSchedule = ({ onCancel }) => {
                   startAdornment: <Computer sx={{ color: "action.active", mr: 1 }} />
                 }}
               >
-                <MenuItem value="" disabled>Seleccione equipo</MenuItem>
+                <MenuItem value="">Seleccione equipo</MenuItem>
                 {equipos.map((eq) => (
                   <MenuItem
                     key={eq.equipoComputo_ID}

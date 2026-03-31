@@ -11,7 +11,8 @@ import {
     ShoppingBag, Info, CheckCircle, Visibility, Edit,
     CalendarToday, Store, Inventory, LocalPostOffice,
     CheckCircleOutline, AssignmentTurnedIn, HelpOutline,
-    Badge, Payments, Discount, MonetizationOn
+    Badge, Payments, Discount, MonetizationOn, Business,
+    ShoppingCart
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import { useSnackbar } from "notistack";
@@ -200,7 +201,7 @@ const AddProductsToPurchaseSection = ({
                     value={value}
                     onChange={(e) => updateEditingField(field, e.target.value)}
                 >
-                    <MenuItem value="" disabled>Seleccione...</MenuItem>
+                    <MenuItem value="">Seleccione...</MenuItem>
                     {(selectOptions || []).map(opt => (
                         <MenuItem key={opt.id} value={opt.id}>{opt.nombre}</MenuItem>
                     ))}
@@ -415,112 +416,112 @@ const AddProductsToPurchaseSection = ({
                     </Box>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={4}>
-                            <TextField 
-                                fullWidth 
-                                label="Número Factura" 
-                                size="small" 
-                                InputProps={{ 
+                            <TextField
+                                fullWidth
+                                label="Número Factura"
+                                size="small"
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <Receipt sx={{ color: "action.active", mr: 1 }} />
-                                }} 
-                                value={invoiceData.numeroFactura} 
-                                onChange={(e) => updateInvoiceField("numeroFactura", e.target.value)} 
+                                }}
+                                value={invoiceData.numeroFactura}
+                                onChange={(e) => updateInvoiceField("numeroFactura", e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField 
-                                fullWidth 
-                                label="Fecha" 
-                                type="date" 
-                                size="small" 
-                                InputProps={{ 
+                            <TextField
+                                fullWidth
+                                label="Fecha"
+                                type="date"
+                                size="small"
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <CalendarToday sx={{ color: "action.active", mr: 1 }} />
-                                }} 
-                                value={invoiceData.fecha} 
-                                onChange={(e) => updateInvoiceField("fecha", e.target.value)} 
-                                InputLabelProps={{ shrink: true }} 
+                                }}
+                                value={invoiceData.fecha}
+                                onChange={(e) => updateInvoiceField("fecha", e.target.value)}
+                                InputLabelProps={{ shrink: true }}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField 
-                                fullWidth 
-                                label="NIT" 
-                                size="small" 
-                                InputProps={{ 
+                            <TextField
+                                fullWidth
+                                label="NIT"
+                                size="small"
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <Badge sx={{ color: "action.active", mr: 1 }} />
-                                }} 
-                                value={invoiceData.nit} 
-                                onChange={(e) => updateInvoiceField("nit", e.target.value)} 
+                                }}
+                                value={invoiceData.nit}
+                                onChange={(e) => updateInvoiceField("nit", e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField 
-                                fullWidth 
-                                label="Nombre Proveedor" 
-                                size="small" 
-                                InputProps={{ 
+                            <TextField
+                                fullWidth
+                                label="Nombre Proveedor"
+                                size="small"
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <Business sx={{ color: "action.active", mr: 1 }} />
-                                }} 
-                                value={invoiceData.nombreProveedor} 
-                                onChange={(e) => updateInvoiceField("nombreProveedor", e.target.value)} 
+                                }}
+                                value={invoiceData.nombreProveedor}
+                                onChange={(e) => updateInvoiceField("nombreProveedor", e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField 
-                                fullWidth 
-                                label="Número Pedido" 
-                                size="small" 
-                                InputProps={{ 
+                            <TextField
+                                fullWidth
+                                label="Número Pedido"
+                                size="small"
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <ShoppingCart sx={{ color: "action.active", mr: 1 }} />
-                                }} 
-                                value={invoiceData.numeroPedido} 
-                                onChange={(e) => updateInvoiceField("numeroPedido", e.target.value)} 
+                                }}
+                                value={invoiceData.numeroPedido}
+                                onChange={(e) => updateInvoiceField("numeroPedido", e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField 
-                                fullWidth 
-                                label="Total Compra" 
-                                type="number" 
-                                size="small" 
-                                InputProps={{ 
+                            <TextField
+                                fullWidth
+                                label="Total Compra"
+                                type="number"
+                                size="small"
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <Payments sx={{ color: "action.active", mr: 1 }} />
-                                }} 
-                                value={invoiceData.totalCompra} 
-                                onChange={(e) => updateInvoiceField("totalCompra", Number(e.target.value))} 
+                                }}
+                                value={invoiceData.totalCompra}
+                                onChange={(e) => updateInvoiceField("totalCompra", Number(e.target.value))}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField 
-                                fullWidth 
-                                label="Desc. Comercial" 
-                                type="number" 
-                                size="small" 
-                                InputProps={{ 
+                            <TextField
+                                fullWidth
+                                label="Desc. Comercial"
+                                type="number"
+                                size="small"
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <Discount sx={{ color: "action.active", mr: 1 }} />
-                                }} 
-                                value={invoiceData.descuentoComercial} 
-                                onChange={(e) => updateInvoiceField("descuentoComercial", Number(e.target.value))} 
+                                }}
+                                value={invoiceData.descuentoComercial}
+                                onChange={(e) => updateInvoiceField("descuentoComercial", Number(e.target.value))}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <TextField 
-                                fullWidth 
-                                label="Desc. Especial" 
-                                type="number" 
-                                size="small" 
-                                InputProps={{ 
+                            <TextField
+                                fullWidth
+                                label="Desc. Especial"
+                                type="number"
+                                size="small"
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <Discount sx={{ color: "action.active", mr: 1 }} />
-                                }} 
-                                value={invoiceData.descuentoEspecial} 
-                                onChange={(e) => updateInvoiceField("descuentoEspecial", Number(e.target.value))} 
+                                }}
+                                value={invoiceData.descuentoEspecial}
+                                onChange={(e) => updateInvoiceField("descuentoEspecial", Number(e.target.value))}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
@@ -531,7 +532,7 @@ const AddProductsToPurchaseSection = ({
                                 size="small"
                                 value={invoiceData.importePagar || 0}
                                 onChange={(e) => updateInvoiceField("importePagar", Number(e.target.value))}
-                                InputProps={{ 
+                                InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <MonetizationOn sx={{ color: farmaColors.primary, mr: 1 }} />
                                 }}
@@ -577,10 +578,10 @@ const AddProductsToPurchaseSection = ({
                 </DialogContent>
                 <DialogActions sx={{ p: 2 }}>
                     <Button onClick={() => setFinishConfirmOpen(false)} disabled={finishing}>No</Button>
-                    <Button 
-                        onClick={handleTerminarCompra} 
-                        variant="contained" 
-                        color="primary" 
+                    <Button
+                        onClick={handleTerminarCompra}
+                        variant="contained"
+                        color="primary"
                         disabled={finishing}
                         startIcon={finishing ? <CircularProgress size={20} color="inherit" /> : null}
                     >
