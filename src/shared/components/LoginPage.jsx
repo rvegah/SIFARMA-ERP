@@ -169,7 +169,7 @@ function LoginPage() {
       <Box
         sx={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          bgcolor: farmaColors.primary,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -178,127 +178,55 @@ function LoginPage() {
           overflow: 'hidden',
         }}
       >
-        {/* Elementos decorativos de fondo */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: -100,
-            right: -100,
-            width: 400,
-            height: 400,
-            background: `radial-gradient(circle, ${farmaColors.alpha.primary10} 0%, transparent 70%)`,
-            borderRadius: '50%',
-            zIndex: 0,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: -150,
-            left: -150,
-            width: 500,
-            height: 500,
-            background: `radial-gradient(circle, ${farmaColors.alpha.secondary10} 0%, transparent 70%)`,
-            borderRadius: '50%',
-            zIndex: 0,
-          }}
-        />
+        {/* Círculos decorativos sobre fondo naranja */}
+        <Box sx={{
+          position: 'absolute', top: -120, right: -100,
+          width: 420, height: 420, borderRadius: '50%',
+          bgcolor: 'rgba(255,255,255,0.06)', zIndex: 0,
+        }} />
+        <Box sx={{
+          position: 'absolute', bottom: -80, left: -80,
+          width: 300, height: 300, borderRadius: '50%',
+          bgcolor: 'rgba(0,0,0,0.08)', zIndex: 0,
+        }} />
+        <Box sx={{
+          position: 'absolute', bottom: 60, right: 40,
+          width: 180, height: 180, borderRadius: '50%',
+          bgcolor: 'rgba(255,255,255,0.04)', zIndex: 0,
+        }} />
 
-        <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
-          {/* Card principal integrado */}
+        <Container maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
           <Card
             sx={{
-              borderRadius: 4,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-              border: 'none',
+              borderRadius: 3,
+              boxShadow: '0 24px 64px rgba(0,0,0,0.25)',
               overflow: 'hidden',
-              background: 'white',
+              border: 'none',
             }}
           >
-            {/* Header con logo y gradiente */}
-            <Box
-              sx={{
-                background: `linear-gradient(135deg, ${farmaColors.secondary} 0%, ${farmaColors.primary} 100%)`,
-                padding: 4,
-                textAlign: 'center',
-                position: 'relative',
-              }}
-            >
-              {/* Patrón decorativo */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundImage: `radial-gradient(circle at 20px 20px, rgba(255,255,255,0.1) 2px, transparent 0)`,
-                  backgroundSize: '40px 40px',
-                  opacity: 0.3,
-                }}
-              />
+            {/* Línea azul superior — detalle minimalista */}
+            <Box sx={{ height: 4, bgcolor: farmaColors.secondary }} />
 
-              {/* Logo */}
-              <Box
-                sx={{
-                  display: 'inline-block',
-                  background: 'white',
-                  padding: '16px 32px',
-                  borderRadius: 3,
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                  mb: 2,
-                  position: 'relative',
-                }}
-              >
+            <CardContent sx={{ p: 4 }}>
+              {/* Logo real de la empresa */}
+              <Box sx={{ mb: 3 }}>
                 <Box
                   component="img"
                   src={logoFarmaDinamica}
                   alt="FARMA DINÁMICA"
                   sx={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                    maxHeight: 60,
+                    height: 44,
                     objectFit: 'contain',
                     display: 'block',
                   }}
                 />
               </Box>
 
-              <Typography
-                variant="h6"
-                sx={{
-                  color: 'white',
-                  fontWeight: 500,
-                  textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Sistema Integral de Farmacia
+              <Typography variant="h5" sx={{ fontWeight: 700, color: farmaColors.secondary, mb: 0.5 }}>
+                Bienvenido
               </Typography>
-            </Box>
-
-            {/* Formulario de login */}
-            <CardContent sx={{ p: 5 }}>
-              <Typography
-                variant="h5"
-                sx={{
-                  textAlign: 'center',
-                  mb: 1,
-                  fontWeight: 700,
-                  color: farmaColors.secondary,
-                }}
-              >
-                Iniciar Sesión
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  textAlign: 'center',
-                  mb: 4,
-                  color: '#6c757d',
-                }}
-              >
-                Ingresa tus credenciales para acceder al sistema
+              <Typography variant="body2" sx={{ color: '#aaa', mb: 3 }}>
+                Ingresa tus credenciales para acceder
               </Typography>
 
               <Box component="form" onSubmit={handleLogin}>
@@ -309,33 +237,26 @@ function LoginPage() {
                   value={usuario}
                   onChange={(e) => setUsuario(e.target.value)}
                   disabled={loading}
+                  required
                   sx={{
-                    mb: 3,
+                    mb: 2,
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
-                      bgcolor: loading ? '#f5f5f5' : '#f8f9fa',
-                      '&.Mui-focused': {
-                        bgcolor: 'white',
-                        '& fieldset': {
-                          borderColor: farmaColors.primary,
-                          borderWidth: '2px',
-                        },
+                      bgcolor: loading ? '#f5f5f5' : '#fafafa',
+                      '&.Mui-focused fieldset': {
+                        borderColor: farmaColors.primary,
+                        borderWidth: '2px',
                       },
                       '&:hover:not(.Mui-focused) fieldset': {
                         borderColor: farmaColors.primaryLight,
                       },
                     },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: farmaColors.primary,
-                    },
+                    '& .MuiInputLabel-root.Mui-focused': { color: farmaColors.primary },
                   }}
-                  required
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Person
-                          sx={{ color: farmaColors.secondary, fontSize: '1.2rem' }}
-                        />
+                        <Person sx={{ color: farmaColors.secondary, fontSize: '1.2rem' }} />
                       </InputAdornment>
                     ),
                   }}
@@ -349,27 +270,22 @@ function LoginPage() {
                   value={contrasena}
                   onChange={(e) => setContrasena(e.target.value)}
                   disabled={loading}
+                  required
                   sx={{
-                    mb: 4,
+                    mb: 3,
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
-                      bgcolor: loading ? '#f5f5f5' : '#f8f9fa',
-                      '&.Mui-focused': {
-                        bgcolor: 'white',
-                        '& fieldset': {
-                          borderColor: farmaColors.primary,
-                          borderWidth: '2px',
-                        },
+                      bgcolor: loading ? '#f5f5f5' : '#fafafa',
+                      '&.Mui-focused fieldset': {
+                        borderColor: farmaColors.primary,
+                        borderWidth: '2px',
                       },
                       '&:hover:not(.Mui-focused) fieldset': {
                         borderColor: farmaColors.primaryLight,
                       },
                     },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: farmaColors.primary,
-                    },
+                    '& .MuiInputLabel-root.Mui-focused': { color: farmaColors.primary },
                   }}
-                  required
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -384,9 +300,7 @@ function LoginPage() {
                           disabled={loading}
                           sx={{
                             color: farmaColors.secondary,
-                            '&:hover': {
-                              bgcolor: farmaColors.alpha.secondary10,
-                            },
+                            '&:hover': { bgcolor: farmaColors.alpha.secondary10 },
                           }}
                         >
                           {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -403,68 +317,43 @@ function LoginPage() {
                   size="large"
                   disabled={loading}
                   sx={{
-                    py: 2.5,
-                    background: loading
-                      ? '#cccccc'
-                      : `linear-gradient(135deg, ${farmaColors.primary} 0%, ${farmaColors.primaryDark} 100%)`,
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
+                    py: 1.5,
+                    bgcolor: loading ? '#ccc' : farmaColors.secondary,
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
                     borderRadius: 2,
                     textTransform: 'none',
-                    boxShadow: loading ? 'none' : `0 8px 24px ${farmaColors.alpha.primary30}`,
-                    transition: 'all 0.3s ease',
+                    boxShadow: 'none',
                     '&:hover': {
-                      background: loading
-                        ? '#cccccc'
-                        : `linear-gradient(135deg, ${farmaColors.primaryDark} 0%, ${farmaColors.primary} 100%)`,
-                      boxShadow: loading ? 'none' : `0 12px 32px ${farmaColors.alpha.primary40}`,
-                      transform: loading ? 'none' : 'translateY(-2px)',
+                      bgcolor: farmaColors.secondaryDark,
+                      boxShadow: 'none',
                     },
                     '&:disabled': {
-                      background: farmaColors.alpha.primary20,
+                      bgcolor: '#ccc',
                       color: 'rgba(255,255,255,0.8)',
                     },
                   }}
                 >
                   {loading ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <CircularProgress size={24} sx={{ color: 'white' }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <CircularProgress size={20} sx={{ color: 'white' }} />
                       <span>Validando acceso...</span>
                     </Box>
                   ) : (
-                    'Ingresar al Sistema'
+                    'Ingresar al sistema'
                   )}
                 </Button>
               </Box>
 
-              <Box sx={{ mt: 4, textAlign: 'center' }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: '#95a5a6',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 1,
-                  }}
-                >
-                  <Box
-                    component="span"
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      bgcolor: '#27ae60',
-                      display: 'inline-block',
-                      animation: 'pulse 2s ease-in-out infinite',
-                      '@keyframes pulse': {
-                        '0%, 100%': { opacity: 1 },
-                        '50%': { opacity: 0.5 },
-                      },
-                    }}
-                  />
-                  Farma Dinámica v1.0 • Sistema seguro
+              {/* Footer */}
+              <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                <Box sx={{
+                  width: 7, height: 7, borderRadius: '50%', bgcolor: '#27ae60',
+                  animation: 'pulse 2s ease-in-out infinite',
+                  '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.4 } },
+                }} />
+                <Typography variant="caption" sx={{ color: '#bbb', fontSize: '0.78rem' }}>
+                  Farma Dinámica v1.0 · Sistema seguro
                 </Typography>
               </Box>
             </CardContent>
@@ -472,7 +361,6 @@ function LoginPage() {
         </Container>
       </Box>
 
-      {/* Dialog de errores/éxito */}
       <ErrorDialog
         open={dialogOpen}
         onClose={handleDialogClose}
@@ -483,7 +371,7 @@ function LoginPage() {
         autoCloseDelay={2000}
       />
     </>
-  );
+  );;
 }
 
 export default LoginPage;
