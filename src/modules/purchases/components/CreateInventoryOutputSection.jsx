@@ -222,7 +222,7 @@ const CreateInventoryOutputSection = ({ outputData, setOutputData, onCreate, cat
                                 documentoReferencia: "",
                                 codigoResponsable: "",
                                 observaciones: "",
-                                fechaSalida: new Date().toISOString().split("T")[0],
+                                fechaSalida: "",
                             })}
                             startIcon={<Cancel />}
                             sx={{

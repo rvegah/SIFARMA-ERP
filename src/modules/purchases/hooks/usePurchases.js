@@ -20,7 +20,7 @@ export const usePurchases = () => {
 
     const [purchaseData, setPurchaseData] = useState({
         descripcion: "",
-        fechaCompra: new Date().toISOString().split("T")[0],
+        fechaCompra: "",
         sucursalId: "",
         tipoFormaPago: "",
         detalleFormaPago: "",
@@ -30,16 +30,16 @@ export const usePurchases = () => {
     });
 
     const [creditData, setCreditData] = useState({
-        fecha: new Date().toISOString().split("T")[0],
+        fecha: "",
         hora: new Date().toLocaleTimeString('es-BO', { hour12: false, hour: '2-digit', minute: '2-digit' }),
         conceptoPago: "",
-        montoDeuda: 0,
-        montoPago: 0,
-        montoSaldo: 0,
+        montoDeuda: "",
+        montoPago: "",
+        montoSaldo: "",
         numeroRecibo: "",
         numeroCheque: "",
         bancoEmitido: "",
-        numeroDiasPago: 0,
+        numeroDiasPago: "",
         observaciones: ""
     });
 
@@ -49,14 +49,14 @@ export const usePurchases = () => {
     // Invoice section data
     const [invoiceData, setInvoiceData] = useState({
         numeroFactura: "",
-        fecha: new Date().toISOString().split("T")[0],
+        fecha: "",
         nit: "",
         nombreProveedor: "",
         numeroPedido: "",
-        totalCompra: 0,
-        descuentoComercial: 0,
-        descuentoEspecial: 0,
-        importePagar: 0
+        totalCompra: "",
+        descuentoComercial: "",
+        descuentoEspecial: "",
+        importePagar: ""
     });
 
     const [catalogs, setCatalogs] = useState({
@@ -128,6 +128,10 @@ export const usePurchases = () => {
     const handleCreatePurchase = async () => {
         if (!purchaseData.sucursalId || !purchaseData.codigoProveedor || !purchaseData.tipoFormaPago || !purchaseData.codigoPedido) {
             enqueueSnackbar("Por favor complete todos los campos obligatorios", { variant: "warning" });
+            return;
+        }
+        if (!purchaseData.fechaCompra) {
+            enqueueSnackbar("Debe seleccionar una Fecha de Compra", { variant: "warning" });
             return;
         }
 
@@ -216,13 +220,13 @@ export const usePurchases = () => {
                 codigoIndustria: "",
                 numeroLote: "",
                 fechaVencimiento: "",
-                cantidad: 1,
-                numeroBlister: 0,
-                cantidadUnidadBlister: 0,
-                factorUnidad: 0,
-                costoUnitario: 0,
-                precioUnitario: 0,
-                precioCaja: 0
+                cantidad: "",
+                numeroBlister: "",
+                cantidadUnidadBlister: "",
+                factorUnidad: "",
+                costoUnitario: "",
+                precioUnitario: "",
+                precioCaja: ""
             }
         ]);
     };
@@ -267,13 +271,13 @@ export const usePurchases = () => {
                     codigoIndustria: item.codigoIndustria,
                     numeroLote: item.numeroLote,
                     fechaVencimiento: item.fechaVencimiento,
-                    cantidad: Number(item.cantidad),
+                    cantidad: Number(item.cantidad) || 0,
                     numeroBlister: Number(item.numeroBlister) || 0,
                     cantidadUnidadBlister: Number(item.cantidadUnidadBlister) || 0,
                     factorUnidad: Number(item.factorUnidad) || 0,
-                    costoUnitario: Number(item.costoUnitario),
-                    precioUnitario: Number(item.precioUnitario),
-                    precioCaja: Number(item.precioCaja)
+                    costoUnitario: Number(item.costoUnitario) || 0,
+                    precioUnitario: Number(item.precioUnitario) || 0,
+                    precioCaja: Number(item.precioCaja) || 0
                 }))
             };
 
@@ -297,6 +301,10 @@ export const usePurchases = () => {
             const payload = {
                 codigoComprobanteCompra: createdPurchase.comprobanteCompra_ID,
                 ...invoiceData,
+                totalCompra: Number(invoiceData.totalCompra) || 0,
+                descuentoComercial: Number(invoiceData.descuentoComercial) || 0,
+                descuentoEspecial: Number(invoiceData.descuentoEspecial) || 0,
+                importePagar: Number(invoiceData.importePagar) || 0,
                 codigoEmpleadoAlta: user?.codigoEmpleado || "EMP-001"
             };
             const res = await purchaseService.guardarFactura(payload);
@@ -319,6 +327,10 @@ export const usePurchases = () => {
             const payload = {
                 codigoComprobanteCompra: createdPurchase.comprobanteCompra_ID,
                 ...creditData,
+                montoDeuda: Number(creditData.montoDeuda) || 0,
+                montoPago: Number(creditData.montoPago) || 0,
+                montoSaldo: Number(creditData.montoSaldo) || 0,
+                numeroDiasPago: Number(creditData.numeroDiasPago) || 0,
                 codigoEmpleadoAlta: user?.codigoEmpleado || "EMP-001"
             };
             const res = await purchaseService.pagarCredito(payload);

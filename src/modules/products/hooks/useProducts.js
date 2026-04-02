@@ -56,9 +56,8 @@ export const useProducts = () => {
           userService.getSucursales(),
         ]);
 
-        // Seleccionar la primera sucursal por defecto (la API devuelve sucursal_ID, no id)
-        const defaultSucursal = sucursales && sucursales.length > 0 ? sucursales[0].sucursal_ID : "";
-        setSearchFilters(prev => ({ ...prev, sucursalId: defaultSucursal }));
+        // Ya no seleccionar la primera sucursal por defecto
+        setSearchFilters(prev => ({ ...prev, sucursalId: "" }));
 
         setCatalogs(prev => ({
           ...prev,
@@ -145,6 +144,18 @@ export const useProducts = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetSearch = () => {
+    setSearchFilters({
+      sucursalId: "",
+      nombre: "",
+      codigo: "",
+      linea: "",
+      laboratorio: "",
+    });
+    setProducts([]);
+    setCatalogs(prev => ({ ...prev, filterLaboratorios: [] }));
   };
 
   const handleFormChange = (field) => (event) => {
@@ -316,6 +327,7 @@ export const useProducts = () => {
     searchFilters,
     updateSearchFilters,
     searchProducts,
+    resetSearch,
     productForm,
     setProductForm,
     productFormChange: handleFormChange,

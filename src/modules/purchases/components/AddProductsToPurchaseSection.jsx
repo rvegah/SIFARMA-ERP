@@ -215,8 +215,8 @@ const AddProductsToPurchaseSection = ({
                 label={label}
                 size="small"
                 type={type}
-                value={value || (type === "number" ? 0 : "")}
-                onChange={(e) => updateEditingField(field, type === "number" ? Number(e.target.value) : e.target.value)}
+                value={value === undefined || value === null ? "" : value}
+                onChange={(e) => updateEditingField(field, type === "number" ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value)}
                 InputLabelProps={type === "date" ? { shrink: true } : {}}
             />
         );
@@ -492,8 +492,8 @@ const AddProductsToPurchaseSection = ({
                                     readOnly: isFinished,
                                     startAdornment: <Payments sx={{ color: "action.active", mr: 1 }} />
                                 }}
-                                value={invoiceData.totalCompra}
-                                onChange={(e) => updateInvoiceField("totalCompra", Number(e.target.value))}
+                                value={invoiceData.totalCompra === undefined ? "" : invoiceData.totalCompra}
+                                onChange={(e) => updateInvoiceField("totalCompra", e.target.value === "" ? "" : Number(e.target.value))}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
@@ -506,8 +506,8 @@ const AddProductsToPurchaseSection = ({
                                     readOnly: isFinished,
                                     startAdornment: <Discount sx={{ color: "action.active", mr: 1 }} />
                                 }}
-                                value={invoiceData.descuentoComercial}
-                                onChange={(e) => updateInvoiceField("descuentoComercial", Number(e.target.value))}
+                                value={invoiceData.descuentoComercial === undefined ? "" : invoiceData.descuentoComercial}
+                                onChange={(e) => updateInvoiceField("descuentoComercial", e.target.value === "" ? "" : Number(e.target.value))}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
@@ -520,8 +520,8 @@ const AddProductsToPurchaseSection = ({
                                     readOnly: isFinished,
                                     startAdornment: <Discount sx={{ color: "action.active", mr: 1 }} />
                                 }}
-                                value={invoiceData.descuentoEspecial}
-                                onChange={(e) => updateInvoiceField("descuentoEspecial", Number(e.target.value))}
+                                value={invoiceData.descuentoEspecial === undefined ? "" : invoiceData.descuentoEspecial}
+                                onChange={(e) => updateInvoiceField("descuentoEspecial", e.target.value === "" ? "" : Number(e.target.value))}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
@@ -530,8 +530,8 @@ const AddProductsToPurchaseSection = ({
                                 label="Importe a Pagar"
                                 type="number"
                                 size="small"
-                                value={invoiceData.importePagar || 0}
-                                onChange={(e) => updateInvoiceField("importePagar", Number(e.target.value))}
+                                value={invoiceData.importePagar === undefined ? "" : invoiceData.importePagar}
+                                onChange={(e) => updateInvoiceField("importePagar", e.target.value === "" ? "" : Number(e.target.value))}
                                 InputProps={{
                                     readOnly: isFinished,
                                     startAdornment: <MonetizationOn sx={{ color: farmaColors.primary, mr: 1 }} />
