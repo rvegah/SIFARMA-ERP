@@ -50,7 +50,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                         <TextField
                             fullWidth
                             label="Título / Descripción"
-                            value={purchaseData.descripcion}
+                            value={purchaseData.descripcion || ""}
                             onChange={(e) => updateField("descripcion", e.target.value)}
                             required
                             InputProps={{
@@ -65,7 +65,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                             fullWidth
                             label="Fecha de Compra"
                             type="date"
-                            value={purchaseData.fechaCompra || new Date().toISOString().split('T')[0]}
+                            value={purchaseData.fechaCompra || ""}
                             onChange={(e) => updateField("fechaCompra", e.target.value)}
                             InputLabelProps={{ shrink: true }}
                             required
@@ -200,7 +200,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
                             disabled={loading}
                             onClick={() => setPurchaseData({
                                 descripcion: "",
-                                fechaCompra: new Date().toISOString().split("T")[0],
+                                fechaCompra: "",
                                 sucursalId: "",
                                 tipoFormaPago: "",
                                 detalleFormaPago: "",

@@ -120,7 +120,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                             required
                             label="Fecha Estimada de Envío"
                             type="date"
-                            value={transferData.fechaEnvio || new Date().toISOString().split('T')[0]}
+                            value={transferData.fechaEnvio || ""}
                             onChange={(e) => updateField("fechaEnvio", e.target.value)}
                             InputLabelProps={{ shrink: true }}
                             InputProps={{

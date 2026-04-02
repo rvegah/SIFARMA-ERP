@@ -32,7 +32,7 @@ export const useInventoryOutput = () => {
         documentoReferencia: "",
         codigoResponsable: "",
         observaciones: "",
-        fechaSalida: new Date().toISOString().split("T")[0],
+        fechaSalida: "",
     });
 
     // Created output (result from POST)
@@ -198,8 +198,8 @@ export const useInventoryOutput = () => {
                     codigoLote: item.codigoLote,
                     numeroLote: item.numeroLote,
                     fechaVencimiento: item.fechaVencimiento,
-                    cantidad: item.cantidad,
-                    costoUnitario: item.costoUnitario,
+                    cantidad: Number(item.cantidad) || 0,
+                    costoUnitario: Number(item.costoUnitario) || 0,
                     observaciones: item.observaciones
                 }))
             };

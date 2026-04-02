@@ -325,8 +325,8 @@ const AddProductsToInventoryOutputSection = ({
                                                         <TextField
                                                             type="number"
                                                             size="small"
-                                                            value={item.cantidad}
-                                                            onChange={(e) => updateOutputItem(idx, "cantidad", Number(e.target.value))}
+                                                            value={item.cantidad === undefined ? "" : item.cantidad}
+                                                            onChange={(e) => updateOutputItem(idx, "cantidad", e.target.value === "" ? "" : Number(e.target.value))}
                                                             inputProps={{ min: 1 }}
                                                         />
                                                     ) : (

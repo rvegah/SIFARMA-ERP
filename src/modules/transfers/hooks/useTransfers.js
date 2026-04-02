@@ -26,7 +26,7 @@ export const useTransfers = () => {
         descripcion: "",
         codigoSucursalOrigen: "",
         codigoSucursalDestino: "",
-        fechaEnvio: new Date().toISOString().split("T")[0],
+        fechaEnvio: "",
         observaciones: ""
     });
 
@@ -286,11 +286,11 @@ export const useTransfers = () => {
                     skU_ID: item.sku,
                     lote_ID: item.lote_ID,
                     producto_ID: item.producto_ID,
-                    cantidad: item.cantidad,
+                    cantidad: Number(item.cantidad) || 0,
                     observaciones: item.observaciones,
-                    costoUnitario: item.costoUnitario,
-                    precioUnitario: item.precioUnitario,
-                    precioRefencial: item.precioRefencial,
+                    costoUnitario: Number(item.costoUnitario) || 0,
+                    precioUnitario: Number(item.precioUnitario) || 0,
+                    precioRefencial: Number(item.precioRefencial) || 0,
                 }))
             };
 
