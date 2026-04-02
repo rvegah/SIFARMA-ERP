@@ -524,8 +524,8 @@ const AddProductsToTransferSection = ({
                                                         <TextField
                                                             type="number"
                                                             size="small"
-                                                            value={item.cantidad}
-                                                            onChange={(e) => updateTransferItem(idx, "cantidad", Number(e.target.value))}
+                                                            value={item.cantidad === undefined ? "" : item.cantidad}
+                                                            onChange={(e) => updateTransferItem(idx, "cantidad", e.target.value === "" ? "" : Number(e.target.value))}
                                                             inputProps={{ min: 1 }}
                                                         />
                                                     ) : (
@@ -597,16 +597,16 @@ const AddProductsToTransferSection = ({
                             <Assessment sx={{ color: farmaColors.primary }} /> Reporte: Productos por Sucursal
                         </Typography>
                         {reportData.length > 0 && (
-                            <Chip 
-                                label={`${reportData.length} productos encontrados`} 
-                                color="primary" 
-                                variant="outlined" 
-                                size="small" 
+                            <Chip
+                                label={`${reportData.length} productos encontrados`}
+                                color="primary"
+                                variant="outlined"
+                                size="small"
                                 sx={{ fontWeight: 600 }}
                             />
                         )}
                     </Box>
-                    <Box sx={{ p: 3, bgcolor: '#fafafa', borderBottom: `1px solid ${farmaColors.alpha.secondary10}` }}>
+                    {/* <Box sx={{ p: 3, bgcolor: '#fafafa', borderBottom: `1px solid ${farmaColors.alpha.secondary10}` }}>
                         <Grid container spacing={2} alignItems="center">
                             <Grid item xs={12} sm={6} md={4}>
                                 <TextField
@@ -653,7 +653,7 @@ const AddProductsToTransferSection = ({
                                 </Box>
                             </Grid>
                         </Grid>
-                    </Box>
+                    </Box> */}
 
                     {reportData.length > 0 && (
                         <TableContainer sx={{ maxHeight: 600 }}>

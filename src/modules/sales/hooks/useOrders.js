@@ -19,7 +19,7 @@ export const useOrders = () => {
     // Section 1: Order Data
     const [orderData, setOrderData] = useState({
         sucursalId: "",
-        fecha: new Date().toISOString().split("T")[0],
+        fecha: "",
         descripcion: "",
         lineaId: "",
         laboratorioId: "",
@@ -161,7 +161,7 @@ export const useOrders = () => {
 
                 const serverOrderData = {
                     sucursalId: detail.codigoSucursal,
-                    fecha: detail.fechaRegistro ? detail.fechaRegistro.split("T")[0] : new Date().toISOString().split("T")[0],
+                    fecha: detail.fechaRegistro ? detail.fechaRegistro.split("T")[0] : "",
                     descripcion: detail.observaciones,
                     lineaId: detail.linea || "",
                     laboratorioId: detail.laboratorio || "",
@@ -313,7 +313,7 @@ export const useOrders = () => {
         }
 
         setSelectedProducts((prev) => [
-            { ...product, cantidad: 1 },
+            { ...product, cantidad: "" },
             ...prev
         ]);
         setIsDirty(true);
@@ -335,7 +335,7 @@ export const useOrders = () => {
                     if (p.isReadOnlyRow) return p;
                     return {
                         ...p,
-                        cantidad: Math.max(1, parseInt(cantidad) || 1),
+                        cantidad: cantidad === "" ? "" : (parseInt(cantidad) || 0),
                         observacionesFila: observation !== null ? observation : p.observacionesFila
                     };
                 }
@@ -359,7 +359,7 @@ export const useOrders = () => {
                 productos: selectedProducts.map(p => ({
                     productoId: p.producto_ID || p.id,
                     codigoProducto: p.codigoProducto || p.codigo,
-                    cantidad: p.cantidad,
+                    cantidad: Number(p.cantidad) || 0,
                     observaciones: p.observacionesFila || ""
                 }))
             };
@@ -394,7 +394,7 @@ export const useOrders = () => {
         setIsDirty(false);
         setOrderData({
             sucursalId: "",
-            fecha: new Date().toISOString().split("T")[0],
+            fecha: "",
             descripcion: "",
             lineaId: "",
             laboratorioId: "",

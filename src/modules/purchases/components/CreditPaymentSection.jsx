@@ -111,8 +111,8 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             fullWidth
                             label="Monto Deuda"
                             type="number"
-                            value={creditData.montoDeuda}
-                            onChange={(e) => updateField("montoDeuda", Number(e.target.value))}
+                            value={creditData.montoDeuda === undefined ? "" : creditData.montoDeuda}
+                            onChange={(e) => updateField("montoDeuda", e.target.value === "" ? "" : Number(e.target.value))}
                             InputProps={{
                                 startAdornment: <MonetizationOn sx={{ color: "action.active", mr: 1 }} />,
                                 endAdornment: <InputAdornment position="end">Bs.</InputAdornment>
@@ -125,8 +125,8 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             fullWidth
                             label="Monto Pago"
                             type="number"
-                            value={creditData.montoPago}
-                            onChange={(e) => updateField("montoPago", Number(e.target.value))}
+                            value={creditData.montoPago === undefined ? "" : creditData.montoPago}
+                            onChange={(e) => updateField("montoPago", e.target.value === "" ? "" : Number(e.target.value))}
                             InputProps={{
                                 startAdornment: <MonetizationOn sx={{ color: "success.main", mr: 1 }} />,
                                 endAdornment: <InputAdornment position="end">Bs.</InputAdornment>
@@ -139,8 +139,8 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             fullWidth
                             label="Monto Saldo"
                             type="number"
-                            value={creditData.montoSaldo}
-                            onChange={(e) => updateField("montoSaldo", Number(e.target.value))}
+                            value={creditData.montoSaldo === undefined ? "" : creditData.montoSaldo}
+                            onChange={(e) => updateField("montoSaldo", e.target.value === "" ? "" : Number(e.target.value))}
                             InputProps={{
                                 startAdornment: <MonetizationOn sx={{ color: "error.main", mr: 1 }} />,
                                 endAdornment: <InputAdornment position="end">Bs.</InputAdornment>
@@ -210,8 +210,8 @@ const CreditPaymentSection = ({ creditData, setCreditData, onSave, loading }) =>
                             fullWidth
                             label="Número de Días Pago"
                             type="number"
-                            value={creditData.numeroDiasPago}
-                            onChange={(e) => updateField("numeroDiasPago", Number(e.target.value))}
+                            value={creditData.numeroDiasPago === undefined ? "" : creditData.numeroDiasPago}
+                            onChange={(e) => updateField("numeroDiasPago", e.target.value === "" ? "" : Number(e.target.value))}
                             InputProps={{
                                 startAdornment: <EventRepeat sx={{ color: "action.active", mr: 1 }} />
                             }}

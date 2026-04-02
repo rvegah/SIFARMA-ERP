@@ -16,8 +16,8 @@ export const useCreditPurchases = () => {
 
     const [filters, setFilters] = useState({
         CodigoSucursal: "",
-        FechaCompraInicio: new Date().toISOString().split("T")[0],
-        FechaCompraFinal: new Date().toISOString().split("T")[0],
+        FechaCompraInicio: "",
+        FechaCompraFinal: "",
         TipoFormaPago: "",
         TieneSaldoPago: "",
         CodigoProveedor: "",

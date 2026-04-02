@@ -53,8 +53,8 @@ const MyOrdersSection = () => {
     const [filters, setFilters] = useState({
         codigoSucursal: "",
         numeroPedido: "",
-        fechaInicio: new Date().toISOString().split("T")[0],
-        fechaFinal: new Date().toISOString().split("T")[0],
+        fechaInicio: "",
+        fechaFinal: "",
         estadoPedido: ""
     });
 

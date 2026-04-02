@@ -56,7 +56,12 @@ const ProductList = ({ onCreateProduct, onEditProduct }) => {
         catalogs,
         handleDeleteProduct,
         prepareEditProduct,
+        resetSearch,
     } = useProductContext();
+
+    useEffect(() => {
+        resetSearch();
+    }, []);
 
     // Paginación
     const [page, setPage] = useState(0);
