@@ -21,12 +21,14 @@ function getLocationFromSession() {
     sucursalId: user?.codigoSucursal_SIAT ?? 0,
     puntoVentaId: user?.codigoPuntoVenta_SIAT ?? 0,
     codigoSucursalInterno: user?.codigoSucursal_ID ?? 1,
+    usuarioId: user?.usuario_ID ?? 0,
+    usuarioCodigo: user?.usuario ?? "",
   };
 }
 
 class SalesService {
   // ── PRODUCTOS — endpoint Ventas/BuscarProductos ───────────────────────────
-  static async searchProducts(query) {
+  static async searchProducts(query, signal = null) {
     try {
       const { codigoSucursalInterno } = getLocationFromSession();
       const response = await farmaciaApiClient.get("/Ventas/BuscarProductos", {
@@ -34,6 +36,7 @@ class SalesService {
           CodigoSucursal: codigoSucursalInterno,
           NombreProducto: query,
         },
+        signal, // ← axios >= 0.22 lo soporta nativamente
       });
 
       if (!response.data?.exitoso) {
@@ -62,6 +65,9 @@ class SalesService {
         unidadMedida: p.unidadMedida || 62,
       }));
     } catch (error) {
+      if (error.name === "AbortError" || error.code === "ERR_CANCELED") {
+        return []; // ← NO re-lanzar, simplemente retornar vacío
+      }
       console.error("❌ Error al buscar productos:", error.message);
       return [];
     }
@@ -234,12 +240,22 @@ class SalesService {
 
   // ── GUARDAR VENTA SIN FACTURAR ────────────────────────────────────────────
   static async saveSale(saleData) {
+    const { usuarioId, usuarioCodigo } = getLocationFromSession();
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log("💾 Venta guardada (sin facturar):", saleData);
+        console.log("💾 Venta guardada (sin facturar):", {
+          ...saleData,
+          usuarioId,
+          usuarioCodigo,
+        });
         resolve({
           success: true,
-          sale: { id: Date.now(), ...saleData, status: SALE_STATUS.SAVED },
+          sale: {
+            id: Date.now(),
+            ...saleData,
+            usuarioId,
+            status: SALE_STATUS.SAVED,
+          },
           message: "Venta guardada exitosamente (sin facturar)",
         });
       }, 300);
@@ -255,7 +271,8 @@ class SalesService {
         return { success: false, message: "Datos incompletos para facturar" };
       }
 
-      const { sucursalId, puntoVentaId } = getLocationFromSession();
+      const { sucursalId, puntoVentaId, usuarioId, usuarioCodigo } =
+        getLocationFromSession();
 
       const tipoMetodoPago = saleData.metodoPago?.codigo || 1;
       const montoPagadoEfectivo =
@@ -271,6 +288,8 @@ class SalesService {
         {
           sucursalId,
           puntoVentaId,
+          usuarioId, // ← nuevo
+          usuarioCodigo, // ← nuevo
           tipoMetodoPago,
           montoPagadoEfectivo,
           montoPagadoTarjeta,

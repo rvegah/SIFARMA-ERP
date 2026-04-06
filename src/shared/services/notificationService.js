@@ -4,15 +4,19 @@ const notificationService = {
   /**
    * Fetch current notifications for the notification panel (bell)
    * GET /api/farmalink-farmacia/Traspasos/NotificacionesTraspasos?CodigoSucursal={id}
+   * NOTA: El backend devuelve 400 cuando la lista está vacía — se trata como exitoso con datos:[]
    */
   getNotificaciones: async (codigoSucursal) => {
     try {
-      console.log("NOTIFICACIONESSS------------------------------------------------");
       const response = await pharmacyApiClient.get("/Traspasos/NotificacionesTraspasos", {
         params: { CodigoSucursal: codigoSucursal },
       });
       return response.data;
     } catch (error) {
+      // El backend retorna 400 con mensaje cuando no hay notificaciones — no es un error real
+      if (error?.response?.status === 400) {
+        return { exitoso: true, datos: [], mensaje: error.response.data?.mensaje ?? '' };
+      }
       console.error("Error fetching notifications:", error);
       throw error;
     }
@@ -29,6 +33,9 @@ const notificationService = {
       });
       return response.data;
     } catch (error) {
+      if (error?.response?.status === 400) {
+        return { exitoso: true, datos: [], mensaje: error.response.data?.mensaje ?? '' };
+      }
       console.error("Error searching notifications:", error);
       throw error;
     }

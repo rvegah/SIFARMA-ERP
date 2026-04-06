@@ -87,13 +87,25 @@ const SaleItemsTable = ({
   }, [editingItem]);
 
   useEffect(() => {
-    if (searchQuery.length >= 2) {
-      onSearchProducts(searchQuery);
-      setShowSuggestions(true);
-      setSelectedIndex(0);
-    } else {
+    if (searchQuery.length < 3) {
       setShowSuggestions(false);
+      return;
     }
+
+    const timer = setTimeout(async () => {
+      try {
+        await onSearchProducts(searchQuery);
+        setShowSuggestions(true);
+        setSelectedIndex(0);
+      } catch (error) {
+        // Ignorar AbortErrors — son cancelaciones normales
+        if (error?.name !== "AbortError" && error?.code !== "ERR_CANCELED") {
+          console.error("Error en búsqueda:", error);
+        }
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
   }, [searchQuery, onSearchProducts]);
 
   useEffect(() => {
@@ -262,7 +274,7 @@ const SaleItemsTable = ({
     <Box sx={{ mt: 2 }}>
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${farmaColors.secondaryDark} 0%, ${farmaColors.secondary} 100%)`,
+          background: farmaColors.secondary,
           px: 2,
           py: 1.5,
           borderRadius: "8px 8px 0 0",

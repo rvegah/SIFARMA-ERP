@@ -150,12 +150,12 @@ const SiatStatusBanner = ({
               <strong>Desde:</strong>{" "}
               {eventoActivo.fechaInicio
                 ? new Date(eventoActivo.fechaInicio).toLocaleString("es-BO", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
                 : "—"}
               {eventoActivo.fechaFin && (
                 <>
@@ -483,7 +483,7 @@ const CreateSaleSection = () => {
         },
         pagado: clientForm.pagado,
         cambio: clientForm.cambio,
-        usuario: "Usuario Sistema",
+        usuario: user?.nombreCompleto ?? user?.usuario ?? "Sistema",
         leyendas: {
           principal:
             "ESTA FACTURA CONTRIBUYE AL DESARROLLO DEL PAÍS, EL USO ILÍCITO SERÁ SANCIONADO PENALMENTE DE ACUERDO A LEY",
@@ -1249,7 +1249,7 @@ const CreateSaleSection = () => {
         open={mySalesModalOpen}
         onClose={() => setMySalesModalOpen(false)}
         onLoadSale={handleLoadSale}
-        userId={1}
+        userId={user?.usuario_ID ?? 1}
       />
 
       <PrintInvoiceModal
