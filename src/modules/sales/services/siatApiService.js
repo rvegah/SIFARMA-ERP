@@ -63,13 +63,15 @@ function buildEmitirFacturaRequest(
   const {
     sucursalId = 0,
     puntoVentaId = 0,
+    usuarioId = 0, // ← nuevo
+    usuarioCodigo = "", // ← nuevo
     tipoMetodoPago = 1,
     montoPagadoEfectivo = 0,
     montoPagadoTarjeta = 0,
     numeroTarjeta = null,
     montoGiftCard = 0,
     numeroFacturaTalonario = undefined,
-    fechaContingencia = undefined,  
+    fechaContingencia = undefined,
   } = options;
 
   const nitCliente = String(clientForm.nit || clientForm.nitCliente || "4444");
@@ -118,6 +120,9 @@ function buildEmitirFacturaRequest(
     codigoExcepcion: options.codigoExcepcion ?? getCodigoExcepcion(nitCliente),
     numeroFacturaTalonario,
     fechaContingencia,
+    
+    usuarioId,
+    usuarioCodigo,
 
     // Detalles
     detalles: mapSaleItemsToDetalles(saleItems),

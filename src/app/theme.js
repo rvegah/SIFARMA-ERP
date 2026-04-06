@@ -82,7 +82,7 @@ export const farmaColors = {
     primary: `linear-gradient(135deg, ${corporateColors.primary} 0%, ${corporateColors.primaryLight} 100%)`,
     secondary: `linear-gradient(135deg, ${corporateColors.secondary} 0%, ${corporateColors.secondaryLight} 100%)`,
     corporate: `linear-gradient(135deg, ${corporateColors.primary} 0%, ${corporateColors.secondary} 100%)`,
-    sidebar: `linear-gradient(180deg, ${corporateColors.secondaryDark} 0%, ${corporateColors.secondary} 100%)`
+    sidebar: `linear-gradient(180deg, ${corporateColors.primaryDark} 0%, ${corporateColors.primary} 100%)`
   },
   
   // Colores sólidos
