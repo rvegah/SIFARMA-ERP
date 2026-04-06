@@ -67,7 +67,7 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
       console.warn("No hay permisos disponibles para construir el menú");
       return [];
     }
-    
+
     console.log("Generando menú con permisos:", perms.length);
     const filtered = getFilteredMenuItems(perms);
     return filtered;
@@ -157,7 +157,7 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
     <Box
       sx={{
         height: "100%",
-        background: farmaColors.gradients.sidebar,
+        background: farmaColors.primary,
         width: collapsed ? collapsedDrawerWidth : drawerWidth,
         transition: "width 0.3s ease",
       }}
@@ -173,8 +173,8 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
       >
         <Avatar
           sx={{
-            bgcolor: "#FFFFFF",
-            color: farmaColors.primary,
+            bgcolor: "rgba(255,255,255,0.2)",
+            color: "#ffffff",
             width: collapsed ? 40 : 64,
             height: collapsed ? 40 : 64,
             mb: collapsed ? 0 : 2,
@@ -186,12 +186,8 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
             fontSize: collapsed ? "1rem" : "1.5rem",
           }}
         >
-          {currentUser?.nombreCompleto
-            ?.split(" ")
-            .filter((_, i, arr) => i === 0 || i === arr.length - 1) // Primera y última palabra
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase() || "U"}
+          {`${currentUser?.nombres?.charAt(0) || ""}${currentUser?.apellidos?.charAt(0) || ""}`.toUpperCase() ||
+            "U"}
         </Avatar>
 
         {!collapsed && (
@@ -200,7 +196,7 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
               variant="h6"
               sx={{ color: "white", fontWeight: 700, mb: 0.5 }}
             >
-              {getPrimerNombreApellido(currentUser?.nombreCompleto)}
+              {`${currentUser?.nombres?.split(" ")[0] || ""} ${currentUser?.apellidos?.split(" ")[0] || ""}`}
             </Typography>
           </>
         )}
@@ -257,11 +253,16 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
                       handleMenuClick(item.ruta, hasSubItems, index)
                     }
                     sx={{
-                      borderRadius: collapsed ? 1 : 2,
                       mb: 0.5,
                       cursor: "pointer",
                       minHeight: 48,
-                      background: "transparent",
+                      background: isActive
+                        ? "rgba(255,255,255,0.18)"
+                        : "transparent",
+                      borderLeft: isActive
+                        ? "3px solid rgba(255,255,255,0.9)"
+                        : "3px solid transparent",
+                      borderRadius: isActive ? "0 10px 10px 0" : 2,
                       border: "none",
                       "&:hover": {
                         bgcolor: "rgba(255,255,255,0.05)",
@@ -270,12 +271,11 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
                       },
                       justifyContent: collapsed ? "center" : "flex-start",
                       px: collapsed ? 1 : 2,
-
                     }}
                   >
                     <ListItemIcon
                       sx={{
-                        color: "rgba(255,255,255,0.7)",
+                        color: isActive ? "#ffffff" : "rgba(255,255,255,0.65)",
                         minWidth: collapsed ? "unset" : 56,
                         mr: collapsed ? 0 : 2,
                         justifyContent: "center",
@@ -379,14 +379,15 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
         position="fixed"
         sx={{
           width: {
-            md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth
-              }px)`,
+            md: `calc(100% - ${
+              collapsed ? collapsedDrawerWidth : drawerWidth
+            }px)`,
           },
           ml: { md: `${collapsed ? collapsedDrawerWidth : drawerWidth}px` },
-          background: farmaColors.gradients.primary,
+          background: farmaColors.secondary,
           backdropFilter: "blur(10px)",
           borderBottom: "none",
-          boxShadow: `0 4px 20px ${farmaColors.alpha.primary20}`,
+          boxShadow: `0 4px 20px ${farmaColors.alpha.secondary20}`,
           transition: "all 0.3s ease",
         }}
       >
@@ -430,18 +431,22 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
             />
 
             {/* Badge de Notificaciones */}
-            <Box sx={{ position: 'relative' }}>
+            <Box sx={{ position: "relative" }}>
               <IconButton color="inherit" onClick={toggleNotifications}>
-                <Badge 
-                  badgeContent={unreadNotificationsCount > 0 ? unreadNotificationsCount : null} 
+                <Badge
+                  badgeContent={
+                    unreadNotificationsCount > 0
+                      ? unreadNotificationsCount
+                      : null
+                  }
                   color="error"
                 >
                   <Notifications />
                 </Badge>
               </IconButton>
-              <NotificationPanel 
-                open={showNotifications} 
-                onClose={() => setShowNotifications(false)} 
+              <NotificationPanel
+                open={showNotifications}
+                onClose={() => setShowNotifications(false)}
                 onUnreadCountChange={setUnreadNotificationsCount}
               />
             </Box>
@@ -467,7 +472,7 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
             >
               <Avatar
                 sx={{
-                  background: farmaColors.gradients.secondary,
+                  bgcolor: farmaColors.primary,
                   width: 40,
                   height: 40,
                   fontWeight: 800,
@@ -475,12 +480,8 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
                 }}
               >
-                {currentUser?.nombreCompleto
-                  ?.split(" ")
-                  .filter((_, i, arr) => i === 0 || i === arr.length - 1)
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase() || "U"}
+                {`${currentUser?.nombres?.charAt(0) || ""}${currentUser?.apellidos?.charAt(0) || ""}`.toUpperCase() ||
+                  "U"}
               </Avatar>
 
               <Box
@@ -494,7 +495,7 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
                     fontSize: "0.9rem",
                   }}
                 >
-                  {getPrimerNombreApellido(currentUser?.nombreCompleto)}
+                  {`${currentUser?.nombres?.split(" ")[0] || ""} ${currentUser?.apellidos?.split(" ")[0] || ""}`}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -583,11 +584,12 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
           flexGrow: 1,
           p: { xs: 2, sm: 3 },
           width: {
-            md: `calc(100% - ${collapsed ? collapsedDrawerWidth : drawerWidth
-              }px)`,
+            md: `calc(100% - ${
+              collapsed ? collapsedDrawerWidth : drawerWidth
+            }px)`,
           },
           minHeight: "100vh",
-          bgcolor: "#F8FAFC",
+          bgcolor: "#F5F6FA",
           mt: 8,
           transition: "all 0.3s ease",
         }}

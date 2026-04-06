@@ -16,29 +16,25 @@ const PageHeader = ({ title, subtitle, icon, action }) => {
             display: 'flex', 
             justifyContent: 'space-between', 
             alignItems: 'center', 
-            mb: 4,
+            mb: 2,
             gap: 2
         }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 {icon && (
                     <Box sx={{ 
                         background: farmaColors.gradients.primary,
-                        p: 1.5,
-                        borderRadius: 3,
+                        p: 1,
+                        borderRadius: 2,
                         display: 'flex',
                         boxShadow: '0 4px 15px rgba(204,108,6,0.2)'
                     }}>
-                        {React.cloneElement(icon, { sx: { color: 'white', fontSize: 30 } })}
+                        {React.cloneElement(icon, { sx: { color: 'white', fontSize: 22 } })}
                     </Box>
                 )}
                 <Box>
                     <Typography 
-                        variant="h4" 
-                        sx={{ 
-                            fontWeight: 800, 
-                            color: farmaColors.secondary,
-                            lineHeight: 1.2
-                        }}
+                        variant="h6"
+                        sx={{ fontWeight: 700, color: farmaColors.secondary, lineHeight: 1.2, fontSize: '1rem' }}
                     >
                         {title}
                     </Typography>

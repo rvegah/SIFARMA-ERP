@@ -1,5 +1,5 @@
 // src/modules/sales/hooks/useSales.js
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import SalesService from "../services/salesService";
 import { FACTURA_SIN_NOMBRE_LIMIT } from "../constants/salesConstants";
 
@@ -24,23 +24,48 @@ export const useSales = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(false);
+  const searchAbortRef = useRef(null);
+  const currentQueryRef = useRef("");
 
   // ── BÚSQUEDA ──────────────────────────────────────────────────────────────
 
   const searchProducts = useCallback(async (query) => {
-    if (!query || query.length < 2) {
+    if (!query || query.length < 3) {
       setSearchResults([]);
       return;
     }
+
+    currentQueryRef.current = query;
+
+    if (searchAbortRef.current) {
+      searchAbortRef.current.abort();
+    }
+    const controller = new AbortController();
+    searchAbortRef.current = controller;
+
     setIsSearching(true);
     try {
-      const results = await SalesService.searchProducts(query);
-      setSearchResults(results);
+      const results = await SalesService.searchProducts(
+        query,
+        controller.signal,
+      );
+
+      // Solo actualizar si esta respuesta corresponde a la query actual
+      if (currentQueryRef.current === query) {
+        setSearchResults(results);
+      }
     } catch (error) {
+      // Cancelaciones: ignorar silenciosamente, NO limpiar resultados
+      // (los resultados correctos llegarán con la query actual)
+      if (error.name === "AbortError" || error.code === "ERR_CANCELED") return;
       console.error("Error buscando productos:", error);
-      setSearchResults([]);
+      if (currentQueryRef.current === query) {
+        setSearchResults([]);
+      }
     } finally {
-      setIsSearching(false);
+      if (!controller.signal.aborted) {
+        setIsSearching(false);
+      }
     }
   }, []);
 
