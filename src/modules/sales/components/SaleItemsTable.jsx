@@ -50,6 +50,7 @@ const SaleItemsTable = ({
   const cantidadInputRef = useRef(null);
   const previousItemsLength = useRef(items.length);
   const shouldAutoEditNext = useRef(false);
+  const lastRowRef = useRef(null);
 
   useEffect(() => {
     if (
@@ -69,6 +70,17 @@ const SaleItemsTable = ({
       shouldAutoEditNext.current = false;
     }
     previousItemsLength.current = items.length;
+  }, [items]);
+
+  useEffect(() => {
+    if (items.length > previousItemsLength.current) {
+      setTimeout(() => {
+        lastRowRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    }
   }, [items]);
 
   useEffect(() => {
@@ -151,6 +163,7 @@ const SaleItemsTable = ({
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (document.activeElement !== searchInputRef.current) return;
       if (!showSuggestions || searchResults.length === 0) return;
       switch (e.key) {
         case "ArrowDown":
@@ -181,7 +194,7 @@ const SaleItemsTable = ({
           break;
       }
     };
-    if (showSuggestions) {
+    if (showSuggestions && document.activeElement === searchInputRef.current) {
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }
@@ -297,12 +310,11 @@ const SaleItemsTable = ({
         sx={{
           borderRadius: "0 0 8px 8px",
           border: `2px solid ${farmaColors.secondary}`,
-          maxHeight: 400,
-          overflow: "auto",
+          overflow: "visible",
         }}
       >
         <Table size="small" stickyHeader>
-          <TableHead>
+          <TableHead sx={{ position: "sticky", top: 64, zIndex: 1000 }}>
             <TableRow sx={{ bgcolor: "#2c2c2c" }}>
               {[
                 "Producto",
@@ -344,10 +356,10 @@ const SaleItemsTable = ({
             {/* FILA DE BÚSQUEDA */}
             <TableRow
               sx={{
-                position: "sticky", 
+                position: "sticky",
                 top: 104,
                 zIndex: 1100,
-                bgcolor: "white",                
+                bgcolor: "white",
               }}
             >
               <TableCell
@@ -402,13 +414,14 @@ const SaleItemsTable = ({
             </TableRow>
 
             {/* ITEMS */}
-            {items.map((item) => {
+            {items.map((item, index) => {
               const isEditing = editingItem === item.id;
               const stockWarning = item.cantidad > item.stock;
 
               return (
                 <TableRow
                   key={item.id}
+                  ref={index === items.length - 1 ? lastRowRef : null}
                   sx={{
                     "&:hover": { bgcolor: farmaColors.alpha.primary10 },
                     bgcolor: stockWarning ? "rgba(244, 67, 54, 0.05)" : "white",
@@ -789,10 +802,10 @@ const SaleItemsTable = ({
                           ? `2px solid ${farmaColors.alpha.secondary10}`
                           : "none",
                       bgcolor:
-                        product.stock === 0
-                          ? "rgba(244, 67, 54, 0.05)"
-                          : index === selectedIndex
-                            ? farmaColors.alpha.primary30
+                        index === selectedIndex
+                          ? farmaColors.alpha.primary30 // 
+                          : product.stock === 0
+                            ? "rgba(244, 67, 54, 0.05)" // 
                             : "white",
                       "&:hover": {
                         bgcolor: farmaColors.alpha.primary20,
