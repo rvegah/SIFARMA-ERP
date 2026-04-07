@@ -2,6 +2,7 @@
 // Formulario de edición de usuarios - SIN CAMPO EQUIPO - CON CARGA DE DETALLES
 
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Typography,
@@ -37,7 +38,7 @@ import {
   PhoneAndroid,
   Email,
   Home,
-  Cancel
+  Cancel,
 } from "@mui/icons-material";
 import { useUsers } from "../context/UserContext";
 import { farmaColors } from "/src/app/theme";
@@ -81,6 +82,8 @@ const EditUserForm = ({ onCancel }) => {
     tipoUsuarios,
   } = useUsers();
 
+  const navigate = useNavigate();
+
   // 🆕 Cargar detalles del usuario cuando se monta el componente
   useEffect(() => {
     if (selectedUser && selectedUser.id) {
@@ -94,18 +97,14 @@ const EditUserForm = ({ onCancel }) => {
     const success = await handleUpdateUserAPI();
     if (success) {
       clearForm();
-      if (onCancel) {
-        onCancel(); // Volver a la lista
-      }
+      navigate("/users/list");
     }
   };
 
   // Manejar cancelación
   const handleCancel = () => {
     clearForm();
-    if (onCancel) {
-      onCancel();
-    }
+    navigate("/users/list");
   };
 
   // Si no hay usuario seleccionado, mostrar loading
@@ -144,7 +143,9 @@ const EditUserForm = ({ onCancel }) => {
         icon={<EditIcon fontSize="large" />}
       />
 
-      <Card sx={{ p: 4, borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
+      <Card
+        sx={{ p: 4, borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}
+      >
         <Grid container spacing={3}>
           {/* ===================== FILA 1: Nombre, Apellidos, CI ===================== */}
 
@@ -158,7 +159,9 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("nombreCompleto")}
               disabled={loading}
               InputProps={{
-                startAdornment: <Person sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <Person sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             />
           </Grid>
@@ -173,7 +176,9 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("apellidos")}
               disabled={loading}
               InputProps={{
-                startAdornment: <Person sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <Person sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             />
           </Grid>
@@ -188,7 +193,9 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("cedula")}
               disabled={loading}
               InputProps={{
-                startAdornment: <Badge sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <Badge sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             />
           </Grid>
@@ -203,7 +210,9 @@ const EditUserForm = ({ onCancel }) => {
               value={userForm.usuario || ""}
               disabled={true}
               InputProps={{
-                startAdornment: <AccountCircle sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <AccountCircle sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
               helperText="El nombre de usuario no se puede modificar"
             />
@@ -259,12 +268,17 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("sucursal_ID")}
               disabled={loading}
               InputProps={{
-                startAdornment: <Store sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <Store sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             >
               <MenuItem value="">Seleccione sucursal</MenuItem>
               {sucursales.map((sucursal) => (
-                <MenuItem key={sucursal.sucursal_ID} value={sucursal.sucursal_ID}>
+                <MenuItem
+                  key={sucursal.sucursal_ID}
+                  value={sucursal.sucursal_ID}
+                >
                   {sucursal.nombreSucursal}
                 </MenuItem>
               ))}
@@ -282,7 +296,9 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("rol_ID")}
               disabled
               InputProps={{
-                startAdornment: <Group sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <Group sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             >
               <MenuItem value="">Seleccione rol</MenuItem>
@@ -305,7 +321,9 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("tipoUsuarioInterno")}
               disabled
               InputProps={{
-                startAdornment: <AdminPanelSettings sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <AdminPanelSettings sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             >
               <MenuItem value="">Seleccione tipo</MenuItem>
@@ -324,18 +342,24 @@ const EditUserForm = ({ onCancel }) => {
               select
               fullWidth
               label="Título"
-              value={TITULOS.some((t) => t.codigo === userForm.titulo)
-                ? userForm.titulo
-                : userForm.titulo?.charAt(0).toUpperCase() +
-                userForm.titulo?.slice(1).toLowerCase() || ""}
+              value={
+                TITULOS.some((t) => t.codigo === userForm.titulo)
+                  ? userForm.titulo
+                  : userForm.titulo?.charAt(0).toUpperCase() +
+                      userForm.titulo?.slice(1).toLowerCase() || ""
+              }
               onChange={handleFormChange("titulo")}
               disabled={loading}
               InputProps={{
-                startAdornment: <School sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <School sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             >
               <MenuItem value="">Seleccione título</MenuItem>
-              <MenuItem value=""><em>Sin título</em></MenuItem>
+              <MenuItem value="">
+                <em>Sin título</em>
+              </MenuItem>
               {TITULOS.map((titulo) => (
                 <MenuItem key={titulo.codigo} value={titulo.codigo}>
                   {titulo.descripcion}
@@ -388,7 +412,9 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("telefono")}
               disabled={loading}
               InputProps={{
-                startAdornment: <PhoneAndroid sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <PhoneAndroid sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             />
           </Grid>
@@ -405,7 +431,9 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("email")}
               disabled={loading}
               InputProps={{
-                startAdornment: <Email sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: (
+                  <Email sx={{ color: "action.active", mr: 1 }} />
+                ),
               }}
             />
           </Grid>
@@ -420,7 +448,7 @@ const EditUserForm = ({ onCancel }) => {
               onChange={handleFormChange("direccion")}
               disabled={loading}
               InputProps={{
-                startAdornment: <Home sx={{ color: "action.active", mr: 1 }} />
+                startAdornment: <Home sx={{ color: "action.active", mr: 1 }} />,
               }}
             />
           </Grid>
