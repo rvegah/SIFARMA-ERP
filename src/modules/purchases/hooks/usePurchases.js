@@ -26,7 +26,7 @@ export const usePurchases = () => {
         detalleFormaPago: "",
         codigoProveedor: "",
         referencia: "",
-        codigoPedido: ""
+        codigoPedido: "" 
     });
 
     const [creditData, setCreditData] = useState({

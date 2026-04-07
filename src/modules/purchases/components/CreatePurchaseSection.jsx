@@ -35,7 +35,7 @@ const CreatePurchaseSection = ({ purchaseData, setPurchaseData, onCreate, catalo
     return (
         <Card sx={{ width: "100%", borderRadius: 4, boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
             <CardContent sx={{ p: 4 }}>
-                <Box sx={{ mb: 3 }}>
+                <Box sx={{ mb: 3 }}> 
                     <Typography variant="h5" sx={{ fontWeight: 800, color: farmaColors.secondary }}>
                         Nueva Compra
                     </Typography>

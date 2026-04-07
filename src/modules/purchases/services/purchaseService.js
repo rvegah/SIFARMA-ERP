@@ -39,7 +39,7 @@ const purchaseService = {
             const response = await pharmacyApiClient.get('/Compras/ListaPedidos', {
                 params: {
                     CodigoSucursal: codigoSucursal,
-                    EstadoPedido: 'ENV' // Solo pedidos en estado ENV (Enviado)
+                    EstadoPedido: 'ENV' // Solo pedidos en estado ENV (Enviado) 
                 }
             });
             return response.data;
