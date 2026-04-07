@@ -347,10 +347,7 @@ const SaleItemsTable = ({
                 position: "sticky", 
                 top: 104,
                 zIndex: 1100,
-                bgcolor: "white",
-                position: "sticky",
-                top: 37,
-                zIndex: 100,
+                bgcolor: "white",                
               }}
             >
               <TableCell
