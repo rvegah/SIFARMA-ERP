@@ -297,12 +297,12 @@ const SaleItemsTable = ({
         sx={{
           borderRadius: "0 0 8px 8px",
           border: `2px solid ${farmaColors.secondary}`,
-          //maxHeight: 400,
-          overflow: "visible",
+          maxHeight: 400,
+          overflow: "auto",
         }}
       >
         <Table size="small" stickyHeader>
-          <TableHead  sx={{ position: "sticky", top: 64, zIndex: 1000 }}>
+          <TableHead>
             <TableRow sx={{ bgcolor: "#2c2c2c" }}>
               {[
                 "Producto",
@@ -344,10 +344,10 @@ const SaleItemsTable = ({
             {/* FILA DE BÚSQUEDA */}
             <TableRow
               sx={{
-                position: "sticky",
-                top: 104,
-                zIndex: 1100,
                 bgcolor: "white",
+                position: "sticky",
+                top: 37,
+                zIndex: 100,
               }}
             >
               <TableCell
