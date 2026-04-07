@@ -344,6 +344,9 @@ const SaleItemsTable = ({
             {/* FILA DE BÚSQUEDA */}
             <TableRow
               sx={{
+                position: "sticky", 
+                top: 104,
+                zIndex: 1100,
                 bgcolor: "white",
                 position: "sticky",
                 top: 37,
