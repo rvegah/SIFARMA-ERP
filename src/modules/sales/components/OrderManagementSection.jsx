@@ -39,6 +39,7 @@ const OrderManagementSection = () => {
     updateData,
     handleCreateOrder,
     searchProducts,
+    searchProductsByText,
     addProductToOrder,
     removeProductFromOrder,
     updateProductQuantity,
@@ -50,7 +51,7 @@ const OrderManagementSection = () => {
     discardPendingOrder,
     canEdit,
     onCambiarEstado,
-    clearPendingOrder
+    clearPendingOrder,     
   } = useOrders();
 
   const location = useLocation();
@@ -145,7 +146,7 @@ const OrderManagementSection = () => {
           searchFilters={searchFilters}
           setSearchFilters={setSearchFilters}
           searchResults={searchResults}
-          onSearch={searchProducts}
+          onSearch={searchProductsByText}
           selectedProducts={selectedProducts}
           onAdd={addProductToOrder}
           onRemove={removeProductFromOrder}

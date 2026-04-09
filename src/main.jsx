@@ -6,9 +6,9 @@ import App from './App.jsx'
 const basename = import.meta.env.MODE === 'production' ? '/sifarma-erp' : '/'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <BrowserRouter basename={basename}>
       <App />
     </BrowserRouter>
-  </React.StrictMode>,
+  //</React.StrictMode>,
 )
