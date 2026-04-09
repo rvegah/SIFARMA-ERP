@@ -377,26 +377,22 @@ export const useOrders = () => {
   const searchProductsByText = async (texto) => {
     if (!texto || texto.length < 2) return;
     try {
-      setLoading(true);
-      const res = await productService.buscarProductos({
-        sucursalId: orderData.sucursalId,
-        nombre: texto,
-        codigo: texto,
-        lineaId: orderData.lineaId,
-        laboratorioId: orderData.laboratorioId,
-      });
-      if (res.exitoso) {
-        setSearchResults(res.datos || []);
-      } else {
-        // No mostrar snackbar aquí — el usuario está escribiendo
-        setSearchResults([]);
-      }
+        setLoading(true);
+        const res = await productService.buscarProductos({
+            sucursalId: orderData.sucursalId,
+            nombre: texto,
+        });
+        if (res.exitoso) {
+            setSearchResults(res.datos || []);
+        } else {
+            setSearchResults([]);
+        }
     } catch {
-      setSearchResults([]);
+        setSearchResults([]);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   // En el return, agregar:
   // searchProductsByText,
