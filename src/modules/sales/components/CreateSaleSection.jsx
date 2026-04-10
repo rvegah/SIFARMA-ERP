@@ -1,5 +1,5 @@
 // src/modules/sales/components/CreateSaleSection.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
   Container,
   Box,
@@ -34,14 +34,9 @@ import {
 import { farmaColors } from "../../../app/theme";
 import { useSales } from "../hooks/useSales";
 import ClientForm from "../components/ClientForm";
-import SaleItemsTable from "../components/SaleItemsTable";
 import StockModal from "../components/StockModal";
-import BranchOrderModal from "../components/BranchOrderModal";
-import MySalesModal from "../components/MySalesModal";
-import PrintInvoiceModal from "../components/PrintInvoiceModal";
 import siatApiService from "../services/siatApiService";
 import CancelInvoiceModal from "../components/CancelInvoiceModal";
-import ProductsModal from "../components/ProductsModal";
 import { useAuth } from "../../../context/AuthContext";
 import SalesService from "../services/salesService";
 import PageHeader from "../../../shared/components/PageHeader";
@@ -49,6 +44,12 @@ import { ShoppingCart as ShoppingCartHeaderIcon } from "@mui/icons-material";
 
 // ✅ NUEVO: Hook de estado SIAT
 import { useSiatStatus } from "../hooks/useSiatStatus";
+
+const SaleItemsTable = lazy(() => import("../components/SaleItemsTable"));
+const BranchOrderModal = lazy(() => import("../components/BranchOrderModal"));
+const MySalesModal = lazy(() => import("../components/MySalesModal"));
+const PrintInvoiceModal = lazy(() => import("../components/PrintInvoiceModal"));
+const ProductsModal = lazy(() => import("../components/ProductsModal"));
 
 const CANCELLATION_REASONS = [
   { value: 1, label: "Error en la transcripción" },
@@ -892,17 +893,19 @@ const CreateSaleSection = () => {
       />
 
       {/* Tabla de items CON búsqueda integrada */}
-      <SaleItemsTable
-        items={saleItems}
-        onUpdateItem={updateItem}
-        onRemoveItem={removeItem}
-        onAddItem={handleAddItemConValidacion}
-        onSearchProducts={searchProducts}
-        searchResults={searchResults}
-        isSearching={isSearching}
-        invoiced={invoiced}
-        unidadesMedidaCatalogo={unidadesMedida}
-      />
+      <Suspense fallback={<div>Cargando productos...</div>}>
+        <SaleItemsTable
+          items={saleItems}
+          onUpdateItem={updateItem}
+          onRemoveItem={removeItem}
+          onAddItem={handleAddItemConValidacion}
+          onSearchProducts={searchProducts}
+          searchResults={searchResults}
+          isSearching={isSearching}
+          invoiced={invoiced}
+          unidadesMedidaCatalogo={unidadesMedida}
+        />
+      </Suspense>
 
       {/* SECCIÓN DE BOTONES */}
       <Box sx={{ mt: 3 }}>
@@ -1240,24 +1243,36 @@ const CreateSaleSection = () => {
         product={selectedProduct}
       />
 
-      <BranchOrderModal
-        open={branchOrderModalOpen}
-        onClose={() => setBranchOrderModalOpen(false)}
-      />
+      {branchOrderModalOpen && (
+        <Suspense fallback={null}>
+          <BranchOrderModal
+            open={branchOrderModalOpen}
+            onClose={() => setBranchOrderModalOpen(false)}
+          />
+        </Suspense>
+      )}
 
-      <MySalesModal
-        open={mySalesModalOpen}
-        onClose={() => setMySalesModalOpen(false)}
-        onLoadSale={handleLoadSale}
-        userId={user?.usuario_ID ?? 1}
-      />
+      {mySalesModalOpen && (
+        <Suspense fallback={null}>
+          <MySalesModal
+            open={mySalesModalOpen}
+            onClose={() => setMySalesModalOpen(false)}
+            onLoadSale={handleLoadSale}
+            userId={user?.usuario_ID ?? 1}
+          />
+        </Suspense>
+      )}
 
-      <PrintInvoiceModal
-        open={printModalOpen}
-        onClose={() => setPrintModalOpen(false)}
-        invoiceData={invoiceDataToPrint}
-        onPrintComplete={handlePrintComplete}
-      />
+      {printModalOpen && (
+        <Suspense fallback={null}>
+          <PrintInvoiceModal
+            open={printModalOpen}
+            onClose={() => setPrintModalOpen(false)}
+            invoiceData={invoiceDataToPrint}
+            onPrintComplete={handlePrintComplete}
+          />
+        </Suspense>
+      )}
 
       <CancelInvoiceModal
         open={cancelModalOpen}
@@ -1270,11 +1285,15 @@ const CreateSaleSection = () => {
         loading={loading}
       />
 
-      <ProductsModal
-        open={productsModalOpen}
-        onClose={() => setProductsModalOpen(false)}
-        onSelectProduct={handleSelectProductFromModal}
-      />
+      {productsModalOpen && (
+        <Suspense fallback={null}>
+          <ProductsModal
+            open={productsModalOpen}
+            onClose={() => setProductsModalOpen(false)}
+            onSelectProduct={handleSelectProductFromModal}
+          />
+        </Suspense>
+      )}
 
       <ActivityConflictModal
         open={activityModalOpen}

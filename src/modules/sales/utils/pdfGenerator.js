@@ -1,6 +1,5 @@
 // src/modules/sales/utils/pdfGenerator.js
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 /**
  * Genera PDF desde un componente React renderizado
@@ -10,6 +9,7 @@ import html2canvas from 'html2canvas';
  */
 export const generatePDFFromElement = async (element, filename = 'factura.pdf', autoPrint = true) => {
   try {
+    const html2canvas = (await import('html2canvas')).default;
     console.log('📄 Generando PDF desde elemento...', element);
 
     if (!element) {

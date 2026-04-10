@@ -6,6 +6,7 @@ import userService from "../../../services/api/userService";
 import orderService from "../services/orderService";
 import { useAuth } from "../../../context/AuthContext";
 import { useOrderStore } from "./useOrderStore";
+import { useNavigate } from "react-router-dom";
 
 export const useOrders = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -55,40 +56,19 @@ export const useOrders = () => {
   const [pendingOrderFound, setPendingOrderFound] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
 
-  // Auto-save to localStorage
-  useEffect(() => {
-    const currentId = orderData.numeroPedido || orderData.pedidoProveedor_ID;
-    // Solo guardamos si hay cambios manuales (isDirty) y no es solo lectura
-    if (
-      isDirty &&
-      viewState !== "initial" &&
-      !isReadOnly &&
-      (selectedProducts.length > 0 || orderData.sucursalId)
-    ) {
-      savePendingOrder(currentId, orderData, selectedProducts);
-    }
-  }, [orderData, selectedProducts, viewState, isReadOnly, isDirty]);
-
-  // Check for pending "NEW_ORDER" on mount (if we are in initial view)
-  useEffect(() => {
-    if (hasPendingOrder(null) && viewState === "initial") {
-      setPendingOrderFound(getPendingOrder(null));
-    }
-  }, []);
+  const navigate = useNavigate();
 
   // Load initial catalogs
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const [sucursales, lineas, proveedoresRes] = await Promise.all([
+        const [sucursales, proveedoresRes] = await Promise.all([
           userService.getSucursales(),
-          productService.getLineas(),
           orderService.getProveedores(),
         ]);
         setCatalogs((prev) => ({
           ...prev,
           sucursales,
-          lineas,
           proveedores: proveedoresRes.datos || [],
         }));
       } catch (error) {
@@ -97,17 +77,6 @@ export const useOrders = () => {
     };
     loadInitialData();
   }, []);
-
-  // Load laboratorios when linea changes
-  useEffect(() => {
-    if (orderData.lineaId) {
-      productService.getLaboratorios(orderData.lineaId).then((labs) => {
-        setCatalogs((prev) => ({ ...prev, laboratorios: labs }));
-      });
-    } else {
-      setCatalogs((prev) => ({ ...prev, laboratorios: [] }));
-    }
-  }, [orderData.lineaId]);
 
   const updateData = (field, value) => {
     if (isReadOnly) return;
@@ -120,13 +89,7 @@ export const useOrders = () => {
   };
 
   const handleCreateOrder = async () => {
-    if (
-      !orderData.sucursalId ||
-      !orderData.fecha ||
-      !orderData.lineaId ||
-      !orderData.laboratorioId ||
-      !orderData.proveedorId
-    ) {
+    if (!orderData.sucursalId || !orderData.fecha || !orderData.proveedorId) {
       enqueueSnackbar("Por favor complete todos los campos obligatorios", {
         variant: "warning",
       });
@@ -141,28 +104,28 @@ export const useOrders = () => {
         proveedorPedido: orderData.proveedorId,
         fechaPedido: orderData.fecha,
         descripcion: orderData.descripcion,
-        lineaPedido: orderData.lineaId,
-        laboratorioPedido: orderData.laboratorioId,
+        lineaPedido: 0,
+        laboratorioPedido: 0,
         observaciones: orderData.observaciones,
         codigoEmpleadoAlta: user?.codigoEmpleado || "EMP-001", // SACAR DEL CONTEXTO
       };
 
       const res = await orderService.crearPedido(payload);
       if (res.exitoso) {
-        // Aligne create with edit: load full detail after creation
-        if (res.datos?.numeroPedido) {
-          await loadPedidoDetalle(res.datos.numeroPedido);
-        } else {
-          setOrderData((prev) => ({
-            ...prev,
-            pedidoProveedor_ID: res.datos.pedidoProveedor_ID,
-            numeroPedido: res.datos.numeroPedido,
-            fecha: res.datos.fechaPedido
-              ? res.datos.fechaPedido.split("T")[0]
-              : prev.fecha,
-          }));
-          setViewState("adding_products");
-        }
+        setOrderData((prev) => ({
+          ...prev,
+          pedidoProveedor_ID: res.datos.pedidoProveedor_ID,
+          numeroPedido: res.datos.numeroPedido,
+          fecha: res.datos.fechaPedido
+            ? res.datos.fechaPedido.split("T")[0]
+            : prev.fecha,
+        }));
+
+        setSelectedProducts([]);
+
+        // 🔥 AQUÍ ESTÁ LA MAGIA
+        navigate(`/ventas/pedidos/${res.datos.numeroPedido}`);
+
         enqueueSnackbar(res.mensaje || "Pedido creado exitosamente.", {
           variant: "success",
         });
@@ -183,7 +146,7 @@ export const useOrders = () => {
       if (res.datos) {
         const detail = res.datos;
         setCanEdit(detail.puedeEditar !== false); // Default to true if not specified
-        
+
         const serverOrderData = {
           sucursalId: detail.codigoSucursal,
           fecha: detail.fechaPedido
@@ -222,54 +185,7 @@ export const useOrders = () => {
           isReadOnlyRow: p.estadoLinea !== "PEN",
         }));
 
-        // Verificar cambios locales
-        const localData = getPendingOrder(numeroPedido);
-        console.log(
-          "⚓ [useOrders] checking localData for:",
-          numeroPedido,
-          localData,
-        );
-
-        if (localData) {
-          const isDifferent = checkIfDifferent(
-            serverProducts,
-            localData.selectedProducts,
-          );
-          console.log("⚓ [useOrders] isDifferent?", isDifferent);
-
-          if (isDifferent) {
-            console.log(
-              "⚓ [useOrders] differences found, showing local storage as priority",
-            );
-            setPendingOrderFound(localData);
-
-            // Guardamos temporalmente los datos del servidor en un backup
-            // Pero mostramos los datos locales (storage) según petición del usuario
-            setOrderData({
-              ...localData.orderData,
-              serverBackup: { data: serverOrderData, products: serverProducts },
-            });
-            setSelectedProducts(localData.selectedProducts);
-
-            // Calcular estado de lectura basado en los productos locales
-            const hasPendingRec = localData.selectedProducts.some(
-              (p) => !p.isReadOnlyRow,
-            );
-            setIsReadOnly(
-              localData.selectedProducts.length > 0 && !hasPendingRec,
-            );
-
-            // Marcamos como sucio porque hay cambios locales no sincronizados
-            setIsDirty(true);
-            setViewState("adding_products");
-            return;
-          } else {
-            console.log(
-              "⚓ [useOrders] data is identical, clearing redundant store",
-            );
-            clearPendingOrder(numeroPedido);
-          }
-        }
+        clearPendingOrder(numeroPedido);
 
         // Si no hay cambios locales o son iguales, cargar lo del servidor
         setOrderData(serverOrderData);
@@ -352,8 +268,6 @@ export const useOrders = () => {
         sucursalId: orderData.sucursalId,
         nombre: searchFilters.nombre,
         codigo: searchFilters.codigo,
-        lineaId: orderData.lineaId,
-        laboratorioId: orderData.laboratorioId,
       });
 
       if (res.exitoso) {
@@ -377,22 +291,22 @@ export const useOrders = () => {
   const searchProductsByText = async (texto) => {
     if (!texto || texto.length < 2) return;
     try {
-        setLoading(true);
-        const res = await productService.buscarProductos({
-            sucursalId: orderData.sucursalId,
-            nombre: texto,
-        });
-        if (res.exitoso) {
-            setSearchResults(res.datos || []);
-        } else {
-            setSearchResults([]);
-        }
-    } catch {
+      setLoading(true);
+      const res = await productService.buscarProductos({
+        sucursalId: orderData.sucursalId,
+        nombre: texto,
+      });
+      if (res.exitoso) {
+        setSearchResults(res.datos || []);
+      } else {
         setSearchResults([]);
+      }
+    } catch {
+      setSearchResults([]);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
 
   // En el return, agregar:
   // searchProductsByText,

@@ -1,26 +1,50 @@
 // src/components/DynamicRouter.jsx
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { routeMap } from "../config/routeMap";
 
-import Dashboard from "../shared/components/Dashboard";
-import NotificationsPage from "../shared/pages/NotificationsPage";
-import NotificationDetailPage from "../shared/pages/NotificationDetailPage";
-import EditProfilePage from "../modules/user-management/components/EditProfilePage";
-import ReportManagementPage from "../modules/reports/pages/ReportManagementPage";
+const Dashboard = lazy(() => import("../shared/components/Dashboard"));
+const NotificationsPage = lazy(
+  () => import("../shared/pages/NotificationsPage"),
+);
+const NotificationDetailPage = lazy(
+  () => import("../shared/pages/NotificationDetailPage"),
+);
+const EditProfilePage = lazy(
+  () => import("../modules/user-management/components/EditProfilePage"),
+);
+const ReportManagementPage = lazy(
+  () => import("../modules/reports/pages/ReportManagementPage"),
+);
 
-// Reportes con endpoint activo — siempre disponibles
-import VentasReportePage from "../modules/reports/pages/VentasReportePage";
-import DiarioReportePage from "../modules/reports/pages/DiarioReportePage";
-import StockNegativoPage from "../modules/reports/pages/StockNegativoPage";
-import MejorVentaPage from "../modules/reports/pages/MejorVentaPage";
+const VentasReportePage = lazy(
+  () => import("../modules/reports/pages/VentasReportePage"),
+);
+const DiarioReportePage = lazy(
+  () => import("../modules/reports/pages/DiarioReportePage"),
+);
+const StockNegativoPage = lazy(
+  () => import("../modules/reports/pages/StockNegativoPage"),
+);
+const MejorVentaPage = lazy(
+  () => import("../modules/reports/pages/MejorVentaPage"),
+);
 
-// Reportes placeholder — siempre disponibles
-import ReporteProductosPage from "../modules/reports/pages/ReporteProductosPage";
-import ReporteSucursalesPage from "../modules/reports/pages/ReporteSucursalesPage";
-import ReporteVencimientosPage from "../modules/reports/pages/ReporteVencimientosPage";
-import ReporteKardexPage from "../modules/reports/pages/ReporteKardexPage";
-import ReportePedidosPage from "../modules/reports/pages/ReportePedidosPage";
+const ReporteProductosPage = lazy(
+  () => import("../modules/reports/pages/ReporteProductosPage"),
+);
+const ReporteSucursalesPage = lazy(
+  () => import("../modules/reports/pages/ReporteSucursalesPage"),
+);
+const ReporteVencimientosPage = lazy(
+  () => import("../modules/reports/pages/ReporteVencimientosPage"),
+);
+const ReporteKardexPage = lazy(
+  () => import("../modules/reports/pages/ReporteKardexPage"),
+);
+const ReportePedidosPage = lazy(
+  () => import("../modules/reports/pages/ReportePedidosPage"),
+);
 
 // Rutas exactas (sin /*)
 const EXACT_ROUTES = new Set([
@@ -63,43 +87,51 @@ export default function DynamicRouter({ apiPermissions }) {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+    <Suspense fallback={<div style={{ padding: 20 }}>Cargando módulo...</div>}>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
 
-      {/* Reportes con datos reales */}
-      <Route path="/reportes/ventas" element={<VentasReportePage />} />
-      <Route path="/reportes/diario" element={<DiarioReportePage />} />
-      <Route path="/reportes/almacenes" element={<StockNegativoPage />} />
-      <Route path="/reportes/mejor-venta" element={<MejorVentaPage />} />
+        {/* Reportes con datos reales */}
+        <Route path="/reportes/ventas" element={<VentasReportePage />} />
+        <Route path="/reportes/diario" element={<DiarioReportePage />} />
+        <Route path="/reportes/almacenes" element={<StockNegativoPage />} />
+        <Route path="/reportes/mejor-venta" element={<MejorVentaPage />} />
 
-      {/* Reportes pendientes de backend */}
-      <Route path="/reportes/productos" element={<ReporteProductosPage />} />
-      <Route path="/reportes/sucursales" element={<ReporteSucursalesPage />} />
-      <Route path="/reportes/vencidos" element={<ReporteVencimientosPage />} />
-      <Route path="/reportes/kardex" element={<ReporteKardexPage />} />
-      <Route path="/reportes/pedidos" element={<ReportePedidosPage />} />
+        {/* Reportes pendientes de backend */}
+        <Route path="/reportes/productos" element={<ReporteProductosPage />} />
+        <Route
+          path="/reportes/sucursales"
+          element={<ReporteSucursalesPage />}
+        />
+        <Route
+          path="/reportes/vencidos"
+          element={<ReporteVencimientosPage />}
+        />
+        <Route path="/reportes/kardex" element={<ReporteKardexPage />} />
+        <Route path="/reportes/pedidos" element={<ReportePedidosPage />} />
 
-      {/* Ruteo dinamico por modulos */}
-      {[...activeModuleRoots].map((ruta) => {
-        const Component = routeMap[ruta];
-        const path = EXACT_ROUTES.has(ruta) ? ruta : `${ruta}/*`;
-        return <Route key={ruta} path={path} element={<Component />} />;
-      })}
+        {/* Ruteo dinamico por modulos */}
+        {[...activeModuleRoots].map((ruta) => {
+          const Component = routeMap[ruta];
+          const path = EXACT_ROUTES.has(ruta) ? ruta : `${ruta}/*`;
+          return <Route key={ruta} path={path} element={<Component />} />;
+        })}
 
-      {/* Rutas estaticas */}
-      <Route path="/profile" element={<EditProfilePage />} />
-      <Route path="/notificaciones" element={<NotificationsPage />} />
-      <Route
-        path="/notificaciones/:numeroTraspaso"
-        element={<NotificationDetailPage />}
-      />
+        {/* Rutas estaticas */}
+        <Route path="/profile" element={<EditProfilePage />} />
+        <Route path="/notificaciones" element={<NotificationsPage />} />
+        <Route
+          path="/notificaciones/:numeroTraspaso"
+          element={<NotificationDetailPage />}
+        />
 
-      {/* Fallback reportes */}
-      <Route path="/reportes/*" element={<ReportManagementPage />} />
-      <Route path="/reporte/*" element={<ReportManagementPage />} />
+        {/* Fallback reportes */}
+        <Route path="/reportes/*" element={<ReportManagementPage />} />
+        <Route path="/reporte/*" element={<ReportManagementPage />} />
 
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </Suspense>
   );
 }

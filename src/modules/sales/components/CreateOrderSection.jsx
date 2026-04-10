@@ -83,7 +83,7 @@ const CreateOrderSection = ({ orderData, updateData, onNext, catalogs }) => {
                         </TextField>
                     </Grid>
 
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             label="Fecha del Pedido"
@@ -96,49 +96,6 @@ const CreateOrderSection = ({ orderData, updateData, onNext, catalogs }) => {
                                 startAdornment: <CalendarMonth sx={{ color: "action.active", mr: 1 }} />
                             }}
                         />
-                    </Grid>
-
-                    <Grid item xs={12} md={4}>
-                        <TextField
-                            select
-                            fullWidth
-                            label="Línea"
-                            value={orderData.lineaId}
-                            onChange={(e) => updateData("lineaId", e.target.value)}
-                            required
-                            InputProps={{
-                                startAdornment: <Category sx={{ color: "action.active", mr: 1 }} />
-                            }}
-                        >
-                            <MenuItem value="">Seleccione...</MenuItem>
-                            {(catalogs.lineas || []).map((l) => (
-                                <MenuItem key={l.id} value={l.id}>
-                                    {l.nombre}
-                                </MenuItem>
-                            ))}
-                        </TextField>
-                    </Grid>
-
-                    <Grid item xs={12} md={4}>
-                        <TextField
-                            select
-                            fullWidth
-                            label="Laboratorio"
-                            value={orderData.laboratorioId}
-                            onChange={(e) => updateData("laboratorioId", e.target.value)}
-                            required
-                            disabled={!orderData.lineaId}
-                            InputProps={{
-                                startAdornment: <Science sx={{ color: "action.active", mr: 1 }} />
-                            }}
-                        >
-                            <MenuItem value="">Seleccione...</MenuItem>
-                            {(catalogs.laboratorios || []).map((l) => (
-                                <MenuItem key={l.id} value={l.id}>
-                                    {l.nombre}
-                                </MenuItem>
-                            ))}
-                        </TextField>
                     </Grid>
 
                     <Grid item xs={12}>
