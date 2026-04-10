@@ -16,6 +16,7 @@ import menuService from "../../../services/api/menuService";
 import { ORGANIZATION_CONFIG } from "../../../config/organizationConfig";
 
 import { useAuth } from "../../../context/AuthContext";
+import apiClient from "../../../services/api/apiClient";
 
 export const useUsers = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -70,7 +71,7 @@ export const useUsers = () => {
       setRoles(rolesData);
 
       const sucursalesData = await userService.getSucursales(
-        ORGANIZATION_CONFIG.organizacion_ID
+        ORGANIZATION_CONFIG.organizacion_ID,
       );
       setSucursales(sucursalesData);
 
@@ -105,7 +106,7 @@ export const useUsers = () => {
           `${usuariosData.length} usuarios cargados correctamente`,
           {
             variant: "success",
-          }
+          },
         );
       }
     } catch (error) {
@@ -142,12 +143,12 @@ export const useUsers = () => {
       const sucursalMatch = sucursales.find(
         (s) =>
           s.nombreSucursal?.trim().toLowerCase() ===
-          detail.sucursal?.trim().toLowerCase()
+          detail.sucursal?.trim().toLowerCase(),
       );
       const rolMatch = roles.find(
         (r) =>
           r.nombre_Rol?.trim().toLowerCase() ===
-          detail.rol?.trim().toLowerCase()
+          detail.rol?.trim().toLowerCase(),
       );
 
       // 4️⃣ Actualizar formulario con los IDs encontrados
@@ -201,7 +202,7 @@ export const useUsers = () => {
 
     if (field === "sucursal_ID") {
       const sucursalSeleccionada = sucursales.find(
-        (s) => s.sucursal_ID === parseInt(value)
+        (s) => s.sucursal_ID === parseInt(value),
       );
       setUserForm((prev) => ({
         ...prev,
@@ -215,7 +216,7 @@ export const useUsers = () => {
 
     if (field === "equipoComputo_ID") {
       const equipoSeleccionado = equipos.find(
-        (e) => e.equipoComputo_ID === parseInt(value)
+        (e) => e.equipoComputo_ID === parseInt(value),
       );
       setUserForm((prev) => ({
         ...prev,
@@ -383,11 +384,11 @@ export const useUsers = () => {
                       ?.nombre_Rol || u.rol,
                   sucursal:
                     sucursales.find(
-                      (s) => s.sucursal_ID === parseInt(payload.sucursal_ID)
+                      (s) => s.sucursal_ID === parseInt(payload.sucursal_ID),
                     )?.nombreSucursal || u.sucursal,
                 }
-              : u
-          )
+              : u,
+          ),
         );
 
         // 3️⃣ Limpia formulario y estados temporales
@@ -403,7 +404,7 @@ export const useUsers = () => {
       } else {
         enqueueSnackbar(
           response?.message || "Error al actualizar el usuario.",
-          { variant: "error" }
+          { variant: "error" },
         );
         return false;
       }
@@ -512,7 +513,7 @@ export const useUsers = () => {
 
   const updateUserPermissions = (userId, newPermissions) => {
     const updatedUsers = users.map((user) =>
-      user.id === userId ? { ...user, permisos: newPermissions } : user
+      user.id === userId ? { ...user, permisos: newPermissions } : user,
     );
 
     setUsers(updatedUsers);
@@ -546,7 +547,7 @@ export const useUsers = () => {
 
     // Buscar los IDs correspondientes desde los catálogos
     const sucursalObj = sucursales.find(
-      (s) => s.nombreSucursal === user.sucursal
+      (s) => s.nombreSucursal === user.sucursal,
     );
     const rolObj = roles.find((r) => r.nombre_Rol === user.rol);
 
@@ -613,7 +614,7 @@ export const useUsers = () => {
   const getRoleTemplatePermissionsReal = async (nombreRol) => {
     try {
       console.log(
-        `📡 Obteniendo plantilla de permisos para rol: ${nombreRol}...`
+        `📡 Obteniendo plantilla de permisos para rol: ${nombreRol}...`,
       );
 
       const templateData = await menuService.getPermisosByRol(nombreRol);
@@ -643,7 +644,7 @@ export const useUsers = () => {
       console.log(
         `✅ Plantilla "${nombreRol}":`,
         activePermissions.length,
-        "permisos"
+        "permisos",
       );
       return activePermissions;
     } catch (error) {
@@ -678,12 +679,9 @@ export const useUsers = () => {
 
       console.log("🧾 Payload:", JSON.stringify(payload, null, 2));
 
-      const apiClient = (await import("../../../services/api/apiClient"))
-        .default;
-
       const response = await apiClient.put(
         "/MenuOpciones/ActualizarPermisosOpciones",
-        payload
+        payload,
       );
 
       if (response.data?.exitoso) {

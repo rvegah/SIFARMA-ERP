@@ -1,4 +1,3 @@
-// src/modules/sales/pages/SalesPage.jsx
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import CreateSaleSection from "../components/CreateSaleSection";
@@ -10,6 +9,7 @@ const SalesPage = () => {
     <Routes>
       <Route index element={<CreateSaleSection />} />
       <Route path="realizar-pedidos" element={<OrderManagementSection />} />
+      <Route path="pedidos/:numeroPedido" element={<OrderManagementSection />} />
       <Route path="mis-pedidos" element={<MyOrdersSection />} />
       {/* <Route path="pedidos/crear" element={<Navigate to="../realizar-pedidos" replace />} /> */}
       {/* <Route path="*" element={<Navigate to="." replace />} /> */}

@@ -85,6 +85,7 @@ const AddProductsToOrderSection = ({
   const anchorRef = React.useRef(null); // el <td> que ancla el dropdown
   const itemRefs = React.useRef([]);
   const cantidadRefsMap = React.useRef({});
+  const observacionRefsMap = React.useRef({});
   const debounceTimer = React.useRef(null);
 
   // ─── Cabecera ─────────────────────────────────────────────────────────────
@@ -238,13 +239,28 @@ const AddProductsToOrderSection = ({
   // ─── Seleccionar producto ─────────────────────────────────────────────────
   const handleSelectProduct = (product) => {
     const id = product.producto_ID || product.id;
-    onAdd(product);
+
+    const existing = selectedProducts.find(
+      (p) => (p.producto_ID || p.id) === id,
+    );
+
+    if (existing) {
+      const nuevaCantidad = Number(existing.cantidad || 0) + 1;
+      onUpdateQty(id, nuevaCantidad);
+      setLastAddedId(id);
+    } else {
+      //  NO EXISTE → agregar con cantidad 1
+      onAdd({ ...product, cantidad: 1 });
+      //  FORZAR REFRESH VISUAL
+      setTimeout(() => {
+        setLastAddedId(id);
+      }, 50);
+    }
+
     setLastAddedId(id);
     setSearchQuery("");
     setShowSuggestions(false);
     setSelectedIndex(0);
-    // Devolver foco al buscador para siguiente búsqueda
-    setTimeout(() => searchInputRef.current?.focus(), 100);
   };
 
   // ─── Utilidades ──────────────────────────────────────────────────────────
@@ -301,8 +317,14 @@ const AddProductsToOrderSection = ({
         { v: orderData.fecha, s: cs },
       ],
       [
-        { v: "ID Pedido", s: ss },
-        { v: orderData.pedidoProveedor_ID || "Pendiente", s: cs },
+        { v: "Número Pedido", s: ss },
+        {
+          v:
+            orderData.numeroPedido ||
+            orderData.pedidoProveedor_ID ||
+            "Pendiente",
+          s: cs,
+        },
         { v: "Descripción", s: ss },
         { v: orderData.descripcion || "Sin descripción", s: cs },
       ],
@@ -323,13 +345,9 @@ const AddProductsToOrderSection = ({
       [
         { v: "#", s: ss },
         { v: "Producto", s: ss },
-        { v: "Código", s: ss },
         { v: "Presentación", s: ss },
         { v: "Unidad", s: ss },
-        { v: "Línea", s: ss },
         { v: "Laboratorio", s: ss },
-        { v: "Lote", s: ss },
-        { v: "Vencimiento", s: ss },
         { v: "Cantidad", s: ss },
         { v: "Observación", s: ss },
       ],
@@ -338,13 +356,9 @@ const AddProductsToOrderSection = ({
       data.push([
         { v: i + 1, s: cs },
         { v: p.producto || p.nombre, s: cs },
-        { v: p.codigoProducto || p.codigo, s: cs },
         { v: p.presentacion, s: cs },
         { v: p.unidadMedida, s: cs },
-        { v: p.linea, s: cs },
         { v: p.laboratorio, s: cs },
-        { v: p.numeroLote || "S/N", s: cs },
-        { v: formatDate(p.fechaVencimiento), s: cs },
         { v: p.cantidad, s: cs },
         { v: p.observacionesFila || "", s: cs },
       ]),
@@ -356,16 +370,12 @@ const AddProductsToOrderSection = ({
     ];
     ws["!cols"] = [
       { wch: 5 },
-      { wch: 35 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 10 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 10 },
+      { wch: 40 },
+      { wch: 20 },
       { wch: 12 },
+      { wch: 20 },
       { wch: 10 },
-      { wch: 30 },
+      { wch: 35 },
     ];
     XLSX.utils.book_append_sheet(wb, ws, "Pedido");
     XLSX.writeFile(
@@ -401,7 +411,7 @@ const AddProductsToOrderSection = ({
     doc.text(`Sucursal: ${sucursalName}`, 14, 38);
     doc.text(`Fecha: ${orderData.fecha}`, 14, 44);
     doc.text(
-      `ID Pedido: ${orderData.pedidoProveedor_ID || "Pendiente"}`,
+      `Número Pedido: ${orderData.numeroPedido || orderData.pedidoProveedor_ID || "Pendiente"}`,
       100,
       38,
     );
@@ -416,19 +426,19 @@ const AddProductsToOrderSection = ({
         [
           "#",
           "Producto",
-          "Código",
-          "Present.",
-          "Línea",
-          "Cant.",
+          "Presentación",
+          "Unidad",
+          "Laboratorio",
+          "Cantidad",
           "Observación",
         ],
       ],
       body: selectedProducts.map((p, i) => [
         i + 1,
-        `${p.producto || p.nombre}\n(${p.laboratorio})`,
-        p.codigoProducto || p.codigo,
+        p.producto || p.nombre,
         p.presentacion,
-        p.linea,
+        p.unidadMedida,
+        p.laboratorio,
         p.cantidad,
         p.observacionesFila || "",
       ]),
@@ -440,9 +450,9 @@ const AddProductsToOrderSection = ({
       columnStyles: {
         0: { cellWidth: 10 },
         1: { cellWidth: 80 },
-        2: { cellWidth: 30 },
-        3: { cellWidth: 30 },
-        4: { cellWidth: 30 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 25 },
+        4: { cellWidth: 35 },
         5: { cellWidth: 20 },
         6: { cellWidth: "auto" },
       },
@@ -536,7 +546,7 @@ const AddProductsToOrderSection = ({
             </Stack>*/}
           </Box>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={2}>
+            <Grid item xs={12} sm={3}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Store color="action" fontSize="small" />
                 <Box>
@@ -549,7 +559,7 @@ const AddProductsToOrderSection = ({
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid item xs={12} sm={3}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <CalendarToday color="action" fontSize="small" />
                 <Box>
@@ -562,7 +572,7 @@ const AddProductsToOrderSection = ({
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid item xs={12} sm={3}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <LocalShipping color="action" fontSize="small" />
                 <Box>
@@ -580,54 +590,20 @@ const AddProductsToOrderSection = ({
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={2}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Science color="action" fontSize="small" />
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Línea:
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {(catalogs.lineas || []).find(
-                      (l) => l.id === orderData.lineaId,
-                    )?.nombre ||
-                      orderData.nombreLinea ||
-                      orderData.lineaId ||
-                      "—"}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={2}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Inventory color="action" fontSize="small" />
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Laboratorio:
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {(catalogs.laboratorios || []).find(
-                      (l) => l.id === orderData.laboratorioId,
-                    )?.nombre ||
-                      orderData.nombreLaboratorio ||
-                      orderData.laboratorioId ||
-                      "—"}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={2}>
+            <Grid item xs={12} sm={3}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <LocalPostOffice color="action" fontSize="small" />
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    ID Pedido:
+                    Número Pedido:
                   </Typography>
                   <Typography
                     variant="body2"
                     sx={{ fontWeight: 600, color: farmaColors.primary }}
                   >
-                    {orderData.pedidoProveedor_ID || "Pendiente"}
+                    {orderData.numeroPedido ||
+                      orderData.pedidoProveedor_ID ||
+                      "Pendiente"}
                   </Typography>
                 </Box>
               </Box>
@@ -837,51 +813,6 @@ const AddProductsToOrderSection = ({
                                 {p.presentacion}
                               </Box>
                             )}
-                            {p.unidadMedida && (
-                              <Box
-                                component="span"
-                                sx={{
-                                  fontWeight: 400,
-                                  color: "text.secondary",
-                                }}
-                              >
-                                {" · "}
-                                {p.unidadMedida}
-                              </Box>
-                            )}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              display: "block",
-                              fontSize: "0.68rem",
-                              color: "text.secondary",
-                              mt: 0.3,
-                            }}
-                          >
-                            {[
-                              p.laboratorio,
-                              p.linea,
-                              p.numeroLote || "S/N",
-                              p.fechaVencimiento
-                                ? `Venc: ${formatDate(p.fechaVencimiento)}`
-                                : null,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                            <Box
-                              component="span"
-                              sx={{
-                                ml: 1,
-                                fontWeight: 700,
-                                color: farmaColors.primary,
-                                bgcolor: farmaColors.alpha.primary10,
-                                px: 0.5,
-                                borderRadius: 0.5,
-                              }}
-                            >
-                              Stock: {p.stockProducto || p.stock || 0}
-                            </Box>
                           </Typography>
                         </TableCell>
 
@@ -891,9 +822,12 @@ const AddProductsToOrderSection = ({
                             <TextField
                               type="number"
                               disabled={isReadOnly}
-                              value={p.cantidad}
+                              value={p.cantidad ?? 1}
                               onChange={(e) =>
-                                onUpdateQty(productId, e.target.value)
+                                onUpdateQty(
+                                  productId,
+                                  Number(e.target.value || 1),
+                                )
                               }
                               inputProps={{ min: 1 }}
                               inputRef={(el) => {
@@ -905,7 +839,18 @@ const AddProductsToOrderSection = ({
                                 if (e.key === "Enter") {
                                   e.preventDefault();
                                   setLastAddedId(null);
-                                  searchInputRef.current?.focus();
+                                  const obs =
+                                    observacionRefsMap.current[productId];
+                                  if (obs) {
+                                    obs.focus();
+                                    obs.select?.();
+                                  }
+                                }
+                                if (e.key === "Tab") {
+                                  e.preventDefault();
+                                  observacionRefsMap.current[
+                                    productId
+                                  ]?.focus();
                                 }
                               }}
                               size="small"
@@ -937,11 +882,19 @@ const AddProductsToOrderSection = ({
                                   e.target.value,
                                 )
                               }
-                              sx={{
-                                "& .MuiInput-underline:before": {
-                                  borderBottomColor:
-                                    farmaColors.alpha.secondary20,
-                                },
+                              inputRef={(el) => {
+                                if (el)
+                                  observacionRefsMap.current[productId] = el;
+                                else
+                                  delete observacionRefsMap.current[productId];
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  searchInputRef.current?.focus();
+                                  setSearchQuery("");
+                                  setShowSuggestions(false);
+                                }
                               }}
                             />
                           ) : (
@@ -1039,7 +992,7 @@ const AddProductsToOrderSection = ({
                       },
                     }}
                   >
-                    Excel
+                    Exportar a Excel
                   </Button>
                 </Tooltip>
                 <Tooltip title="Exportar a PDF">
@@ -1057,7 +1010,7 @@ const AddProductsToOrderSection = ({
                       },
                     }}
                   >
-                    PDF
+                    Exportar a PDF
                   </Button>
                 </Tooltip>
               </>
