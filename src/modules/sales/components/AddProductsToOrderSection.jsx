@@ -45,6 +45,7 @@ import {
   Science,
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
+import { useNavigate } from "react-router-dom";
 
 const AddProductsToOrderSection = ({
   orderData,
@@ -94,6 +95,21 @@ const AddProductsToOrderSection = ({
   );
   const sucursalName = sucursal?.nombreSucursal || "Sucursal";
   const totalProducts = selectedProducts.length;
+
+  const shouldBlock = selectedProducts.length > 0;
+
+  const navigate = useNavigate();
+
+  const handleSafeNavigate = (path) => {
+    if (selectedProducts.length > 0) {
+      const confirm = window.confirm(
+        "Si sales del pedido perderás los cambios no guardados. ¿Deseas continuar?",
+      );
+      if (!confirm) return;
+    }
+
+    navigate(path);
+  };
 
   // ─── Reset página ─────────────────────────────────────────────────────────
   React.useEffect(() => {
@@ -199,6 +215,46 @@ const AddProductsToOrderSection = ({
     }, 350);
   };
 
+  React.useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (selectedProducts.length > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [selectedProducts]);
+
+  React.useEffect(() => {
+    const handleClick = (e) => {
+      if (selectedProducts.length === 0) return;
+
+      // buscar si hizo click en un link
+      const link = e.target.closest("a");
+      if (!link) return;
+
+      const confirmLeave = window.confirm(
+        "Si sales del pedido perderás los cambios no guardados. ¿Deseas continuar?",
+      );
+
+      if (!confirmLeave) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, [selectedProducts]);
+
   // ─── Teclado sobre el input de búsqueda ──────────────────────────────────
   React.useEffect(() => {
     const handler = (e) => {
@@ -245,12 +301,12 @@ const AddProductsToOrderSection = ({
     );
 
     if (existing) {
-      const nuevaCantidad = Number(existing.cantidad || 0) + 1;
+      const nuevaCantidad = Number(existing.cantidad || 1) + 1;
       onUpdateQty(id, nuevaCantidad);
       setLastAddedId(id);
     } else {
       //  NO EXISTE → agregar con cantidad 1
-      onAdd({ ...product, cantidad: 1 });
+      onAdd({ ...product, cantidad: "" });
       //  FORZAR REFRESH VISUAL
       setTimeout(() => {
         setLastAddedId(id);
@@ -820,16 +876,33 @@ const AddProductsToOrderSection = ({
                         <TableCell sx={{ width: 130 }}>
                           {canEdit && !p.isReadOnlyRow ? (
                             <TextField
-                              type="number"
+                              type="text"
                               disabled={isReadOnly}
-                              value={p.cantidad ?? 1}
-                              onChange={(e) =>
+                              value={p.cantidad ?? ""}
+                              onChange={(e) => {
+                                let value = e.target.value;
+
+                                // solo números
+                                value = value.replace(/\D/g, "");
+
+                                // máximo 5 dígitos
+                                value = value.slice(0, 5);
+
                                 onUpdateQty(
                                   productId,
-                                  Number(e.target.value || 1),
-                                )
-                              }
-                              inputProps={{ min: 1 }}
+                                  value === "" ? "" : Number(value),
+                                );
+                              }}
+                              onBlur={(e) => {
+                                if (e.target.value === "") {
+                                  onUpdateQty(productId, 1);
+                                }
+                              }}
+                              inputProps={{
+                                inputMode: "numeric",
+                                pattern: "[0-9]*",
+                                maxLength: 5,
+                              }}
                               inputRef={(el) => {
                                 if (el) cantidadRefsMap.current[productId] = el;
                                 else delete cantidadRefsMap.current[productId];
