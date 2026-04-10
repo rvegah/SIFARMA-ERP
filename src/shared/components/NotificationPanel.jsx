@@ -24,7 +24,8 @@ import {
 } from "@mui/icons-material";
 import { farmaColors } from "../../app/theme";
 import { useAuth } from "../../context/AuthContext";
-import notificationService from "../services/notificationService";
+
+import { useNotifications } from "../../modules/notifications/hooks/useNotifications";
 
 const NotificationPanel = ({
   open,
@@ -35,45 +36,13 @@ const NotificationPanel = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { notifications, fetchNotifications, loading } = useNotifications();
 
   useEffect(() => {
-    if (user?.codigoSucursal_ID) {
-      fetchNotifications();
+    if (open && user?.codigoSucursal_ID) {
+      fetchNotifications(user.codigoSucursal_ID);
     }
-  }, [location.pathname, user?.codigoSucursal_ID]);
-
-  const fetchNotifications = async () => {
-    setLoading(true);
-    try {
-      const res = await notificationService.getNotificaciones(
-        user.codigoSucursal_ID,
-      );
-      if (res.exitoso) {
-        const data = res.datos || [];
-        setNotifications(data);
-        // The new requirements do not strictly specify unread vs read logic beyond esEnvio.
-        // It says: if esEnvio is true -> "tono de no leidos". If false -> "tono blanco de leidos".
-        // We consider "esEnvio" loosely as "Requires attention / Unread-like styling".
-        if (onUnreadCountChange) {
-          onUnreadCountChange(data.length);
-        }
-      } else {
-        console.error("Error fetching notifications:", res.mensaje);
-      }
-    } catch (error) {
-      // El backend devuelve 400 cuando la lista está vacía — tratar como vacío
-      if (error?.response?.status === 400) {
-        setNotifications([]);
-        if (onUnreadCountChange) onUnreadCountChange(0);
-      } else {
-        console.error("Failed to load notifications", error);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [open]);
 
   const handleViewAll = (e) => {
     e.preventDefault();

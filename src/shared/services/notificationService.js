@@ -21,26 +21,7 @@ const notificationService = {
       throw error;
     }
   },
-
-  /**
-   * Fetch all notifications for the full notifications page
-   * GET /api/farmalink-farmacia/Traspasos/BuscarNotificacionesTraspasos?CodigoSucursal={id}
-   */
-  buscarNotificaciones: async (codigoSucursal) => {
-    try {
-      const response = await pharmacyApiClient.get("/Traspasos/BuscarNotificacionesTraspasos", {
-        params: { CodigoSucursal: codigoSucursal },
-      });
-      return response.data;
-    } catch (error) {
-      if (error?.response?.status === 400) {
-        return { exitoso: true, datos: [], mensaje: error.response.data?.mensaje ?? '' };
-      }
-      console.error("Error searching notifications:", error);
-      throw error;
-    }
-  },
-
+  
   /**
    * Fetch transfer details for a notification
    * GET /api/farmalink-farmacia/Traspasos/EditarTraspaso?NumeroTraspaso={numeroTraspaso}
