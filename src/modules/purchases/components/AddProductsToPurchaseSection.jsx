@@ -35,9 +35,12 @@ import {
   HelpOutline,
   CheckCircleOutline,
   ArrowBack,
+  BarChart,
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import PurchaseItemsTable from "./PurchaseItemsTable";
+
+import StockDrawer from "./StockDrawer";
 
 const AddProductsToPurchaseSection = ({
   createdPurchase,
@@ -83,6 +86,8 @@ const AddProductsToPurchaseSection = ({
   };
 
   if (!createdPurchase) return null;
+
+  const [stockDrawerOpen, setStockDrawerOpen] = useState(false);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -474,6 +479,22 @@ const AddProductsToPurchaseSection = ({
           </Box>
           <Button
             variant="outlined"
+            startIcon={<BarChart />}
+            onClick={() => setStockDrawerOpen(true)}
+            sx={{
+              borderColor: farmaColors.primary,
+              color: farmaColors.primary,
+              px: 3,
+              py: 1,
+              borderRadius: 2,
+              fontWeight: 700,
+              "&:hover": { bgcolor: farmaColors.alpha.primary10 },
+            }}
+          >
+            Ver Stock
+          </Button>
+          <Button
+            variant="outlined"
             startIcon={
               loading ? (
                 <CircularProgress size={18} color="inherit" />
@@ -516,7 +537,7 @@ const AddProductsToPurchaseSection = ({
             Terminar Compra
           </Button>
         </Box>
-      )}     
+      )}
 
       {isFinished && (
         <Box
@@ -577,6 +598,7 @@ const AddProductsToPurchaseSection = ({
           </Button>
         </DialogActions>
       </Dialog>
+      <StockDrawer open={stockDrawerOpen} onClose={() => setStockDrawerOpen(false)} />
     </Box>
   );
 };
