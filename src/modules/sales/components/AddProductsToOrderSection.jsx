@@ -46,6 +46,7 @@ import {
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import { useNavigate } from "react-router-dom";
+import { CodigoProductoChip } from "../../../shared/components/ProductoStockPopup";
 
 const AddProductsToOrderSection = ({
   orderData,
@@ -1196,7 +1197,6 @@ const AddProductsToOrderSection = ({
                     <ListItem
                       key={id}
                       ref={(el) => (itemRefs.current[index] = el)}
-                      onClick={() => !isAdded && handleSelectProduct(product)}
                       sx={{
                         borderBottom:
                           index < searchResults.length - 1
@@ -1209,7 +1209,7 @@ const AddProductsToOrderSection = ({
                             : stock === 0
                               ? "rgba(244,67,54,0.04)"
                               : "white",
-                        cursor: isAdded ? "default" : "pointer",
+                        cursor: "default",
                         "&:hover": {
                           bgcolor: isAdded
                             ? "rgba(76,175,80,0.07)"
@@ -1229,19 +1229,8 @@ const AddProductsToOrderSection = ({
                         }}
                       >
                         {/* Código */}
-                        <Chip
-                          label={product.codigoProducto || product.codigo}
-                          size="small"
-                          sx={{
-                            bgcolor: farmaColors.primary,
-                            color: "white",
-                            fontWeight: 700,
-                            fontSize: "0.72rem",
-                            height: 22,
-                            minWidth: 72,
-                            fontFamily: "monospace",
-                            flexShrink: 0,
-                          }}
+                        <CodigoProductoChip
+                          codigo={product.codigoProducto || product.codigo}
                         />
 
                         {/* Nombre + detalle */}
@@ -1322,6 +1311,10 @@ const AddProductsToOrderSection = ({
                           <Chip
                             label="+ Agregar"
                             size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectProduct(product);
+                            }}
                             sx={{
                               bgcolor: farmaColors.primary,
                               color: "white",
@@ -1329,6 +1322,7 @@ const AddProductsToOrderSection = ({
                               height: 22,
                               flexShrink: 0,
                               cursor: "pointer",
+                              "&:hover": { bgcolor: farmaColors.secondary },
                             }}
                           />
                         )}

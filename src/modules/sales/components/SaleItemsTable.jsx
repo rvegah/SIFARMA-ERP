@@ -23,6 +23,7 @@ import {
 import { Delete, Warning, Check, Close, Search } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import { UNITS_OF_MEASURE } from "../constants/salesConstants";
+import { CodigoProductoChip } from "../../../shared/components/ProductoStockPopup";
 
 const SaleItemsTable = ({
   items,
@@ -447,14 +448,23 @@ const SaleItemsTable = ({
                         {item.nombre}
                       </Typography>
                       {/* Fila 1b: código / línea / laboratorio */}
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ fontSize: "0.7rem" }}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                          flexWrap: "wrap",
+                        }}
                       >
-                        (Código: {item.codigo})(Línea: {item.linea}
-                        )(Laboratorio: {item.laboratorio})
-                      </Typography>
+                        <CodigoProductoChip codigo={item.codigo} />
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontSize: "0.7rem" }}
+                        >
+                          (Línea: {item.linea})(Laboratorio: {item.laboratorio})
+                        </Typography>
+                      </Box>
                       {/* Fila 2: presentación */}
                       <Typography
                         variant="caption"
@@ -803,9 +813,9 @@ const SaleItemsTable = ({
                           : "none",
                       bgcolor:
                         index === selectedIndex
-                          ? farmaColors.alpha.primary30 // 
+                          ? farmaColors.alpha.primary30 //
                           : product.stock === 0
-                            ? "rgba(244, 67, 54, 0.05)" // 
+                            ? "rgba(244, 67, 54, 0.05)" //
                             : "white",
                       "&:hover": {
                         bgcolor: farmaColors.alpha.primary20,
