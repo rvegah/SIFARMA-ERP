@@ -1025,7 +1025,7 @@ const CreateSaleSection = () => {
             >
               Ver Stock
             </Button>
-          </Grid> */}
+          </Grid> 
 
           <Grid item xs={1.5}>
             <Button
@@ -1048,7 +1048,7 @@ const CreateSaleSection = () => {
             >
               Ver Stock
             </Button>
-          </Grid>
+          </Grid>*/}
 
           <Grid item xs={1.5}>
             <Button
