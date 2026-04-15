@@ -109,7 +109,7 @@ const ReportePorSucursalesSection = ({ compactMode = false }) => {
   }, []);
 
   const handleSearch = useCallback(async () => {
-    if (!nombreProducto && !lineaId) return;
+    if (!lineaId) return;
     try {
       setLoading(true);
       const params = {};
@@ -215,7 +215,7 @@ const ReportePorSucursalesSection = ({ compactMode = false }) => {
                 )
               }
               onClick={handleSearch}
-              disabled={loading || (!nombreProducto && !lineaId)}
+              disabled={loading || !lineaId}
               sx={{
                 background:
                   farmaColors.gradients?.primary || farmaColors.primary,

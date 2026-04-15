@@ -43,10 +43,12 @@ import {
   PictureAsPdf,
   LocalShipping,
   Science,
+  BarChart,
 } from "@mui/icons-material";
 import { farmaColors } from "../../../app/theme";
 import { useNavigate } from "react-router-dom";
 import { CodigoProductoChip } from "../../../shared/components/ProductoStockPopup";
+import StockDrawer from "../../purchases/components/StockDrawer";
 
 const AddProductsToOrderSection = ({
   orderData,
@@ -100,6 +102,8 @@ const AddProductsToOrderSection = ({
   const shouldBlock = selectedProducts.length > 0;
 
   const navigate = useNavigate();
+
+  const [stockDrawerOpen, setStockDrawerOpen] = React.useState(false);
 
   const handleSafeNavigate = (path) => {
     if (selectedProducts.length > 0) {
@@ -346,7 +350,7 @@ const AddProductsToOrderSection = ({
   const executeExportExcel = () => {
     const wb = XLSX.utils.book_new();
     const hs = {
-      fill: { fgColor: { rgb: "00529B" } },
+      fill: { fgColor: { rgb: "CC6C06" } },
       font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
       alignment: { horizontal: "center", vertical: "center" },
       border: {
@@ -358,7 +362,7 @@ const AddProductsToOrderSection = ({
     };
     const ss = {
       font: { bold: true, sz: 11 },
-      fill: { fgColor: { rgb: "E3F2FD" } },
+      fill: { fgColor: { rgb: "FFF3E0" } },
       border: { bottom: { style: "thin", color: { rgb: "000000" } } },
     };
     const cs = {
@@ -452,12 +456,12 @@ const AddProductsToOrderSection = ({
 
   const executeExportPDF = () => {
     const doc = new jsPDF("l", "mm", "a4");
-    const pc = [0, 82, 155];
+    const pc = [204, 108, 6];
     doc.setFillColor(...pc);
     doc.rect(0, 0, 297, 20, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
-    doc.text("SIFARMA - REPORTE DE PEDIDO", 14, 13);
+    doc.text("REPORTE DE PEDIDO", 14, 13);
     doc.setTextColor(50, 50, 50);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
@@ -501,7 +505,7 @@ const AddProductsToOrderSection = ({
       ]),
       theme: "striped",
       headStyles: { fillColor: pc, textColor: 255, fontStyle: "bold" },
-      alternateRowStyles: { fillColor: [245, 248, 255] },
+      alternateRowStyles: { fillColor: [255, 248, 235] },
       margin: { left: 14, right: 14 },
       styles: { fontSize: 9, cellPadding: 3 },
       columnStyles: {
@@ -1092,33 +1096,50 @@ const AddProductsToOrderSection = ({
           </Stack>
 
           {/* Guardar — solo si puede editar */}
-          {canEdit && !isReadOnly ? (
+          <Stack direction="row" spacing={1} alignItems="center">
             <Button
-              variant="contained"
-              size="large"
-              startIcon={
-                loading ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <CheckCircle />
-                )
-              }
-              onClick={onSave}
-              disabled={loading || selectedProducts.length === 0}
+              variant="outlined"
+              startIcon={<BarChart />}
+              onClick={() => setStockDrawerOpen(true)}
               sx={{
-                background: farmaColors.gradients.primary,
-                px: 5,
-                height: 52,
+                borderColor: farmaColors.primary,
+                color: farmaColors.primary,
+                px: 3,
+                py: 1,
                 borderRadius: 2,
                 fontWeight: 700,
+                "&:hover": { bgcolor: farmaColors.alpha.primary10 },
               }}
             >
-              {loading ? "Guardando..." : "Guardar Pedido"}
+              Ver Stock
             </Button>
-          ) : (
-            // Espaciador para mantener los botones de exportar a la izquierda cuando no hay Guardar
-            <Box />
-          )}
+            {canEdit && !isReadOnly ? (
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <CheckCircle />
+                  )
+                }
+                onClick={onSave}
+                disabled={loading || selectedProducts.length === 0}
+                sx={{
+                  background: farmaColors.gradients.primary,
+                  px: 5,
+                  height: 52,
+                  borderRadius: 2,
+                  fontWeight: 700,
+                }}
+              >
+                {loading ? "Guardando..." : "Guardar Pedido"}
+              </Button>
+            ) : (
+              <Box />
+            )}
+          </Stack>
         </Box>
       </Card>
 
@@ -1335,6 +1356,8 @@ const AddProductsToOrderSection = ({
           </Portal>
         </ClickAwayListener>
       )}
+
+      <StockDrawer open={stockDrawerOpen} onClose={() => setStockDrawerOpen(false)} />
 
       {/* ── Diálogo exportar + cambio estado ── */}
       <Dialog
