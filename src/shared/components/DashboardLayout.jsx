@@ -104,14 +104,17 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
     });
   };
 
-  const handleMenuClick = (path, hasSubItems = false, menuIndex = null) => {
+  const handleMenuClick = (e, path, hasSubItems = false, menuIndex = null) => {
+    if (e.ctrlKey) {
+      window.open(path, "_blank");
+      return;
+    }
+
     if (hasSubItems && !collapsed) {
       handleSubMenuToggle(menuIndex);
     } else {
-      // 🚀 Forzar actualización aunque sea la misma ruta
       if (location.pathname === path) {
         navigate(path, { replace: true });
-        // 🔁 Forzar re-render del componente actual
         window.dispatchEvent(new Event("forceReload"));
       } else {
         navigate(path);
@@ -249,8 +252,8 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
               return (
                 <React.Fragment key={index}>
                   <ListItem
-                    onClick={() =>
-                      handleMenuClick(item.ruta, hasSubItems, index)
+                    onClick={(e) =>
+                      handleMenuClick(e, item.ruta, hasSubItems, index)
                     }
                     sx={{
                       mb: 0.5,
@@ -315,7 +318,7 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
                         {item.subElementos.map((subItem, subIndex) => (
                           <ListItem
                             key={subIndex}
-                            onClick={() => handleMenuClick(subItem.ruta)}
+                            onClick={(e) => handleMenuClick(e, subItem.ruta)}
                             sx={{
                               borderRadius: 1,
                               mb: 0.5,
