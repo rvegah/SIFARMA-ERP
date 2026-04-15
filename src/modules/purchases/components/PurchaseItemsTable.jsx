@@ -1,6 +1,6 @@
 // src/modules/purchases/components/PurchaseItemsTable.jsx
-// Tabla inline de productos para compras — patrón idéntico a SaleItemsTable
-// Sin modales. Búsqueda en la misma tabla con portal flotante.
+// Tabla inline de productos para compras — columnas en orden de interfaz antigua
+// Nro | Código | Producto | Vencimiento | Stock | C/U | P/U | P/C | Cantidad | Total | Acción
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
@@ -71,6 +71,7 @@ const PurchaseItemsTable = ({
           cantidad: lastItem.cantidad,
           costoUnitario: lastItem.costoUnitario,
           precioUnitario: lastItem.precioUnitario,
+          precioCaja: lastItem.precioCaja,
           numeroLote: lastItem.numeroLote,
           fechaVencimiento: lastItem.fechaVencimiento,
         });
@@ -245,6 +246,7 @@ const PurchaseItemsTable = ({
       cantidad: item.cantidad,
       costoUnitario: item.costoUnitario,
       precioUnitario: item.precioUnitario,
+      precioCaja: item.precioCaja,
       numeroLote: item.numeroLote,
       fechaVencimiento: item.fechaVencimiento,
     });
@@ -252,10 +254,23 @@ const PurchaseItemsTable = ({
 
   const handleSaveEdit = useCallback(
     (id) => {
-      Object.keys(editValues).forEach((field) => {
-        const val = ["cantidad", "costoUnitario", "precioUnitario"].includes(
-          field,
-        )
+      // Guardar todos los campos editados
+      const fields = [
+        "cantidad",
+        "costoUnitario",
+        "precioUnitario",
+        "precioCaja",
+        "numeroLote",
+        "fechaVencimiento",
+      ];
+      fields.forEach((field) => {
+        const numericFields = [
+          "cantidad",
+          "costoUnitario",
+          "precioUnitario",
+          "precioCaja",
+        ];
+        const val = numericFields.includes(field)
           ? editValues[field] === ""
             ? 0
             : Number(editValues[field])
@@ -273,20 +288,32 @@ const PurchaseItemsTable = ({
     setEditValues({});
   }, []);
 
+  // P/C — Precio Caja manual. Si no se ingresa, se envía 0
+  const handleEditChange = (field, value) => {
+    setEditValues((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Columnas en orden de interfaz antigua
   const columns = [
-    { label: "Producto", width: "28%" },
-    { label: "Lote", width: "10%" },
-    { label: "Vencimiento", width: "10%" },
-    { label: "Cantidad", width: "8%", align: "center" },
-    { label: "Costo Unit.", width: "10%", align: "center" },
-    { label: "Precio Unit.", width: "10%", align: "center" },
-    { label: "Total", width: "10%", align: "right" },
-    { label: "Acción", width: "6%", align: "center" },
+    { label: "Nro", width: "4%", align: "center" },
+    { label: "Código", width: "8%", align: "center" },
+    { label: "Producto", width: "22%", align: "left" },
+    { label: "Vencimiento", width: "9%", align: "center" },
+    { label: "Stock", width: "6%", align: "center" },
+    { label: "C/U", width: "8%", align: "center" },
+    { label: "P/U", width: "8%", align: "center" },
+    { label: "P/C", width: "8%", align: "center" },
+    { label: "Cantidad", width: "7%", align: "center" },
+    { label: "Total", width: "9%", align: "right" },
+    { label: "Opciones", width: "7%", align: "center" },
   ];
 
   return (
     <Box sx={{ mt: 2 }}>
-      {/* Header de la tabla */}
+      {/* Header */}
       <Box
         sx={{
           background: farmaColors.secondary,
@@ -299,7 +326,7 @@ const PurchaseItemsTable = ({
         }}
       >
         <Typography variant="body2" sx={{ color: "white", fontWeight: 700 }}>
-          Productos de la Compra
+          DETALLE COMPRAS
         </Typography>
         <Chip
           label={`${items.length} ítem${items.length !== 1 ? "s" : ""}`}
@@ -324,11 +351,11 @@ const PurchaseItemsTable = ({
       >
         <Table size="small" stickyHeader>
           <TableHead>
-            <TableRow sx={{ bgcolor: "#2c2c2c" }}>
+            <TableRow>
               {columns.map((col) => (
                 <TableCell
                   key={col.label}
-                  align={col.align || "left"}
+                  align={col.align}
                   sx={{
                     color: "white",
                     fontWeight: 700,
@@ -336,6 +363,7 @@ const PurchaseItemsTable = ({
                     width: col.width,
                     py: 1,
                     fontSize: "0.78rem",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {col.label}
@@ -356,7 +384,7 @@ const PurchaseItemsTable = ({
                 }}
               >
                 <TableCell
-                  colSpan={8}
+                  colSpan={11}
                   sx={{
                     p: 1,
                     borderBottom: `2px solid ${farmaColors.primary}`,
@@ -413,7 +441,9 @@ const PurchaseItemsTable = ({
             {/* FILAS DE ÍTEMS */}
             {items.map((item, index) => {
               const isEditing = editingId === item._id;
-              const total = Number(item.precioCaja) || 0;
+              const total =
+                (Number(item.cantidad) || 0) *
+                (Number(item.costoUnitario) || 0);
 
               return (
                 <TableRow
@@ -421,13 +451,32 @@ const PurchaseItemsTable = ({
                   ref={index === items.length - 1 ? lastRowRef : null}
                   hover
                   sx={{
-                    bgcolor: "white",
+                    bgcolor: index % 2 === 0 ? "white" : "#fafafa",
                     "&:hover": {
                       bgcolor:
                         farmaColors.alpha?.primary10 || "rgba(204,108,6,0.05)",
                     },
                   }}
                 >
+                  {/* NRO */}
+                  <TableCell align="center">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "0.82rem",
+                        color: "text.secondary",
+                      }}
+                    >
+                      {index + 1}
+                    </Typography>
+                  </TableCell>
+
+                  {/* CÓDIGO */}
+                  <TableCell align="center">
+                    <CodigoProductoChip codigo={item.codigoProducto} />
+                  </TableCell>
+
                   {/* PRODUCTO */}
                   <TableCell>
                     <Typography
@@ -440,10 +489,15 @@ const PurchaseItemsTable = ({
                     >
                       {item.nombreProducto}
                     </Typography>
-                    <CodigoProductoChip
-                      codigo={item.codigoProducto}
-                      sx={{ mt: 0.3 }}
-                    />
+                    {item.presentacion && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: "block", fontSize: "0.68rem" }}
+                      >
+                        {item.presentacion}
+                      </Typography>
+                    )}
                     {item.laboratorio && (
                       <Typography
                         variant="caption"
@@ -453,13 +507,24 @@ const PurchaseItemsTable = ({
                         {item.laboratorio}
                       </Typography>
                     )}
-                  </TableCell>
-
-                  {/* LOTE */}
-                  <TableCell>
-                    {isEditing ? (
+                    {/* Lote en modo no-edición, debajo del nombre */}
+                    {!isEditing && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "block",
+                          fontSize: "0.68rem",
+                          color: "text.secondary",
+                        }}
+                      >
+                        Lote: {item.numeroLote || "S/N"}
+                      </Typography>
+                    )}
+                    {/* Lote editable inline */}
+                    {isEditing && (
                       <TextField
                         size="small"
+                        label="Lote"
                         value={editValues.numeroLote ?? ""}
                         onChange={(e) =>
                           setEditValues((prev) => ({
@@ -467,21 +532,14 @@ const PurchaseItemsTable = ({
                             numeroLote: e.target.value,
                           }))
                         }
-                        sx={{ width: 90 }}
-                        inputProps={{ style: { fontSize: "0.8rem" } }}
+                        sx={{ mt: 0.5, width: 100 }}
+                        inputProps={{ style: { fontSize: "0.75rem" } }}
                       />
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        sx={{ fontSize: "0.82rem", fontWeight: 600 }}
-                      >
-                        {item.numeroLote || "-"}
-                      </Typography>
                     )}
                   </TableCell>
 
                   {/* VENCIMIENTO */}
-                  <TableCell>
+                  <TableCell align="center">
                     {isEditing ? (
                       <TextField
                         type="date"
@@ -495,50 +553,40 @@ const PurchaseItemsTable = ({
                         }
                         InputLabelProps={{ shrink: true }}
                         sx={{ width: 130 }}
-                        inputProps={{ style: { fontSize: "0.8rem" } }}
+                        inputProps={{ style: { fontSize: "0.78rem" } }}
                       />
                     ) : (
                       <Typography
                         variant="caption"
-                        sx={{ color: "error.main", fontWeight: 600 }}
+                        sx={{
+                          color: "error.main",
+                          fontWeight: 600,
+                          fontSize: "0.78rem",
+                        }}
                       >
                         {item.fechaVencimiento || "-"}
                       </Typography>
                     )}
                   </TableCell>
 
-                  {/* CANTIDAD */}
+                  {/* STOCK */}
                   <TableCell align="center">
-                    {isEditing ? (
-                      <TextField
-                        type="number"
-                        size="small"
-                        value={editValues.cantidad ?? 1}
-                        onChange={(e) =>
-                          setEditValues((prev) => ({
-                            ...prev,
-                            cantidad: e.target.value,
-                          }))
-                        }
-                        inputRef={cantidadInputRef}
-                        inputProps={{
-                          min: 1,
-                          step: 1,
-                          style: { fontSize: "0.8rem", textAlign: "center" },
-                        }}
-                        sx={{ width: 70 }}
-                      />
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
-                      >
-                        {item.cantidad}
-                      </Typography>
-                    )}
+                    <Chip
+                      label={item.stockProducto ?? 0}
+                      size="small"
+                      sx={{
+                        bgcolor:
+                          (item.stockProducto ?? 0) > 0 ? "#4CAF50" : "#f44336",
+                        color: "white",
+                        fontWeight: 700,
+                        fontSize: "0.72rem",
+                        height: 22,
+                        minWidth: 40,
+                      }}
+                    />
                   </TableCell>
 
-                  {/* COSTO UNITARIO */}
+                  {/* C/U — Costo Unitario */}
                   <TableCell align="center">
                     {isEditing ? (
                       <TextField
@@ -546,26 +594,27 @@ const PurchaseItemsTable = ({
                         size="small"
                         value={editValues.costoUnitario ?? 0}
                         onChange={(e) =>
-                          setEditValues((prev) => ({
-                            ...prev,
-                            costoUnitario: e.target.value,
-                          }))
+                          handleEditChange("costoUnitario", e.target.value)
                         }
+                        inputRef={cantidadInputRef}
                         inputProps={{
                           min: 0,
                           step: 0.01,
-                          style: { fontSize: "0.8rem", textAlign: "center" },
+                          style: { fontSize: "0.78rem", textAlign: "center" },
                         }}
-                        sx={{ width: 85 }}
+                        sx={{ width: 75 }}
                       />
                     ) : (
-                      <Typography variant="body2" sx={{ fontSize: "0.82rem" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontSize: "0.82rem", fontWeight: 600 }}
+                      >
                         {Number(item.costoUnitario).toFixed(2)}
                       </Typography>
                     )}
                   </TableCell>
 
-                  {/* PRECIO UNITARIO */}
+                  {/* P/U — Precio Unitario */}
                   <TableCell align="center">
                     {isEditing ? (
                       <TextField
@@ -581,9 +630,9 @@ const PurchaseItemsTable = ({
                         inputProps={{
                           min: 0,
                           step: 0.01,
-                          style: { fontSize: "0.8rem", textAlign: "center" },
+                          style: { fontSize: "0.78rem", textAlign: "center" },
                         }}
-                        sx={{ width: 85 }}
+                        sx={{ width: 75 }}
                       />
                     ) : (
                       <Typography variant="body2" sx={{ fontSize: "0.82rem" }}>
@@ -592,7 +641,72 @@ const PurchaseItemsTable = ({
                     )}
                   </TableCell>
 
-                  {/* TOTAL */}
+                  {/* P/C — Precio Caja (auto = C/U × Cantidad, editable) */}
+                  <TableCell align="center">
+                    {isEditing ? (
+                      <Tooltip
+                        title="Valor manual. Si no se ingresa, se enviará 0."
+                        placement="top"
+                      >
+                        <TextField
+                          type="number"
+                          size="small"
+                          value={editValues.precioCaja ?? 0}
+                          onChange={(e) =>
+                            setEditValues((prev) => ({
+                              ...prev,
+                              precioCaja: e.target.value,
+                            }))
+                          }
+                          inputProps={{
+                            min: 0,
+                            step: 0.01,
+                            style: { fontSize: "0.78rem", textAlign: "center" },
+                          }}
+                          sx={{
+                            width: 80,
+                            "& .MuiOutlinedInput-root fieldset": {
+                              borderColor: farmaColors.primary,
+                              borderWidth: 2,
+                            },
+                          }}
+                        />
+                      </Tooltip>
+                    ) : (
+                      <Typography variant="body2" sx={{ fontSize: "0.82rem" }}>
+                        {Number(item.precioCaja).toFixed(2)}
+                      </Typography>
+                    )}
+                  </TableCell>
+
+                  {/* CANTIDAD */}
+                  <TableCell align="center">
+                    {isEditing ? (
+                      <TextField
+                        type="number"
+                        size="small"
+                        value={editValues.cantidad ?? 1}
+                        onChange={(e) =>
+                          handleEditChange("cantidad", e.target.value)
+                        }
+                        inputProps={{
+                          min: 1,
+                          step: 1,
+                          style: { fontSize: "0.78rem", textAlign: "center" },
+                        }}
+                        sx={{ width: 65 }}
+                      />
+                    ) : (
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                      >
+                        {item.cantidad}
+                      </Typography>
+                    )}
+                  </TableCell>
+
+                  {/* TOTAL = C/U × Cantidad */}
                   <TableCell align="right">
                     <Typography
                       variant="body1"
@@ -606,7 +720,7 @@ const PurchaseItemsTable = ({
                     </Typography>
                   </TableCell>
 
-                  {/* ACCIONES */}
+                  {/* OPCIONES */}
                   <TableCell align="center">
                     <Box
                       sx={{
@@ -649,56 +763,48 @@ const PurchaseItemsTable = ({
                           </Tooltip>
                         </>
                       ) : (
-                        <>
-                          {!isFinished && (
-                            <>
-                              <Tooltip title="Editar (A)">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleStartEdit(item)}
-                                  sx={{
-                                    bgcolor: "#4CAF50",
-                                    color: "white",
-                                    width: 26,
-                                    height: 26,
-                                    "&:hover": { bgcolor: "#388e3c" },
-                                  }}
+                        !isFinished && (
+                          <>
+                            <Tooltip title="Editar">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleStartEdit(item)}
+                                sx={{
+                                  bgcolor: "#4CAF50",
+                                  color: "white",
+                                  width: 26,
+                                  height: 26,
+                                  "&:hover": { bgcolor: "#388e3c" },
+                                }}
+                              >
+                                <Typography
+                                  sx={{ fontWeight: 700, fontSize: "0.72rem" }}
                                 >
-                                  <Typography
-                                    sx={{
-                                      fontWeight: 700,
-                                      fontSize: "0.72rem",
-                                    }}
-                                  >
-                                    A
-                                  </Typography>
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Eliminar (E)">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => onRemoveItem(item._id)}
-                                  sx={{
-                                    bgcolor: "#f44336",
-                                    color: "white",
-                                    width: 26,
-                                    height: 26,
-                                    "&:hover": { bgcolor: "#d32f2f" },
-                                  }}
+                                  A
+                                </Typography>
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Eliminar">
+                              <IconButton
+                                size="small"
+                                onClick={() => onRemoveItem(item._id)}
+                                sx={{
+                                  bgcolor: "#f44336",
+                                  color: "white",
+                                  width: 26,
+                                  height: 26,
+                                  "&:hover": { bgcolor: "#d32f2f" },
+                                }}
+                              >
+                                <Typography
+                                  sx={{ fontWeight: 700, fontSize: "0.72rem" }}
                                 >
-                                  <Typography
-                                    sx={{
-                                      fontWeight: 700,
-                                      fontSize: "0.72rem",
-                                    }}
-                                  >
-                                    E
-                                  </Typography>
-                                </IconButton>
-                              </Tooltip>
-                            </>
-                          )}
-                        </>
+                                  E
+                                </Typography>
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )
                       )}
                     </Box>
                   </TableCell>
@@ -709,7 +815,7 @@ const PurchaseItemsTable = ({
             {/* Estado vacío */}
             {items.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} sx={{ textAlign: "center", py: 6 }}>
+                <TableCell colSpan={11} sx={{ textAlign: "center", py: 6 }}>
                   <InventoryIcon
                     sx={{
                       fontSize: 40,
@@ -789,10 +895,7 @@ const PurchaseItemsTable = ({
                         width: "100%",
                       }}
                     >
-                      {/* Código */}
                       <CodigoProductoChip codigo={product.codigoProducto} />
-
-                      {/* Nombre + presentación */}
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Typography
                           variant="body2"
@@ -816,8 +919,6 @@ const PurchaseItemsTable = ({
                             : "---"}
                         </Typography>
                       </Box>
-
-                      {/* Stock */}
                       <Chip
                         label={`Stock: ${product.stockProducto ?? 0}`}
                         size="small"
@@ -834,8 +935,19 @@ const PurchaseItemsTable = ({
                           flexShrink: 0,
                         }}
                       />
-
-                      {/* Precio */}
+                      <Chip
+                        label={`C/U: ${Number(product.costoUnitario || 0).toFixed(2)}`}
+                        size="small"
+                        sx={{
+                          bgcolor: "#FF9800",
+                          color: "white",
+                          height: 24,
+                          fontSize: "0.72rem",
+                          fontWeight: 700,
+                          minWidth: 80,
+                          flexShrink: 0,
+                        }}
+                      />
                       <Chip
                         label={`P/U: ${Number(product.precioUnitario || 0).toFixed(2)}`}
                         size="small"
