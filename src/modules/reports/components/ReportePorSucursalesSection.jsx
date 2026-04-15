@@ -307,7 +307,11 @@ const ReportePorSucursalesSection = ({ compactMode = false }) => {
         }}
       >
         <TableContainer
-          sx={{ maxHeight: compactMode ? 420 : "calc(100vh - 320px)" }}
+          sx={{
+            flex: 1,
+            height: "100%",
+            maxHeight: "100%",
+          }}
         >
           <Table size="small" stickyHeader>
             <TableHead>

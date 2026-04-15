@@ -296,16 +296,6 @@ export const usePurchases = () => {
       prev.map((item) => {
         if (item._id !== id) return item;
         const updated = { ...item, [field]: value };
-        // Recalcular total
-        if (field === "cantidad" || field === "costoUnitario") {
-          const qty =
-            field === "cantidad" ? Number(value) : Number(item.cantidad);
-          const cost =
-            field === "costoUnitario"
-              ? Number(value)
-              : Number(item.costoUnitario);
-          updated.precioCaja = qty * cost;
-        }
         return updated;
       }),
     );
@@ -319,13 +309,20 @@ export const usePurchases = () => {
   // ── Calcular total ──
   const calculateTotal = useCallback(() => {
     return purchaseItems.reduce(
-      (sum, item) => sum + (Number(item.precioCaja) || 0),
+      (sum, item) =>
+        sum + (Number(item.cantidad) || 0) * (Number(item.costoUnitario) || 0),
       0,
     );
   }, [purchaseItems]);
 
   // ── Guardar productos (NO cambia viewState, usuario sigue en la misma pantalla) ──
   const handleSaveProducts = async () => {
+    if (createdPurchase?.estado === "ENV") {
+      enqueueSnackbar("La compra ya fue enviada y no puede modificarse", {
+        variant: "warning",
+      });
+      return;
+    }
     if (!createdPurchase?.comprobanteCompra_ID) return;
     if (purchaseItems.length === 0) {
       enqueueSnackbar("Debe añadir al menos un producto", {
@@ -357,6 +354,8 @@ export const usePurchases = () => {
           costoUnitario: Number(item.costoUnitario) || 0,
           precioUnitario: Number(item.precioUnitario) || 0,
           precioCaja: Number(item.precioCaja) || 0,
+          total:
+            (Number(item.cantidad) || 0) * (Number(item.costoUnitario) || 0),
         })),
       };
 
@@ -381,6 +380,10 @@ export const usePurchases = () => {
 
   // ── Guardar factura ──
   const handleSaveInvoice = async () => {
+    if (createdPurchase?.estado === "ENV") {
+      console.warn("Factura bloqueada por estado ENV");
+      return;
+    }
     if (!createdPurchase?.comprobanteCompra_ID) return;
     try {
       setLoading(true);
@@ -416,6 +419,10 @@ export const usePurchases = () => {
 
   // ── Terminar compra ──
   const handleTerminarCompra = async () => {
+    if (createdPurchase?.estado === "ENV") {
+      console.warn("Ya está enviada");
+      return false;
+    }
     if (!createdPurchase?.comprobanteCompra_ID) return false;
     try {
       setLoading(true);
@@ -488,6 +495,8 @@ export const usePurchases = () => {
             numeroCompra: data.numeroCompra,
             fecha: data.fechaCompra,
             descripcion: data.observaciones,
+            estado: data.estado,
+            puedeEditar: data.puedeEditar,
           });
           // Cargar sucursalId para que searchProducts funcione al editar
           setPurchaseData((prev) => ({
@@ -523,10 +532,10 @@ export const usePurchases = () => {
               fechaVencimiento: p.fechaVencimiento
                 ? p.fechaVencimiento.split("T")[0]
                 : "",
-              cantidad: p.stockProducto || 1,
+              cantidad: p.cantidad || 1,
               costoUnitario: p.costoUnitario || 0,
               precioUnitario: p.precioUnitario || 0,
-              precioCaja: (p.costoUnitario || 0) * (p.stockProducto || 1),
+              precioCaja: p.precioCaja || 0,
               codigo: p.codigoProducto || "",
               nombreGenerico: "",
               concentracion: "",

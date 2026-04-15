@@ -55,8 +55,18 @@ const StockDrawer = ({ open, onClose }) => {
       <Divider />
 
       {/* Contenido */}
-      <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
-        <ReportePorSucursalesSection compactMode />
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          p: 2,
+        }}
+      >
+        <Box sx={{ flex: 1, overflow: "auto" }}>
+          <ReportePorSucursalesSection compactMode />
+        </Box>
       </Box>
     </Drawer>
   );

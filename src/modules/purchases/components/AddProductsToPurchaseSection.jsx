@@ -68,6 +68,8 @@ const AddProductsToPurchaseSection = ({
 
   const total = calculateTotal ? calculateTotal() : 0;
 
+  const isReadOnly = isFinished || createdPurchase?.puedeEditar === false;
+
   const updateInvoiceField = (field, value) => {
     setInvoiceData((prev) => ({ ...prev, [field]: value }));
   };
@@ -114,7 +116,7 @@ const AddProductsToPurchaseSection = ({
                 <IconButton
                   size="small"
                   onClick={() => setViewState("creating")}
-                  disabled={isFinished}
+                  disabled={isReadOnly}
                 >
                   <ArrowBack fontSize="small" />
                 </IconButton>
@@ -220,7 +222,7 @@ const AddProductsToPurchaseSection = ({
               <Receipt sx={{ color: farmaColors.primary }} /> Datos de
               Facturación
             </Typography>
-            {!isFinished && (
+            {!isReadOnly && (
               <Tooltip title="Guardar Factura">
                 <IconButton
                   onClick={handleSaveInvoice}
@@ -253,7 +255,7 @@ const AddProductsToPurchaseSection = ({
                   updateInvoiceField("numeroFactura", e.target.value)
                 }
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <Receipt sx={{ color: "action.active", mr: 1 }} />
                   ),
@@ -270,7 +272,7 @@ const AddProductsToPurchaseSection = ({
                 onChange={(e) => updateInvoiceField("fecha", e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <CalendarToday sx={{ color: "action.active", mr: 1 }} />
                   ),
@@ -285,7 +287,7 @@ const AddProductsToPurchaseSection = ({
                 value={invoiceData.nit || ""}
                 onChange={(e) => updateInvoiceField("nit", e.target.value)}
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <Badge sx={{ color: "action.active", mr: 1 }} />
                   ),
@@ -302,7 +304,7 @@ const AddProductsToPurchaseSection = ({
                   updateInvoiceField("nombreProveedor", e.target.value)
                 }
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <Business sx={{ color: "action.active", mr: 1 }} />
                   ),
@@ -319,7 +321,7 @@ const AddProductsToPurchaseSection = ({
                   updateInvoiceField("numeroPedido", e.target.value)
                 }
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <ShoppingCart sx={{ color: "action.active", mr: 1 }} />
                   ),
@@ -344,7 +346,7 @@ const AddProductsToPurchaseSection = ({
                   )
                 }
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <Payments sx={{ color: "action.active", mr: 1 }} />
                   ),
@@ -369,7 +371,7 @@ const AddProductsToPurchaseSection = ({
                   )
                 }
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <Discount sx={{ color: "action.active", mr: 1 }} />
                   ),
@@ -394,7 +396,7 @@ const AddProductsToPurchaseSection = ({
                   )
                 }
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <Discount sx={{ color: "action.active", mr: 1 }} />
                   ),
@@ -419,7 +421,7 @@ const AddProductsToPurchaseSection = ({
                   )
                 }
                 InputProps={{
-                  readOnly: isFinished,
+                  readOnly: isReadOnly,
                   startAdornment: (
                     <MonetizationOn
                       sx={{ color: farmaColors.primary, mr: 1 }}
@@ -444,11 +446,11 @@ const AddProductsToPurchaseSection = ({
         isSearching={isSearching}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        isFinished={isFinished}
+        isFinished={isReadOnly}
       />
 
       {/* Total + botón guardar productos */}
-      {!isFinished && (
+      {!isReadOnly && (
         <Box
           sx={{
             display: "flex",
@@ -539,7 +541,7 @@ const AddProductsToPurchaseSection = ({
         </Box>
       )}
 
-      {isFinished && (
+      {isReadOnly && (
         <Box
           sx={{
             p: 3,
@@ -552,7 +554,9 @@ const AddProductsToPurchaseSection = ({
         >
           <CheckCircleOutline sx={{ fontSize: 48, color: "#4CAF50", mb: 1 }} />
           <Typography variant="h6" sx={{ fontWeight: 700, color: "#388e3c" }}>
-            ¡Compra finalizada correctamente!
+            {createdPurchase?.puedeEditar === false
+              ? "La compra ya fue enviada y no puede modificarse."
+              : "¡Compra finalizada correctamente!"}
           </Typography>
         </Box>
       )}
@@ -598,7 +602,10 @@ const AddProductsToPurchaseSection = ({
           </Button>
         </DialogActions>
       </Dialog>
-      <StockDrawer open={stockDrawerOpen} onClose={() => setStockDrawerOpen(false)} />
+      <StockDrawer
+        open={stockDrawerOpen}
+        onClose={() => setStockDrawerOpen(false)}
+      />
     </Box>
   );
 };

@@ -42,11 +42,16 @@ import purchaseService from "../services/purchaseService";
 import PageHeader from "../../../shared/components/PageHeader";
 import { useNavigate } from "react-router-dom";
 
-const ESTADO_OPTIONS = [
+/*const ESTADO_OPTIONS = [
   { value: "PEN", label: "Pendiente" },
   { value: "REC", label: "Recibido" },
   { value: "ENV", label: "Enviado" },
   { value: "CER", label: "Cerrado" },
+];*/
+
+const ESTADO_OPTIONS = [  
+  { value: "REC", label: "Recibido" },
+  { value: "ENV", label: "Enviado" },  
 ];
 
 const ESTADO_COLORS = {
