@@ -25,6 +25,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import reportesService from "../../../services/api/reportesService";
 import userService from "../../../services/api/userService";
+import ProductoBuscador from "../components/ProductoBuscador";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const fmt2 = (n) => (n ?? 0).toFixed(2);
@@ -70,12 +71,26 @@ export default function VentasDiariasPage() {
 
   const hoy = new Date().toISOString().split("T")[0];
 
+  const [sucursales, setSucursales] = useState([]);
+
   const [filtros, setFiltros] = useState({
     fechaInicio: hoy,
     fechaFinal: hoy,
+    codigoSucursal: 0,
     codigoUsuario: 0,
-    busquedaProducto: "", // campo unificado
+    producto: null, // campo unificado
   });
+
+  useEffect(() => {
+    cargarUsuarios();
+    cargarSucursales(); // <-- nuevo
+    handleBuscar();
+  }, []);
+
+  const cargarSucursales = async () => {
+    const res = await userService.getSucursales();
+    setSucursales(res ?? []);
+  };
 
   const [resumen, setResumen] = useState({
     totalVenta: 0,
@@ -83,11 +98,6 @@ export default function VentasDiariasPage() {
     totalDescuento: 0,
     utilidad: 0,
   });
-
-  useEffect(() => {
-    cargarUsuarios();
-    handleBuscar();
-  }, []);
 
   const cargarUsuarios = async () => {
     const res = await userService.getEmpleadosUsuarios();
@@ -110,17 +120,15 @@ export default function VentasDiariasPage() {
 
   const handleBuscar = async () => {
     setLoading(true);
-
-    const busqueda = filtros.busquedaProducto.trim();
     const payload = {
       fechaInicio: filtros.fechaInicio,
       fechaFinal: filtros.fechaFinal,
+      codigoSucursal: filtros.codigoSucursal || 0,
       codigoUsuario: filtros.codigoUsuario,
-      codigoProducto: CODIGO_RE.test(busqueda) ? busqueda.toUpperCase() : "",
-      nombreProducto: CODIGO_RE.test(busqueda) ? "" : busqueda,
+      codigoProducto: filtros.producto?.codigoProducto ?? "",
+      nombreProducto: filtros.producto?.nombreProducto ?? "",
     };
-
-    const res = await reportesService.getVentasDiarias(payload);
+    const res = await reportesService.getVentasDiarias(payload); // o getVentasMensuales
     setData(res);
     calcularResumen(res);
     setLoading(false);
@@ -175,7 +183,8 @@ export default function VentasDiariasPage() {
 
         <CardContent>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={2}>
+            {/* FILA 1 */}
+            <Grid item xs={12} sm={3}>
               <TextField
                 label="Fecha Inicio"
                 type="date"
@@ -189,7 +198,7 @@ export default function VentasDiariasPage() {
               />
             </Grid>
 
-            <Grid item xs={12} sm={2}>
+            <Grid item xs={12} sm={3}>
               <TextField
                 label="Fecha Final"
                 type="date"
@@ -201,6 +210,26 @@ export default function VentasDiariasPage() {
                   setFiltros({ ...filtros, fechaFinal: e.target.value })
                 }
               />
+            </Grid>
+
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Sucursal</InputLabel>
+                <Select
+                  value={filtros.codigoSucursal}
+                  label="Sucursal"
+                  onChange={(e) =>
+                    setFiltros({ ...filtros, codigoSucursal: e.target.value })
+                  }
+                >
+                  <MenuItem value={0}>Todas</MenuItem>
+                  {sucursales.map((s) => (
+                    <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
+                      {s.nombreSucursal}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={3}>
@@ -226,26 +255,17 @@ export default function VentasDiariasPage() {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={3}>
-              <Tooltip
-                title="Puedes buscar por nombre o código (ej: TER-0003)"
-                arrow
-              >
-                <TextField
-                  label="Producto (nombre o código)"
-                  size="small"
-                  fullWidth
-                  value={filtros.busquedaProducto}
-                  onChange={(e) =>
-                    setFiltros({ ...filtros, busquedaProducto: e.target.value })
-                  }
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ej: FORTICAM o COF-0155"
-                />
-              </Tooltip>
+            {/* FILA 2 */}
+            <Grid item xs={12} sm={8}>
+              <ProductoBuscador
+                codigoSucursal={filtros.codigoSucursal || 0}
+                value={filtros.producto}
+                onSelect={(p) => setFiltros({ ...filtros, producto: p })}
+                onClear={() => setFiltros({ ...filtros, producto: null })}
+              />
             </Grid>
 
-            <Grid item xs={12} sm={2}>
+            <Grid item xs={12} sm={4}>
               <Button
                 variant="contained"
                 fullWidth

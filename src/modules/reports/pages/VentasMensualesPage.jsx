@@ -25,6 +25,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import reportesService from "../../../services/api/reportesService";
 import userService from "../../../services/api/userService";
+import ProductoBuscador from "../components/ProductoBuscador";
 
 const fmt2 = (n) => (n ?? 0).toFixed(2);
 const fmtDate = (iso) => iso?.split("T")[0] ?? "";
@@ -66,6 +67,8 @@ export default function VentasMensualesPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [sucursales, setSucursales] = useState([]);
+
   const hoy = new Date().toISOString().split("T")[0];
   const primerDiaMes = new Date(
     new Date().getFullYear(),
@@ -78,8 +81,9 @@ export default function VentasMensualesPage() {
   const [filtros, setFiltros] = useState({
     fechaInicio: primerDiaMes,
     fechaFinal: hoy,
+    codigoSucursal: 0,
     codigoUsuario: 0,
-    busquedaProducto: "",
+    producto: null,
   });
 
   const [resumen, setResumen] = useState({
@@ -91,8 +95,14 @@ export default function VentasMensualesPage() {
 
   useEffect(() => {
     cargarUsuarios();
+    cargarSucursales(); // <-- nuevo
     handleBuscar();
   }, []);
+
+  const cargarSucursales = async () => {
+    const res = await userService.getSucursales();
+    setSucursales(res ?? []);
+  };
 
   const cargarUsuarios = async () => {
     const res = await userService.getEmpleadosUsuarios();
@@ -115,15 +125,15 @@ export default function VentasMensualesPage() {
 
   const handleBuscar = async () => {
     setLoading(true);
-    const busqueda = filtros.busquedaProducto.trim();
     const payload = {
       fechaInicio: filtros.fechaInicio,
       fechaFinal: filtros.fechaFinal,
+      codigoSucursal: filtros.codigoSucursal || 0,
       codigoUsuario: filtros.codigoUsuario,
-      codigoProducto: CODIGO_RE.test(busqueda) ? busqueda.toUpperCase() : "",
-      nombreProducto: CODIGO_RE.test(busqueda) ? "" : busqueda,
+      codigoProducto: filtros.producto?.codigoProducto ?? "",
+      nombreProducto: filtros.producto?.nombreProducto ?? "",
     };
-    const res = await reportesService.getVentasMensuales(payload);
+    const res = await reportesService.getVentasDiarias(payload); // o getVentasMensuales
     setData(res);
     calcularResumen(res);
     setLoading(false);
@@ -172,7 +182,8 @@ export default function VentasMensualesPage() {
         </Box>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={2}>
+            {/* FILA 1 */}
+            <Grid item xs={12} sm={3}>
               <TextField
                 label="Fecha Inicio"
                 type="date"
@@ -185,7 +196,8 @@ export default function VentasMensualesPage() {
                 }
               />
             </Grid>
-            <Grid item xs={12} sm={2}>
+
+            <Grid item xs={12} sm={3}>
               <TextField
                 label="Fecha Final"
                 type="date"
@@ -198,6 +210,27 @@ export default function VentasMensualesPage() {
                 }
               />
             </Grid>
+
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Sucursal</InputLabel>
+                <Select
+                  value={filtros.codigoSucursal}
+                  label="Sucursal"
+                  onChange={(e) =>
+                    setFiltros({ ...filtros, codigoSucursal: e.target.value })
+                  }
+                >
+                  <MenuItem value={0}>Todas</MenuItem>
+                  {sucursales.map((s) => (
+                    <MenuItem key={s.sucursal_ID} value={s.sucursal_ID}>
+                      {s.nombreSucursal}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
             <Grid item xs={12} sm={3}>
               <FormControl fullWidth size="small">
                 <InputLabel>Usuario</InputLabel>
@@ -220,25 +253,18 @@ export default function VentasMensualesPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={3}>
-              <Tooltip
-                title="Puedes buscar por nombre o código (ej: TER-0003)"
-                arrow
-              >
-                <TextField
-                  label="Producto (nombre o código)"
-                  size="small"
-                  fullWidth
-                  value={filtros.busquedaProducto}
-                  onChange={(e) =>
-                    setFiltros({ ...filtros, busquedaProducto: e.target.value })
-                  }
-                  onKeyDown={(e) => e.key === "Enter" && handleBuscar()}
-                  placeholder="Ej: FORTICAM o COF-0155"
-                />
-              </Tooltip>
+
+            {/* FILA 2 */}
+            <Grid item xs={12} sm={8}>
+              <ProductoBuscador
+                codigoSucursal={filtros.codigoSucursal || 0}
+                value={filtros.producto}
+                onSelect={(p) => setFiltros({ ...filtros, producto: p })}
+                onClear={() => setFiltros({ ...filtros, producto: null })}
+              />
             </Grid>
-            <Grid item xs={12} sm={2}>
+
+            <Grid item xs={12} sm={4}>
               <Button
                 variant="contained"
                 fullWidth
