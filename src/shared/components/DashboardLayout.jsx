@@ -105,8 +105,11 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
   };
 
   const handleMenuClick = (e, path, hasSubItems = false, menuIndex = null) => {
-    if (e.ctrlKey) {
-      window.open(path, "_blank");
+    const base = import.meta.env.BASE_URL || "/";
+
+    if (e.ctrlKey || e.button === 1) {
+      const fullPath = base + path.replace(/^\//, "");
+      window.open(fullPath, "_blank");
       return;
     }
 
