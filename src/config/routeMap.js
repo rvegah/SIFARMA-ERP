@@ -15,7 +15,6 @@ const ReportManagementPage = lazy(() => import("../modules/reports/pages/ReportM
 
 // Reportes con endpoint activo
 const VentasReportePage = lazy(() => import("../modules/reports/pages/VentasReportePage"));
-const DiarioReportePage = lazy(() => import("../modules/reports/pages/DiarioReportePage"));
 const StockNegativoPage = lazy(() => import("../modules/reports/pages/StockNegativoPage"));
 const MejorVentaPage = lazy(() => import("../modules/reports/pages/MejorVentaPage"));
 
@@ -25,6 +24,11 @@ const ReporteSucursalesPage = lazy(() => import("../modules/reports/pages/Report
 const ReporteVencimientosPage = lazy(() => import("../modules/reports/pages/ReporteVencimientosPage"));
 const ReporteKardexPage = lazy(() => import("../modules/reports/pages/ReporteKardexPage"));
 const ReportePedidosPage = lazy(() => import("../modules/reports/pages/ReportePedidosPage"));
+
+const VentasDiariasPage = lazy(() => import("../modules/reports/pages/VentasDiariasPage"));
+const VentasMensualesPage = lazy(() => import("../modules/reports/pages/VentasMensualesPage"));
+const VentasGeneralPage   = lazy(() => import("../modules/reports/pages/VentasGeneralPage"));
+
 
 export const routeMap = {
   "/dashboard": Dashboard,
@@ -38,8 +42,7 @@ export const routeMap = {
   "/configurar": CertificatePage,
 
   // Reportes con datos reales
-  "/reportes/ventas": VentasReportePage,
-  "/reportes/diario": DiarioReportePage,
+  "/reportes/ventas": VentasReportePage,  
   "/reportes/almacenes": StockNegativoPage,
   "/reportes/mejor-venta": MejorVentaPage,
 
@@ -52,4 +55,8 @@ export const routeMap = {
 
   // Fallback
   "/reportes": ReportManagementPage,
+
+  "/reportes/diario": VentasDiariasPage,
+  "/reportes/mensual":  VentasMensualesPage,
+  "/reportes/general":  VentasGeneralPage,
 };

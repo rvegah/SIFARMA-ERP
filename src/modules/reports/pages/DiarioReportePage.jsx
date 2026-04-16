@@ -35,7 +35,10 @@ function TablaCompras({ datos, loading }) {
       <Table size="small">
         <TableHead>
           <TableRow sx={{ bgcolor: '#27ae60' }}>
-            {['UID','Usuario','Tipo','Estado','Código','Producto','Fecha Ingreso','Hora Ingreso','Hora Acept.','Laboratorio','N° Factura','C/U','P/U','P/C','Stock Ant.','Cant.','Total'].map(h => (
+            {/*['UID','Usuario','Tipo','Estado','Código','Producto','Fecha Ingreso','Hora Ingreso','Hora Acept.','Laboratorio','N° Factura','C/U','P/U','P/C','Stock Ant.','Cant.','Total'].map(h => (
+              <TableCell key={h} sx={{ color: 'white', fontWeight: 700, fontSize: '0.73rem', whiteSpace: 'nowrap' }}>{h}</TableCell>
+            ))*/}
+            {['Usuario','Tipo','Estado','Código','Producto','Fecha Ingreso','Hora Ingreso','Hora Acept.','Laboratorio','N° Factura','C/U','P/U','P/C','Stock Ant.','Cant.','Total'].map(h => (
               <TableCell key={h} sx={{ color: 'white', fontWeight: 700, fontSize: '0.73rem', whiteSpace: 'nowrap' }}>{h}</TableCell>
             ))}
           </TableRow>
@@ -43,7 +46,7 @@ function TablaCompras({ datos, loading }) {
         <TableBody>
           {datos.map((r, i) => (
             <TableRow key={i} hover>
-              <TableCell sx={{ fontSize: '0.76rem' }}>{r.codigoCompra}</TableCell>
+              {/*<TableCell sx={{ fontSize: '0.76rem' }}>{r.codigoCompra}</TableCell>*/}
               <TableCell sx={{ fontSize: '0.76rem', whiteSpace: 'nowrap' }}>{r.nombreUsuario}</TableCell>
               <TableCell><Chip label={r.tipoIngreso} size="small" sx={{ bgcolor: '#3498db', color: 'white', fontSize: '0.68rem' }} /></TableCell>
               <TableCell><Chip label={r.estadoIngreso} size="small" sx={{ bgcolor: '#27ae60', color: 'white', fontSize: '0.68rem' }} /></TableCell>

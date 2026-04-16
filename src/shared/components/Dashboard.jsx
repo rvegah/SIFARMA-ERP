@@ -66,21 +66,21 @@ const TARJETAS_CONFIG = [
     titulo: "Compras del día",
     color: "#27ae60", // verde
     icono: ShoppingCart,
-    ruta: "/reportes/diario",
+    ruta: "/reportes/operativo",
   },
   {
     key: "traspasos",
     titulo: "Traspasos del día",
     color: "#e67e22", // naranja
     icono: SwapHoriz,
-    ruta: "/reportes/diario", // ANTES: '/traspasos'
+    ruta: "/reportes/operativo", // ANTES: '/traspasos'
   },
   {
     key: "credito",
     titulo: "Compras a crédito por pagar",
     color: "#e74c3c", // rojo
     icono: CreditCard,
-    ruta: "/reportes/diario",
+    ruta: "/reportes/operativo",
   },
   {
     key: "stockNegativo",
@@ -101,7 +101,7 @@ const TARJETAS_CONFIG = [
     titulo: "Traspasos no aceptados",
     color: "#2c3e50", // azul muy oscuro
     icono: Block,
-    ruta: "/reportes/diario", // ANTES: '/traspasos'
+    ruta: "/reportes/operativo", // ANTES: '/traspasos'
   },
 ];
 

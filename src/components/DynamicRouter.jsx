@@ -46,6 +46,20 @@ const ReportePedidosPage = lazy(
   () => import("../modules/reports/pages/ReportePedidosPage"),
 );
 
+/*PARA LOS REPORTES DIARIOS MENSUALES Y GENERAL DIRECTO AL ROL*/
+const VentasDiariasPage = lazy(
+  () => import("../modules/reports/pages/VentasDiariasPage")
+);
+
+const VentasMensualesPage = lazy(
+  () => import("../modules/reports/pages/VentasMensualesPage")
+);
+const VentasGeneralPage = lazy(
+  () => import("../modules/reports/pages/VentasGeneralPage")
+);
+
+
+
 // Rutas exactas (sin /*)
 const EXACT_ROUTES = new Set([
   "/dashboard",
@@ -58,6 +72,9 @@ const EXACT_ROUTES = new Set([
   "/reportes/vencidos",
   "/reportes/kardex",
   "/reportes/pedidos",
+  "/reportes/diarios",
+  "/reportes/mensual",
+  "/reportes/general",
 ]);
 
 export default function DynamicRouter({ apiPermissions }) {
@@ -94,7 +111,7 @@ export default function DynamicRouter({ apiPermissions }) {
 
         {/* Reportes con datos reales */}
         <Route path="/reportes/ventas" element={<VentasReportePage />} />
-        <Route path="/reportes/diario" element={<DiarioReportePage />} />
+        <Route path="/reportes/operativo" element={<DiarioReportePage />} />
         <Route path="/reportes/almacenes" element={<StockNegativoPage />} />
         <Route path="/reportes/mejor-venta" element={<MejorVentaPage />} />
 
@@ -126,10 +143,15 @@ export default function DynamicRouter({ apiPermissions }) {
           element={<NotificationDetailPage />}
         />
 
+        {/* Ruta para ventas diarias */}
+        <Route path="/reportes/diario" element={<VentasDiariasPage />} />
+        <Route path="/reportes/mensual" element={<VentasMensualesPage />} />
+        <Route path="/reportes/general" element={<VentasGeneralPage />} />
+
         {/* Fallback reportes */}
         <Route path="/reportes/*" element={<ReportManagementPage />} />
         <Route path="/reporte/*" element={<ReportManagementPage />} />
-
+        
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Suspense>

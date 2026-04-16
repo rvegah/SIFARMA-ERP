@@ -284,6 +284,57 @@ const reportesService = {
       return [];
     }
   },
+
+  async getVentasDiarias(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/VentasDiarias", {
+        params: {
+          CodigoSucursal: getCodigoSucursal(),
+          CodigoUsuario: filtros.codigoUsuario ?? 0,
+          FechaInicio: filtros.fechaInicio,
+          FechaFinal: filtros.fechaFinal,
+          CodigoProducto: filtros.codigoProducto ?? "",
+          NombreProducto: filtros.nombreProducto ?? "",
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
+
+  async getVentasMensuales(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/VentasMensuales", {
+        params: {
+          CodigoSucursal: getCodigoSucursal(),
+          CodigoUsuario: filtros.codigoUsuario ?? 0,
+          FechaInicio: filtros.fechaInicio,
+          FechaFinal: filtros.fechaFinal,
+          CodigoProducto: filtros.codigoProducto ?? "",
+          NombreProducto: filtros.nombreProducto ?? "",
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
+
+  async getVentasGeneral(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/VentaGeneral", {
+        params: {
+          CodigoSucursal: getCodigoSucursal(),
+          FechaInicio: filtros.fechaInicio,
+          FechaFinal: filtros.fechaFinal,
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
 };
 
 export default reportesService;
