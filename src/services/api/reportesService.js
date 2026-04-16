@@ -289,7 +289,7 @@ const reportesService = {
     try {
       const res = await pharmacyApiClient.get("/Reportes/VentasDiarias", {
         params: {
-          CodigoSucursal: getCodigoSucursal(),
+          CodigoSucursal: filtros.codigoSucursal || getCodigoSucursal(),
           CodigoUsuario: filtros.codigoUsuario ?? 0,
           FechaInicio: filtros.fechaInicio,
           FechaFinal: filtros.fechaFinal,
@@ -307,7 +307,7 @@ const reportesService = {
     try {
       const res = await pharmacyApiClient.get("/Reportes/VentasMensuales", {
         params: {
-          CodigoSucursal: getCodigoSucursal(),
+          CodigoSucursal: filtros.codigoSucursal || getCodigoSucursal(),
           CodigoUsuario: filtros.codigoUsuario ?? 0,
           FechaInicio: filtros.fechaInicio,
           FechaFinal: filtros.fechaFinal,
@@ -332,6 +332,25 @@ const reportesService = {
       });
       return res.data?.datos ?? [];
     } catch {
+      return [];
+    }
+  },
+
+  async buscarProductos(query, codigoSucursal, signal) {
+    try {
+      const esCodigo = /^[A-Z]{2,4}-\d{3,6}$/i.test(query.trim());
+      const res = await pharmacyApiClient.get("/Productos/Buscar", {
+        params: {
+          CodigoSucursal: codigoSucursal || getCodigoSucursal(),
+          ...(esCodigo
+            ? { CodigoProducto: query.trim().toUpperCase() }
+            : { Producto: query.trim() }),
+        },
+        signal,
+      });
+      return res.data?.datos ?? [];
+    } catch (err) {
+      if (err?.name === "AbortError" || err?.code === "ERR_CANCELED") return [];
       return [];
     }
   },
