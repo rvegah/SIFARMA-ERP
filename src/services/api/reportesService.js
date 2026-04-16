@@ -108,14 +108,13 @@ const reportesService = {
     }
   },
 
-  async getGraficoProductosMasVendidos(numeroMes) {
+  async getGraficoProductosMasVendidos() {
     try {
       const res = await pharmacyApiClient.get(
         "/Reportes/GraficoProductosMasVendidos",
         {
           params: {
             CodigoSucursal: getCodigoSucursal(),
-            NumeroMesVenta: numeroMes ?? new Date().getMonth() + 1,
           },
         },
       );

@@ -51,21 +51,6 @@ import { Assessment } from "@mui/icons-material";
 
 // ─── CONSTANTES ───────────────────────────────────────────────────────────────
 
-const MESES = [
-  { value: 1, label: "Enero" },
-  { value: 2, label: "Febrero" },
-  { value: 3, label: "Marzo" },
-  { value: 4, label: "Abril" },
-  { value: 5, label: "Mayo" },
-  { value: 6, label: "Junio" },
-  { value: 7, label: "Julio" },
-  { value: 8, label: "Agosto" },
-  { value: 9, label: "Septiembre" },
-  { value: 10, label: "Octubre" },
-  { value: 11, label: "Noviembre" },
-  { value: 12, label: "Diciembre" },
-];
-
 // Configuración de las 7 tarjetas del dashboard
 // color, icono, label, fetchKey, ruta destino al hacer click en "Más info"
 const TARJETAS_CONFIG = [
@@ -228,7 +213,6 @@ export default function Dashboard() {
   const [loadingCards, setLoadingCards] = useState(true);
 
   // Estado para el gráfico
-  const [mesGrafico, setMesGrafico] = useState(new Date().getMonth() + 1);
   const [datosGrafico, setDatosGrafico] = useState([]);
   const [loadingGrafico, setLoadingGrafico] = useState(false);
 
@@ -271,11 +255,10 @@ export default function Dashboard() {
   }, []);
 
   // ── Carga del gráfico ──────────────────────────────────────────────────────
-  const cargarGrafico = useCallback(async (mes) => {
+  const cargarGrafico = useCallback(async () => {
     setLoadingGrafico(true);
     try {
-      const datos = await reportesService.getGraficoProductosMasVendidos(mes);
-      // Tomar los primeros 15 para no saturar el gráfico
+      const datos = await reportesService.getGraficoProductosMasVendidos();
       setDatosGrafico(datos.slice(0, 15));
     } catch (err) {
       console.error("❌ Error cargando gráfico:", err);
@@ -288,13 +271,8 @@ export default function Dashboard() {
   // Carga inicial
   useEffect(() => {
     cargarTarjetas();
-    cargarGrafico(mesGrafico);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Recarga cuando cambia el mes del gráfico
-  useEffect(() => {
-    cargarGrafico(mesGrafico);
-  }, [mesGrafico, cargarGrafico]);
+    cargarGrafico();
+  }, []);
 
   const handleMasInfo = (ruta) => {
     navigate(ruta);
@@ -398,23 +376,7 @@ export default function Dashboard() {
               </Typography>
             </Box>
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              {/* Selector de mes */}
-              <FormControl size="small" sx={{ minWidth: 130 }}>
-                <InputLabel>Mes</InputLabel>
-                <Select
-                  value={mesGrafico}
-                  label="Mes"
-                  onChange={(e) => setMesGrafico(e.target.value)}
-                >
-                  {MESES.map((m) => (
-                    <MenuItem key={m.value} value={m.value}>
-                      {m.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>              
               {/* Link a la página completa */}
               <Link
                 component="button"
@@ -455,7 +417,7 @@ export default function Dashboard() {
               }}
             >
               <Typography color="text.secondary">
-                No hay datos para el mes seleccionado
+                No hay datos disponibles
               </Typography>
             </Box>
           ) : (
