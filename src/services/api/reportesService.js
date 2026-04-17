@@ -461,6 +461,26 @@ const reportesService = {
       return [];
     }
   },
+
+  async getStockAlmacenSucursal(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get(
+        "/Reportes/StockAlmacenSucursal",
+        {
+          params: {
+            CodigoSucursal: filtros.codigoSucursal,
+            Linea_ID: filtros.lineaId,
+            CodigoProducto: filtros.codigoProducto ?? "",
+            NombreProducto: filtros.nombreProducto ?? "",
+            Laboratorio_ID: filtros.laboratorioId ?? "",
+          },
+        },
+      );
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
 };
 
 export default reportesService;
