@@ -424,6 +424,43 @@ const reportesService = {
       return [];
     }
   },
+
+  async getProductosMasVendidos(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get(
+        "/Reportes/ProductosMasVendidos",
+        {
+          params: {
+            CodigoSucursal: filtros.codigoSucursal,
+            FechaInicio: filtros.fechaInicio,
+            FechaFinal: filtros.fechaFinal,
+            CodigoProducto: filtros.codigoProducto ?? "",
+            NombreProducto: filtros.nombreProducto ?? "",
+          },
+        },
+      );
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
+
+  async getPedidosSucursal(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/PedidosSucursal", {
+        params: {
+          CodigoSucursal: filtros.codigoSucursal,
+          FechaInicio: filtros.fechaInicio,
+          FechaFinal: filtros.fechaFinal,
+          CodigoProducto: filtros.codigoProducto ?? "",
+          NombreProducto: filtros.nombreProducto ?? "",
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
 };
 
 export default reportesService;
