@@ -58,7 +58,9 @@ const VentasGeneralPage = lazy(
   () => import("../modules/reports/pages/VentasGeneralPage")
 );
 
-
+const HistorialVentasPage = lazy(
+  () => import("../modules/reports/pages/HistorialVentasPage")
+);
 
 // Rutas exactas (sin /*)
 const EXACT_ROUTES = new Set([
@@ -75,6 +77,7 @@ const EXACT_ROUTES = new Set([
   "/reportes/diarios",
   "/reportes/mensual",
   "/reportes/general",
+  "/reportes/historial",
 ]);
 
 export default function DynamicRouter({ apiPermissions }) {
@@ -147,10 +150,12 @@ export default function DynamicRouter({ apiPermissions }) {
         <Route path="/reportes/diario" element={<VentasDiariasPage />} />
         <Route path="/reportes/mensual" element={<VentasMensualesPage />} />
         <Route path="/reportes/general" element={<VentasGeneralPage />} />
+        <Route path="/reportes/historial" element={<HistorialVentasPage />} />
 
         {/* Fallback reportes */}
         <Route path="/reportes/*" element={<ReportManagementPage />} />
         <Route path="/reporte/*" element={<ReportManagementPage />} />
+        
         
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

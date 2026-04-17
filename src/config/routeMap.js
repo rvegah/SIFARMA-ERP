@@ -29,6 +29,7 @@ const VentasDiariasPage = lazy(() => import("../modules/reports/pages/VentasDiar
 const VentasMensualesPage = lazy(() => import("../modules/reports/pages/VentasMensualesPage"));
 const VentasGeneralPage   = lazy(() => import("../modules/reports/pages/VentasGeneralPage"));
 
+const HistorialVentasPage = lazy(() => import("../modules/reports/pages/HistorialVentasPage"));
 
 export const routeMap = {
   "/dashboard": Dashboard,
@@ -59,4 +60,5 @@ export const routeMap = {
   "/reportes/diario": VentasDiariasPage,
   "/reportes/mensual":  VentasMensualesPage,
   "/reportes/general":  VentasGeneralPage,
+  "/reportes/historial": HistorialVentasPage,
 };
