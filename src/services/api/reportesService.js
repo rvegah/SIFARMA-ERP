@@ -391,6 +391,23 @@ const reportesService = {
       return [];
     }
   },
+
+  async getHistorialVentas(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/HistorialVentas", {
+        params: {
+          CodigoSucursal: filtros.codigoSucursal,
+          CodigoUsuario: filtros.codigoUsuario,
+          Fecha: filtros.fecha,
+          CodigoProducto: filtros.codigoProducto ?? "",
+          NombreProducto: filtros.nombreProducto ?? "",
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
 };
 
 export default reportesService;
