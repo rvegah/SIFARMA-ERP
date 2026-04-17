@@ -354,6 +354,43 @@ const reportesService = {
       return [];
     }
   },
+
+  async getListaProductos(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/ListaProductos", {
+        params: {
+          CodigoSucursal: filtros.codigoSucursal,
+          Linea_ID: filtros.lineaId,
+          CodigoProducto: filtros.codigoProducto ?? "",
+          NombrePoducto: filtros.nombreProducto ?? "", // typo intencional del API
+          Laboratorio_ID: filtros.laboratorioId ?? "",
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
+
+  async getLineasProductos() {
+    try {
+      const res = await pharmacyApiClient.get("/Productos/LineaProductos");
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
+
+  async getLaboratoriosPorLinea(codigoLinea) {
+    try {
+      const res = await pharmacyApiClient.get("/Productos/Laboratorios", {
+        params: { CodigoLineaProducto: codigoLinea },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
 };
 
 export default reportesService;

@@ -125,7 +125,7 @@ const MyOrdersSection = () => {
       }
     } catch (error) {
       console.error(error);
-      enqueueSnackbar("Error de conexión al buscar pedidos", {
+      enqueueSnackbar("Lista de pedidos no encontrado", {
         variant: "error",
       });
     } finally {
