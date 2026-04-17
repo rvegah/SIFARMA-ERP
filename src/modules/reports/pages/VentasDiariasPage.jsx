@@ -440,13 +440,13 @@ export default function VentasDiariasPage() {
                           fontFamily: "monospace",
                           color: "#CC6C06",
                           fontWeight: 600,
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {row.codigoProducto}
                       </TableCell>
                       <TableCell
-                        sx={{
-                          whiteSpace: "nowrap",
+                        sx={{                          
                           fontSize: "0.78rem",
                           maxWidth: 220,
                         }}
@@ -456,8 +456,7 @@ export default function VentasDiariasPage() {
                       <TableCell
                         sx={{
                           fontSize: "0.72rem",
-                          color: "text.secondary",
-                          whiteSpace: "nowrap",
+                          color: "text.secondary",                          
                         }}
                       >
                         {row.descripcion}

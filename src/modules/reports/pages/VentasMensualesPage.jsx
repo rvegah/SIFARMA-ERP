@@ -436,20 +436,20 @@ export default function VentasMensualesPage() {
                           fontFamily: "monospace",
                           color: "#CC6C06",
                           fontWeight: 600,
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {row.codigoProducto}
                       </TableCell>
                       <TableCell
-                        sx={{ whiteSpace: "nowrap", fontSize: "0.78rem" }}
+                        sx={{fontSize: "0.78rem" }}
                       >
                         {row.nombreProducto}
                       </TableCell>
                       <TableCell
                         sx={{
                           fontSize: "0.72rem",
-                          color: "text.secondary",
-                          whiteSpace: "nowrap",
+                          color: "text.secondary",                          
                         }}
                       >
                         {row.descripcion}

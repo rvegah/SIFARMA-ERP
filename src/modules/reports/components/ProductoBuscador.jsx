@@ -35,12 +35,19 @@ export default function ProductoBuscador({
   const abortRef = useRef(null);
   const timerRef = useRef(null);
 
+  const mostrarRef = useRef(false);
+
   // Actualizar posición del portal
   const updatePos = useCallback(() => {
     if (!inputRef.current) return;
     const rect = inputRef.current.getBoundingClientRect();
     setPortalPos({ top: rect.bottom + 2, left: rect.left, width: rect.width });
   }, []);
+
+  const setMostrarSync = (val) => {
+    mostrarRef.current = val;
+    setMostrar(val);
+  };
 
   useEffect(() => {
     if (mostrar) {
@@ -56,9 +63,9 @@ export default function ProductoBuscador({
 
   // Debounce + búsqueda
   useEffect(() => {
-    if (query.length < 2) {
+    if (query.length < 4) {
       setResultados([]);
-      setMostrar(false);
+      setMostrarSync(false);
       return;
     }
 
@@ -76,7 +83,7 @@ export default function ProductoBuscador({
       );
       setBuscando(false);
       setResultados(res);
-      setMostrar(res.length > 0);
+      setMostrarSync(res.length > 0);
       setSelectedIdx(0);
     }, 350);
 
@@ -85,7 +92,7 @@ export default function ProductoBuscador({
 
   // Teclado
   const handleKeyDown = (e) => {
-    if (!mostrar) return;
+    if (!mostrarRef.current) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIdx((p) => Math.min(p + 1, resultados.length - 1));
@@ -96,14 +103,14 @@ export default function ProductoBuscador({
       e.preventDefault();
       if (resultados[selectedIdx]) seleccionar(resultados[selectedIdx]);
     } else if (e.key === "Escape") {
-      setMostrar(false);
+      setMostrarSync(false);
     }
   };
 
   const seleccionar = (producto) => {
-    setQuery(producto.producto);
-    setMostrar(false);
+    setMostrarSync(false);
     setResultados([]);
+    setQuery("");
     onSelect({
       codigoProducto: producto.codigoProducto,
       nombreProducto: producto.producto,
@@ -113,7 +120,7 @@ export default function ProductoBuscador({
   const limpiar = () => {
     setQuery("");
     setResultados([]);
-    setMostrar(false);
+    setMostrarSync(false);
     onClear();
   };
 
@@ -127,8 +134,14 @@ export default function ProductoBuscador({
           value ? `${value.codigoProducto} — ${value.nombreProducto}` : query
         }
         onChange={(e) => {
-          if (value) onClear();
-          setQuery(e.target.value);
+          if (value) {
+            onClear();
+            setQuery("");
+            setResultados([]);
+            setMostrarSync(false);
+          } else {
+            setQuery(e.target.value);
+          }
         }}
         onKeyDown={handleKeyDown}
         inputRef={inputRef}
