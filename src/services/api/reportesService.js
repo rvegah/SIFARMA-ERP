@@ -408,6 +408,22 @@ const reportesService = {
       return [];
     }
   },
+
+  async getProductosVencidos(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/ProductosVencidos", {
+        params: {
+          CodigoSucursal: filtros.codigoSucursal,
+          FechaInicio: filtros.fechaInicio,
+          FechaFinal: filtros.fechaFinal,
+          Linea_ID: filtros.lineaId,
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
 };
 
 export default reportesService;
