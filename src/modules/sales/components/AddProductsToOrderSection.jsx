@@ -200,7 +200,7 @@ const AddProductsToOrderSection = ({
     setSearchQuery(value);
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-    if (value.length < 2) {
+    if (value.length < 4) {
       setShowSuggestions(false);
       return;
     }
