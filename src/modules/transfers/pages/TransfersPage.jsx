@@ -1,90 +1,110 @@
 // src/modules/transfers/pages/TransfersPage.jsx
-import React from "react";
-import { Container, Box, Typography, Breadcrumbs, Link } from "@mui/material";
+import React, { useEffect } from "react";
+import { Routes, Route, useParams } from "react-router-dom";
+import { Container, Box } from "@mui/material";
+import { SwapHoriz } from "@mui/icons-material";
+
 import { useTransfers } from "../hooks/useTransfers";
 import CreateTransferSection from "../components/CreateTransferSection";
 import AddProductsToTransferSection from "../components/AddProductsToTransferSection";
-import { NavigateNext, SwapHoriz } from "@mui/icons-material";
-import { farmaColors } from "../../../app/theme";
+import MyTransfersSection from "../components/MyTransfersSection";
 import PageHeader from "../../../shared/components/PageHeader";
 
-import { Routes, Route, Navigate } from "react-router-dom";
-
+// ─── Crear / Editar Traspaso ──────────────────────────────────────────────────
 const TransfersDispatcher = () => {
-    const transferHook = useTransfers();
-    const { viewState } = transferHook;
+  const { numeroTraspaso } = useParams();
 
-    return (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-            {/* Header & Breadcrumbs */}
-            <Box sx={{ mb: 4 }}>
-                <PageHeader
-                    title="Módulo de Traspasos"
-                    // subtitle="Gestión de movimiento de mercadería entre sucursales."
-                    icon={<SwapHoriz />}
-                />
-                {/* <Breadcrumbs separator={<NavigateNext fontSize="small" />} aria-label="breadcrumb">
-                    <Link underline="hover" color="inherit" href="#">
-                        Inventario
-                    </Link>
-                    <Typography color="text.primary" sx={{ fontWeight: 600 }}>
-                        {viewState === "creating" ? "Nuevo Traspaso" : "Añadir Productos"}
-                    </Typography>
-                </Breadcrumbs> */}
-            </Box>
+  const {
+    viewState,
+    setViewState,
+    loading,
+    loadingCatalogs,
+    loadingSearch,
+    transferData,
+    setTransferData,
+    createdTransfer,
+    transferItems,
+    isReadOnly,
+    catalogs,
+    handleCreateTransfer,
+    loadTraspasoDetalle,
+    searchResults,
+    searchProductsByText,
+    addTransferItem,
+    updateTransferItem,
+    removeTransferItem,
+    handleConfirmSave,
+    handleTerminarTraspaso,
+    purchaseList,
+    selectedPurchase,
+    purchaseProducts,
+    loadingPurchases,
+    loadingPurchaseProducts,
+    fetchPurchases,
+    fetchPurchaseProducts,
+    copyProductsFromPurchase,
+  } = useTransfers();
 
-            {/* Dynamic Content */}
-            <Box>
-                {viewState === "creating" ? (
-                    <CreateTransferSection
-                        transferData={transferHook.transferData}
-                        setTransferData={transferHook.setTransferData}
-                        onCreate={transferHook.handleCreateTransfer}
-                        catalogs={transferHook.catalogs}
-                        loading={transferHook.loading}
-                        loadingCatalogs={transferHook.loadingCatalogs}
-                    />
-                ) : (
-                    <AddProductsToTransferSection
-                        createdTransfer={transferHook.createdTransfer}
-                        transferItems={transferHook.transferItems}
-                        isReadOnly={transferHook.isReadOnly}
-                        loading={transferHook.loading}
-                        loadingSearch={transferHook.loadingSearch}
-                        searchFilters={transferHook.searchFilters}
-                        setSearchFilters={transferHook.setSearchFilters}
-                        searchResults={transferHook.searchResults}
-                        searchProducts={transferHook.searchProducts}
-                        addTransferItem={transferHook.addTransferItem}
-                        updateTransferItem={transferHook.updateTransferItem}
-                        removeTransferItem={transferHook.removeTransferItem}
-                        handleConfirmSave={transferHook.handleConfirmSave}
-                        setViewState={transferHook.setViewState}
-                        catalogs={transferHook.catalogs}
-                        // Purchase Copying props
-                        purchaseList={transferHook.purchaseList}
-                        selectedPurchase={transferHook.selectedPurchase}
-                        purchaseProducts={transferHook.purchaseProducts}
-                        loadingPurchases={transferHook.loadingPurchases}
-                        loadingPurchaseProducts={transferHook.loadingPurchaseProducts}
-                        fetchPurchases={transferHook.fetchPurchases}
-                        fetchPurchaseProducts={transferHook.fetchPurchaseProducts}
-                        copyProductsFromPurchase={transferHook.copyProductsFromPurchase}
-                    />
-                )}
-            </Box>
-        </Container>
-    );
+  useEffect(() => {
+    if (numeroTraspaso) {
+      loadTraspasoDetalle(numeroTraspaso);
+    }
+  }, [numeroTraspaso]);
+
+  return (
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <PageHeader title="Módulo de Traspasos" icon={<SwapHoriz />} />
+      </Box>
+      <Box>
+        {viewState === "creating" && (
+          <CreateTransferSection
+            transferData={transferData}
+            setTransferData={setTransferData}
+            onCreate={handleCreateTransfer}
+            catalogs={catalogs}
+            loading={loading}
+            loadingCatalogs={loadingCatalogs}
+          />
+        )}
+        {viewState === "adding_products" && (
+          <AddProductsToTransferSection
+            createdTransfer={createdTransfer}
+            transferItems={transferItems}
+            isReadOnly={isReadOnly}
+            loading={loading}
+            loadingSearch={loadingSearch}
+            searchResults={searchResults}
+            searchProductsByText={searchProductsByText}
+            addTransferItem={addTransferItem}
+            updateTransferItem={updateTransferItem}
+            removeTransferItem={removeTransferItem}
+            handleConfirmSave={handleConfirmSave}
+            handleTerminarTraspaso={handleTerminarTraspaso}
+            setViewState={setViewState}
+            catalogs={catalogs}
+            purchaseList={purchaseList}
+            selectedPurchase={selectedPurchase}
+            purchaseProducts={purchaseProducts}
+            loadingPurchases={loadingPurchases}
+            loadingPurchaseProducts={loadingPurchaseProducts}
+            fetchPurchases={fetchPurchases}
+            fetchPurchaseProducts={fetchPurchaseProducts}
+            copyProductsFromPurchase={copyProductsFromPurchase}
+          />
+        )}
+      </Box>
+    </Container>
+  );
 };
 
-const TransfersPage = () => {
-    return (
-        <Routes>
-            {/* <Route index element={<Navigate to="nuevo-traspaso" replace />} /> */}
-            <Route path="nuevo" element={<TransfersDispatcher />} />
-            {/* <Route path="*" element={<Navigate to="nuevo-traspaso" replace />} /> */}
-        </Routes>
-    );
-};
+// ─── Router ───────────────────────────────────────────────────────────────────
+const TransfersPage = () => (
+  <Routes>
+    <Route path="nuevo" element={<TransfersDispatcher />} />
+    <Route path="nuevo/:numeroTraspaso" element={<TransfersDispatcher />} />
+    <Route path="mis-traspasos" element={<MyTransfersSection />} />
+  </Routes>
+);
 
 export default TransfersPage;
