@@ -39,10 +39,34 @@ const NotificationPanel = ({
   const { notifications, fetchNotifications, loading } = useNotifications();
 
   useEffect(() => {
-    if (open && user?.codigoSucursal_ID) {
-      fetchNotifications(user.codigoSucursal_ID);
-    }
-  }, [open]);
+    if (!open || !user?.codigoSucursal_ID) return;
+
+    fetchNotifications(user.codigoSucursal_ID);
+
+    const interval = setInterval(() => {
+      fetchNotifications(user.codigoSucursal_ID, true);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [open, user?.codigoSucursal_ID, fetchNotifications]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    onUnreadCountChange(notifications.length || 0);
+  }, [notifications, open]);
+
+  useEffect(() => {
+    const handler = () => {
+      if (user?.codigoSucursal_ID) {
+        fetchNotifications(user.codigoSucursal_ID, true);
+      }
+    };
+
+    window.addEventListener("notifications:update", handler);
+
+    return () => window.removeEventListener("notifications:update", handler);
+  }, [user?.codigoSucursal_ID, fetchNotifications]);
 
   const handleViewAll = (e) => {
     e.preventDefault();

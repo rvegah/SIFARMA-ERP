@@ -52,7 +52,7 @@ export const useTransfers = () => {
   }, [enqueueSnackbar]);
 
   const handleCreateTransfer = async () => {
-    if (      
+    if (
       !transferData.codigoSucursalOrigen ||
       !transferData.codigoSucursalDestino ||
       !transferData.fechaEnvio
@@ -347,6 +347,10 @@ export const useTransfers = () => {
         enqueueSnackbar("Traspaso enviado y finalizado correctamente", {
           variant: "success",
         });
+
+        // 🔥 ESTA ES LA LINEA QUE TE FALTABA
+        window.dispatchEvent(new Event("notifications:update"));
+
         setIsReadOnly(true);
       } else {
         enqueueSnackbar(resCambiar.mensaje || "Error al terminar el traspaso", {

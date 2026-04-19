@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
@@ -41,6 +41,8 @@ import {
 import { farmaColors } from "../../app/theme";
 import { getFilteredMenuItems } from "../../config/menuBuilder";
 import NotificationPanel from "./NotificationPanel";
+import { useNotifications } from "../../modules/notifications/hooks/useNotifications";
+import { useAuth } from "../../context/AuthContext";
 
 const drawerWidth = 280;
 const collapsedDrawerWidth = 60;
@@ -57,6 +59,9 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { user } = useAuth();
+  const { notifications, fetchNotifications } = useNotifications();
 
   // Obtener menú filtrado según permisos del usuario
   const elementosMenu = useMemo(() => {
@@ -151,8 +156,32 @@ function DashboardLayout({ children, onLogout, currentUser, userPermissions }) {
 
   const toggleNotifications = (event) => {
     event.stopPropagation();
-    setShowNotifications(!showNotifications);
+
+    const next = !showNotifications;
+    setShowNotifications(next);
+
+    if (next) {
+      setUnreadNotificationsCount(0); // 👈 limpia badge
+    }
   };
+
+  useEffect(() => {
+    if (!user?.codigoSucursal_ID) return;
+
+    // Primera carga
+    fetchNotifications(user.codigoSucursal_ID);
+
+    // 🔥 polling liviano SOLO para badge
+    const interval = setInterval(() => {
+      fetchNotifications(user.codigoSucursal_ID, true);
+    }, 60000); // cada 60s (seguro para producción)
+
+    return () => clearInterval(interval);
+  }, [user?.codigoSucursal_ID, fetchNotifications]);
+
+  useEffect(() => {
+    setUnreadNotificationsCount(notifications.length || 0);
+  }, [notifications]);
 
   // Cierra notificaciones al hacer clic en cualquier parte del layout
   const handleLayoutClick = () => {
