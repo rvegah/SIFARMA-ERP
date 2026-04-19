@@ -102,7 +102,9 @@ export const useOrders = () => {
         codigoSucursal: orderData.sucursalId,
         usuarioPedido: user?.usuario_ID || user?.userId || "SISTEMA",
         proveedorPedido: orderData.proveedorId,
-        fechaPedido: orderData.fecha,
+        fechaPedido: orderData.fecha
+          ? `${orderData.fecha}T${new Date().getHours().toString().padStart(2, "0")}:${new Date().getMinutes().toString().padStart(2, "0")}:${new Date().getSeconds().toString().padStart(2, "0")}`
+          : new Date().toISOString(),
         descripcion: orderData.descripcion,
         lineaPedido: 0,
         laboratorioPedido: 0,

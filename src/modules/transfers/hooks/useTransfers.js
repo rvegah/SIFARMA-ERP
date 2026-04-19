@@ -52,8 +52,7 @@ export const useTransfers = () => {
   }, [enqueueSnackbar]);
 
   const handleCreateTransfer = async () => {
-    if (
-      !transferData.descripcion ||
+    if (      
       !transferData.codigoSucursalOrigen ||
       !transferData.codigoSucursalDestino ||
       !transferData.fechaEnvio
