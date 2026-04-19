@@ -31,6 +31,10 @@ const VentasGeneralPage   = lazy(() => import("../modules/reports/pages/VentasGe
 
 const HistorialVentasPage = lazy(() => import("../modules/reports/pages/HistorialVentasPage"));
 
+const InventarioDiarioPage = lazy(() => import("../modules/reports/pages/InventarioDiarioPage"));
+const InventarioLineaPage = lazy(() => import("../modules/reports/pages/InventarioLineaPage"));
+const KardexMovimientoPage = lazy(() => import("../modules/reports/pages/KardexMovimientoPage"));
+
 export const routeMap = {
   "/dashboard": Dashboard,
 
@@ -61,4 +65,8 @@ export const routeMap = {
   "/reportes/mensual":  VentasMensualesPage,
   "/reportes/general":  VentasGeneralPage,
   "/reportes/historial": HistorialVentasPage,
+
+  "/finanzas/inventario-diario": InventarioDiarioPage,
+  "/finanzas/linea": InventarioLineaPage,
+  "/finanzas/kardex": KardexMovimientoPage,
 };
