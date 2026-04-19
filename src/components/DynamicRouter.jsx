@@ -48,18 +48,30 @@ const ReportePedidosPage = lazy(
 
 /*PARA LOS REPORTES DIARIOS MENSUALES Y GENERAL DIRECTO AL ROL*/
 const VentasDiariasPage = lazy(
-  () => import("../modules/reports/pages/VentasDiariasPage")
+  () => import("../modules/reports/pages/VentasDiariasPage"),
 );
 
+
 const VentasMensualesPage = lazy(
-  () => import("../modules/reports/pages/VentasMensualesPage")
+  () => import("../modules/reports/pages/VentasMensualesPage"),
 );
 const VentasGeneralPage = lazy(
-  () => import("../modules/reports/pages/VentasGeneralPage")
+  () => import("../modules/reports/pages/VentasGeneralPage"),
 );
 
 const HistorialVentasPage = lazy(
-  () => import("../modules/reports/pages/HistorialVentasPage")
+  () => import("../modules/reports/pages/HistorialVentasPage"),
+);
+
+
+const InventarioDiarioPage = lazy(
+  () => import("../modules/reports/pages/InventarioDiarioPage"),
+);
+const InventarioLineaPage = lazy(
+  () => import("../modules/reports/pages/InventarioLineaPage"),
+);
+const KardexMovimientoPage = lazy(
+  () => import("../modules/reports/pages/KardexMovimientoPage"),
 );
 
 // Rutas exactas (sin /*)
@@ -78,6 +90,9 @@ const EXACT_ROUTES = new Set([
   "/reportes/mensual",
   "/reportes/general",
   "/reportes/historial",
+  "/finanzas/inventario-diario",
+  "/finanzas/linea",
+  "/finanzas/kardex",
 ]);
 
 export default function DynamicRouter({ apiPermissions }) {
@@ -152,11 +167,17 @@ export default function DynamicRouter({ apiPermissions }) {
         <Route path="/reportes/general" element={<VentasGeneralPage />} />
         <Route path="/reportes/historial" element={<HistorialVentasPage />} />
 
+        <Route
+          path="/finanzas/inventario-diario"
+          element={<InventarioDiarioPage />}
+        />
+        <Route path="/finanzas/linea" element={<InventarioLineaPage />} />
+
         {/* Fallback reportes */}
         <Route path="/reportes/*" element={<ReportManagementPage />} />
         <Route path="/reporte/*" element={<ReportManagementPage />} />
-        
-        
+        <Route path="/finanzas/kardex" element={<KardexMovimientoPage />} />
+
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Suspense>

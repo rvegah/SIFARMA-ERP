@@ -481,6 +481,64 @@ const reportesService = {
       return [];
     }
   },
+
+  async getInventarioDiario(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/InventarioDiario", {
+        params: {
+          CodigoSucursal: filtros.codigoSucursal,
+          FechaInicio: filtros.fechaInicio,
+          FechaFinal: filtros.fechaFinal,
+          CodigoProducto: filtros.codigoProducto ?? "",
+          NombreProducto: filtros.nombreProducto ?? "",
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
+
+  async getInventarioLinea(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/InventarioLinea", {
+        params: {
+          CodigoSucursal: filtros.codigoSucursal,
+          FechaInicio:    filtros.fechaInicio,
+          FechaFinal:     filtros.fechaFinal,
+          Linea_ID:       filtros.lineaId,
+        },
+      });
+      return res.data?.datos ?? [];
+    } catch {
+      return [];
+    }
+  },
+
+  async getKardexMovimiento(filtros = {}) {
+    try {
+      const res = await pharmacyApiClient.get("/Reportes/KardexMovimientoSucursal", {
+        params: {
+          CodigoSucursal:  filtros.codigoSucursal,
+          FechaInicio:     filtros.fechaInicio,
+          FechaFinal:      filtros.fechaFinal,
+          CodigoUsuario:   filtros.codigoUsuario || undefined,
+          CodigoProducto:  filtros.codigoProducto ?? "",
+          NombreProducto:  filtros.nombreProducto ?? "",
+          Linea_ID:        filtros.lineaId || undefined,
+        },
+      });
+      const datos = res.data?.datos ?? {};
+      return {
+        ventas:    datos.ventas    ?? [],
+        traspasos: datos.traspasos ?? [],
+        compras:   datos.compras   ?? [],
+      };
+    } catch {
+      return { ventas: [], traspasos: [], compras: [] };
+    }
+  },
+
 };
 
 export default reportesService;
