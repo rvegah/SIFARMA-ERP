@@ -86,6 +86,19 @@ const transferService = {
     }
   },
 
+  aceptarTraspaso: async (payload) => {
+    try {
+      const response = await pharmacyApiClient.post(
+        "/Traspasos/AceptarTraspaso",
+        payload,
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error accepting transfer:", error);
+      throw error;
+    }
+  },
+
   // GET /Traspasos/EditarTraspaso?NumeroTraspaso=xxx
   editarTraspaso: async (numeroTraspaso) => {
     try {
