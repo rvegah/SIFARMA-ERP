@@ -32,6 +32,7 @@ import {
 import { farmaColors } from "../../app/theme";
 import notificationService from "../services/notificationService";
 import PageHeader from "../components/PageHeader";
+import { useAuth } from "../../context/AuthContext";
 
 const NotificationDetailPage = () => {
   const { numeroTraspaso } = useParams();
@@ -44,6 +45,9 @@ const NotificationDetailPage = () => {
   // Selection state
   const [selectedRows, setSelectedRows] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const { user } = useAuth();
+ 
 
   useEffect(() => {
     if (numeroTraspaso) {
@@ -78,28 +82,30 @@ const NotificationDetailPage = () => {
 
   const handleRecibir = async () => {
     setSubmitting(true);
+
     try {
-      const res = await notificationService.cambiarEstadoTraspaso(
-        data.numeroTraspaso,
-        "REC",
-      );
+      const res = await notificationService.aceptarTraspaso({
+        traspasoProducto_ID: data.codigoTraspaso, 
+        usuarioRecibe_ID: user.usuario_ID,
+      });
+
       if (res.exitoso) {
-        enqueueSnackbar("Traspaso marcado como Recibido", {
+        enqueueSnackbar("Traspaso aceptado correctamente", {
           variant: "success",
         });
 
-        // 🔥 ESTA ES LA LINEA QUE TE FALTA
+        // 🔥 ACTUALIZA CAMPANA
         window.dispatchEvent(new Event("notifications:update"));
 
         setSelectedRows([]);
         fetchDetalle();
       } else {
-        enqueueSnackbar(res.mensaje || "Error al recibir traspaso", {
+        enqueueSnackbar(res.mensaje || "Error al aceptar traspaso", {
           variant: "error",
         });
       }
     } catch (error) {
-      console.error("Error al recibir traspaso:", error);
+      console.error("Error al aceptar traspaso:", error);
       enqueueSnackbar("Error de red", { variant: "error" });
     } finally {
       setSubmitting(false);
