@@ -56,7 +56,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
 
                 <Grid container spacing={3}>
                     {/* Título / Descripción */}
-                    <Grid item xs={12}>
+                    {/*<Grid item xs={12}>
                         <TextField
                             fullWidth
                             required
@@ -67,7 +67,7 @@ const CreateTransferSection = ({ transferData, setTransferData, onCreate, catalo
                                 startAdornment: <DescriptionIcon sx={{ color: "action.active", mr: 1 }} />
                             }}
                         />
-                    </Grid>
+                    </Grid>*/}
 
                     {/* Sucursal Origen */}
                     <Grid item xs={12} sm={6}>

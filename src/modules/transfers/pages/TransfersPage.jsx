@@ -9,6 +9,7 @@ import CreateTransferSection from "../components/CreateTransferSection";
 import AddProductsToTransferSection from "../components/AddProductsToTransferSection";
 import MyTransfersSection from "../components/MyTransfersSection";
 import PageHeader from "../../../shared/components/PageHeader";
+import ListaTraspasosSection from "../components/ListaTraspasosSection";
 
 // ─── Crear / Editar Traspaso ──────────────────────────────────────────────────
 const TransfersDispatcher = () => {
@@ -104,6 +105,7 @@ const TransfersPage = () => (
     <Route path="nuevo" element={<TransfersDispatcher />} />
     <Route path="nuevo/:numeroTraspaso" element={<TransfersDispatcher />} />
     <Route path="mis-traspasos" element={<MyTransfersSection />} />
+    <Route path="lista-traspasos" element={<ListaTraspasosSection />} />
   </Routes>
 );
 

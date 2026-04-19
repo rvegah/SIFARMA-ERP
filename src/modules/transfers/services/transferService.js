@@ -158,6 +158,18 @@ const transferService = {
       throw error;
     }
   },
+
+  buscarListaTraspasos: async (params) => {
+    try {
+      const response = await pharmacyApiClient.get("/Traspasos/MisTraspasos", {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error searching transfer detail list:", error);
+      throw error;
+    }
+  },
 };
 
 export default transferService;
